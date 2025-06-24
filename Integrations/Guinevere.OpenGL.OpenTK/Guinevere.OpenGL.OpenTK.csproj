@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RootNamespace>$(MSBuildProjectName.Replace("-", "_"))</RootNamespace>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <!-- NuGet Package Properties -->
+        <PackageId>org.mass4.Guinevere.OpenGL.OpenTK</PackageId>
+        <Title>Guinevere - OpenGL - OpenTK</Title>
+        <Description>OpenGL via OpenTK integration for Guinevere</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="OpenTK" Version="4.9.4"/>
+        <PackageReference Include="SkiaSharp" Version="3.119.0"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.0"/>
+        <PackageReference Include="SkiaSharp.Views.Desktop.Common" Version="3.119.0"/>
+        <PackageReference Include="SkiaSharp.Vulkan.SharpVk" Version="3.119.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Guinevere\Guinevere.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Update="Shaders\*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Fonts\*"/>
+        <EmbeddedResource Include="Shaders\*"/>
+    </ItemGroup>
+</Project>

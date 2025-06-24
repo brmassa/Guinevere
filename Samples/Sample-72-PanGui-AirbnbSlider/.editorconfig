@@ -1,0 +1,11 @@
+
+[*]
+csharp_style_var_elsewhere = true:none
+csharp_style_var_for_built_in_types = true:none
+csharp_style_var_when_type_is_apparent = true:none
+
+dotnet_diagnostic.cs8618.severity = none
+dotnet_diagnostic.CS0219.severity = none
+dotnet_diagnostic.CS8019.severity = none
+dotnet_diagnostic.cs1305.severity = none
+dotnet_diagnostic.CA1305.severity = none
