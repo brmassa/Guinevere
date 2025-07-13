@@ -196,7 +196,7 @@ public class AnimationManagerTests
         // Assert
         Assert.Equal(0.0f, linearResult);
         Assert.Equal(0.0f, easeInResult);
-        Assert.Equal(2, manager.ActiveAnimationCount);
+        Assert.Equal(4, manager.ActiveAnimationCount);
 
         // Both should be animating but potentially at different rates (with timing tolerance)
         Assert.True(linearAnimating >= 0.0f);

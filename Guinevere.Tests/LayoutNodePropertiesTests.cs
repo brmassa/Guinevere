@@ -374,8 +374,8 @@ public class LayoutNodePropertiesTests : LayoutNodeTestBase
         gui.SetZIndex(zIndex);
 
         // Assert
-        Assert.Equal(zIndex, scope.Node.Scope.ZIndex);
-        Assert.Equal(zIndex, gui.GetEffectiveZIndex(scope));
+        Assert.Equal(zIndex, scope.Node.Scope.Get<LayoutNodeScopeZIndex>().Value);
+        Assert.Equal(zIndex, scope.Get<LayoutNodeScopeZIndex>().Value);
     }
 
     [Fact]
@@ -388,7 +388,7 @@ public class LayoutNodePropertiesTests : LayoutNodeTestBase
         using var nodeScope = gui.Node().Enter();
 
         // Assert
-        Assert.Equal(0, gui.GetEffectiveZIndex(nodeScope));
+        Assert.Equal(0, nodeScope.Get<LayoutNodeScopeZIndex>().Value);
     }
 
     [Fact]
@@ -404,8 +404,8 @@ public class LayoutNodePropertiesTests : LayoutNodeTestBase
         gui.SetZIndex(5);
 
         // Assert
-        Assert.Equal(5, gui.GetEffectiveZIndex(childScope));
-        Assert.Equal(0, gui.GetEffectiveZIndex(parentScope));
+        Assert.Equal(5, childScope.Get<LayoutNodeScopeZIndex>().Value);
+        Assert.Equal(0, parentScope.Get<LayoutNodeScopeZIndex>().Value);
     }
 
     [Fact]
@@ -422,9 +422,9 @@ public class LayoutNodePropertiesTests : LayoutNodeTestBase
         gui.SetZIndex(10);
 
         // Assert
-        Assert.Equal(5, parentScope.Node.Scope.ZIndex);
-        Assert.Equal(10, childScope.Node.Scope.ZIndex);
-        Assert.Equal(10, gui.GetEffectiveZIndex(childScope)); // Child's own ZIndex takes precedence
+        Assert.Equal(5, parentScope.Node.Scope.Get<LayoutNodeScopeZIndex>().Value);
+        Assert.Equal(10, childScope.Node.Scope.Get<LayoutNodeScopeZIndex>().Value);
+        Assert.Equal(10, childScope.Get<LayoutNodeScopeZIndex>().Value); // Child's own ZIndex takes precedence
     }
 
     [Fact]
@@ -452,7 +452,7 @@ public class LayoutNodePropertiesTests : LayoutNodeTestBase
                     var level3ANode = level3AScope.Node;
 
                     // Add nodes to a flat list as renderer would
-                    flatList.Add((gui.GetEffectiveZIndex(level3ANode.Scope), level3ANode));
+                    flatList.Add((level3ANode.Scope.Get<LayoutNodeScopeZIndex>().Value, level3ANode));
                 }
 
                 using (var level3BScope = gui.Node(100, 100).Enter())
@@ -460,13 +460,13 @@ public class LayoutNodePropertiesTests : LayoutNodeTestBase
                     // Level 3b doesn't set ZIndex - should inherit from level 2 (which inherits from level 1)
                     var level3BNode = level3BScope.Node;
 
-                    flatList.Add((gui.GetEffectiveZIndex(level3BNode.Scope), level3BNode));
+                    flatList.Add((level3BNode.Scope.Get<LayoutNodeScopeZIndex>().Value, level3BNode));
                 }
 
-                flatList.Add((gui.GetEffectiveZIndex(level2Node.Scope), level2Node));
+                flatList.Add((level2Node.Scope.Get<LayoutNodeScopeZIndex>().Value, level2Node));
             }
 
-            flatList.Add((gui.GetEffectiveZIndex(level1Node.Scope), level1Node));
+            flatList.Add((level1Node.Scope.Get<LayoutNodeScopeZIndex>().Value, level1Node));
         }
 
         // Create another top-level node with a different ZIndex
@@ -474,7 +474,7 @@ public class LayoutNodePropertiesTests : LayoutNodeTestBase
         {
             gui.SetZIndex(1);
             var topNode = topScope.Node;
-            flatList.Add((gui.GetEffectiveZIndex(topNode.Scope), topNode));
+            flatList.Add((topNode.Scope.Get<LayoutNodeScopeZIndex>().Value, topNode));
         }
 
         // Sort as renderer would
