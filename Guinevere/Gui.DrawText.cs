@@ -44,23 +44,83 @@ public partial class Gui
         bool Clip,
         float WrapWidth);
 
+    private record struct FontRun(
+        string Text,
+        Font Font,
+        int StartIndex,
+        int Length);
+
+    /// <summary>
+    /// Checks if a character is supported by the given font by querying the underlying typeface.
+    /// Returns true if the font contains a glyph for the specified character, false otherwise.
+    /// This is used to determine when to fall back to the icon font for unsupported characters.
+    /// </summary>
+    /// <param name="font">The font to check for character support.</param>
+    /// <param name="character">The character to test for support.</param>
+    /// <returns>True if the font supports the character, false if fallback is needed.</returns>
+    private static bool IsCharacterSupported(Font font, char character) =>
+        font.SkFont.Typeface.GetGlyph(character) != 0;
+
+    /// <summary>
+    /// Splits text into runs where each run uses the same font (either main font or icon font fallback).
+    /// </summary>
+    private List<FontRun> CreateFontRuns(string text, Font mainFont, Font iconFont)
+    {
+        var runs = new List<FontRun>();
+        if (string.IsNullOrEmpty(text))
+            return runs;
+
+        var currentRunStart = 0;
+        var currentFont = IsCharacterSupported(mainFont, text[0]) ? mainFont : iconFont;
+
+        for (var i = 1; i < text.Length; i++)
+        {
+            var charFont = IsCharacterSupported(mainFont, text[i]) ? mainFont : iconFont;
+
+            if (charFont != currentFont)
+            {
+                // End current run and start a new one
+                runs.Add(new FontRun(
+                    text.Substring(currentRunStart, i - currentRunStart),
+                    currentFont,
+                    currentRunStart,
+                    i - currentRunStart));
+
+                currentRunStart = i;
+                currentFont = charFont;
+            }
+        }
+
+        // Add the final run
+        runs.Add(new FontRun(
+            text.Substring(currentRunStart),
+            currentFont,
+            currentRunStart,
+            text.Length - currentRunStart));
+
+        return runs;
+    }
+
     private LayoutNode DrawTextOrGlyph(DrawConfig cfg)
     {
         var size = cfg.Size > 0 ? cfg.Size : GetEffectiveTextSize();
         var color = cfg.Color ?? GetEffectiveTextColor();
 
-        var usedFont = new SKFont(cfg.Font.SkFont.Typeface, size);
+        var mainFont = new Font(new SKFont(cfg.Font.SkFont.Typeface, size));
+        var iconFont = new Font(new SKFont(GetEffectiveIconFont().SkFont.Typeface, size));
 
         // Handle text wrapping if wrapWidth is specified
-        var lines = cfg.WrapWidth > 0 ? WrapText(cfg.Text, usedFont, cfg.WrapWidth) : cfg.Text.Split('\n');
+        var lines = cfg.WrapWidth > 0
+            ? WrapTextWithFallback(cfg.Text, mainFont, iconFont, cfg.WrapWidth)
+            : cfg.Text.Split('\n');
 
         var maxWidth = 0f;
-        var lineHeight = usedFont.Size * 1.2f; // Add some line spacing
+        var lineHeight = size * 1.2f; // Add some line spacing
 
         foreach (var line in lines)
         {
-            usedFont.MeasureText(line, out var lineBounds);
-            maxWidth = Math.Max(maxWidth, lineBounds.Width);
+            var lineWidth = MeasureLineWidth(line, mainFont, iconFont);
+            maxWidth = Math.Max(maxWidth, lineWidth);
         }
 
         // If wrapping is enabled, use the wrap width as max width
@@ -78,26 +138,60 @@ public partial class Gui
 
         var paint = new SKPaint { IsAntialias = true, Color = color };
 
-
         // Draw each line
         for (var i = 0; i < lines.Length; i++)
         {
             var line = lines[i];
-            usedFont.MeasureText(line, out var lineBounds);
+            var lineWidth = MeasureLineWidth(line, mainFont, iconFont);
 
             var pos = node.InnerRect.Position;
             pos.Y += (i + 1) * lineHeight; // Move down for each line
 
             if (cfg.Center)
             {
-                pos.X += Math.Max((node.InnerRect.W - lineBounds.Width) * 0.5f, 0f);
+                pos.X += Math.Max((node.InnerRect.W - lineWidth) * 0.5f, 0f);
             }
 
-            AddDraw(new Text(line, pos, usedFont, paint), cfg.Clip, node);
+            DrawLineWithFallback(line, pos, mainFont, iconFont, paint, cfg.Clip, node);
         }
 
-
         return node;
+    }
+
+    /// <summary>
+    /// Measures the width of a line of text with font fallback support.
+    /// </summary>
+    private float MeasureLineWidth(string line, Font mainFont, Font iconFont)
+    {
+        var runs = CreateFontRuns(line, mainFont, iconFont);
+        var totalWidth = 0f;
+
+        foreach (var run in runs)
+        {
+            run.Font.SkFont.MeasureText(run.Text, out var bounds);
+            totalWidth += bounds.Width;
+        }
+
+        return totalWidth;
+    }
+
+    /// <summary>
+    /// Draws a line of text with font fallback support.
+    /// </summary>
+    private void DrawLineWithFallback(string line, Vector2 startPos, Font mainFont, Font iconFont, SKPaint paint,
+        bool clip, LayoutNode node)
+    {
+        var runs = CreateFontRuns(line, mainFont, iconFont);
+        var currentX = startPos.X;
+
+        foreach (var run in runs)
+        {
+            var pos = new Vector2(currentX, startPos.Y);
+            AddDraw(new Text(run.Text, pos, run.Font.SkFont, paint), clip, node);
+
+            run.Font.SkFont.MeasureText(run.Text, out var bounds);
+            currentX += bounds.Width;
+        }
     }
 
     private string[] WrapText(string text, SKFont font, float maxWidth)
@@ -122,6 +216,58 @@ public partial class Gui
                 font.MeasureText(testLine, out var bounds);
 
                 if (bounds.Width <= maxWidth)
+                {
+                    currentLine = testLine;
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(currentLine))
+                    {
+                        lines.Add(currentLine);
+                        currentLine = word;
+                    }
+                    else
+                    {
+                        // Single word is too long, add it anyway
+                        lines.Add(word);
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(currentLine))
+            {
+                lines.Add(currentLine);
+            }
+        }
+
+        return lines.ToArray();
+    }
+
+    /// <summary>
+    /// Wraps text with font fallback support.
+    /// </summary>
+    private string[] WrapTextWithFallback(string text, Font mainFont, Font iconFont, float maxWidth)
+    {
+        var lines = new List<string>();
+        var paragraphs = text.Split('\n');
+
+        foreach (var paragraph in paragraphs)
+        {
+            if (string.IsNullOrEmpty(paragraph))
+            {
+                lines.Add("");
+                continue;
+            }
+
+            var words = paragraph.Split(' ');
+            var currentLine = "";
+
+            foreach (var word in words)
+            {
+                var testLine = string.IsNullOrEmpty(currentLine) ? word : currentLine + " " + word;
+                var testWidth = MeasureLineWidth(testLine, mainFont, iconFont);
+
+                if (testWidth <= maxWidth)
                 {
                     currentLine = testLine;
                 }

@@ -49,7 +49,7 @@ public class GuiWindow : IInputHandler, IWindowHandler, IDisposable
         _gui.WindowHandler = this;
         var fontStream = GetStreamResource("Fonts.font.ttf");
         _fontText = Font.FromStream(fontStream);
-        fontStream = GetStreamResource("Fonts.iconfont.ttf");
+        fontStream = GetStreamResource("Fonts.icons.ttf");
         _fontIcon = Font.FromStream(fontStream);
         _renderer = new CanvasRenderer();
 
@@ -58,7 +58,7 @@ public class GuiWindow : IInputHandler, IWindowHandler, IDisposable
         options.Size = new Vector2D<int>(width, height);
         options.Title = title;
         options.VSync = false;
-        // options.WindowBorder = WindowBorder.Hidden;
+        options.WindowBorder = WindowBorder.Hidden;
         options.WindowBorder = WindowBorder.Resizable;
         options.API = GraphicsAPI.Default;
 
