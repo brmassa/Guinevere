@@ -30,10 +30,10 @@ public class Font
 
     /// <summary>
     /// Initializes a new instance of the Font class from an existing SKFont.
-    /// Used internally by the framework.
+    /// Used internally by the framework and for font fallback functionality.
     /// </summary>
     /// <param name="skFont">The SkiaSharp font to wrap.</param>
-    internal Font(SKFont skFont)
+    public Font(SKFont skFont)
     {
         _skFont = skFont;
     }

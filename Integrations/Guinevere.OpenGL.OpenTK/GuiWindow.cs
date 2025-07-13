@@ -11,7 +11,7 @@ namespace Guinevere.OpenGL.OpenTK;
 /// Represents a GUI window implementation using OpenTK for OpenGL rendering.
 /// Provides input handling, window management, and rendering capabilities for the Guinevere GUI framework.
 /// </summary>
-public class GuiWindow : GameWindow, IInputHandler, IWindowHandler
+public class GuiWindow : GameWindow, IInputHandler, IWindowHandler, IDisposable
 {
     private readonly Gui _gui;
     private readonly ICanvasRenderer _canvasRenderer;
