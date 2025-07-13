@@ -21,22 +21,10 @@ public class Time
     public float DeltaTime { get; private set; }
 
     /// <summary>
-    /// Gets the total time in seconds elapsed since the application's start.
-    /// This is the real (unscaled) time and unaffected by <see cref="TimeScale"/>.
-    /// </summary>
-    public float UnscaledElapsed { get; private set; }
-
-    /// <summary>
     /// Gets the total scaled time in seconds since the Time instance was created.
     /// This value is affected by <see cref="TimeScale"/>.
     /// </summary>
     public float Elapsed { get; private set; }
-
-    /// <summary>
-    /// Gets or sets the scale at which time progresses.
-    /// 1.0 is normal speed, 0.5 is half speed, 2.0 is double speed.
-    /// </summary>
-    public float TimeScale { get; set; } = 1f;
 
     /// <summary>
     /// Gets the total number of frames that have been processed since creation.
@@ -60,21 +48,22 @@ public class Time
     /// </summary>
     public void Update()
     {
-        // Calculate raw frame time
-        var currentTime = (float)_stopwatch.Elapsed.TotalSeconds;
-        var unscaledDelta = currentTime - _lastFrameTime;
+        // Get current time first
+        float currentTime = (float)_stopwatch.Elapsed.TotalSeconds;
+
+        // Calculate delta time before updating elapsed
+        DeltaTime = currentTime - _lastFrameTime;
+
+        // Update the other time values
+        Elapsed = currentTime;
         _lastFrameTime = currentTime;
 
         // Update counters
         Frames++;
-        UnscaledElapsed += unscaledDelta;
-        DeltaTime = unscaledDelta * TimeScale;
-        Elapsed += DeltaTime;
 
         // Update smooth FPS calculation
-        _smoothingTimer += unscaledDelta;
+        _smoothingTimer += DeltaTime;
         _frameCountSinceLastSmooth++;
-
         if (!(_smoothingTimer >= SmoothingInterval)) return;
         SmoothFps = _frameCountSinceLastSmooth / _smoothingTimer;
         _frameCountSinceLastSmooth = 0;

@@ -94,7 +94,7 @@ public partial class Gui : ILayoutNodeEnterExit
     /// Performs layout calculations on the root node of the GUI tree.
     /// This ensures that all nodes have their layout properties properly computed based on the hierarchy and cascading style rules.
     /// </summary>
-    public void CalculateLayout() => RootNode?.CalculateLayout();
+    public void CalculateLayout() => RootNode!.CalculateLayout();
     private LayoutNodeScope RegisterLayoutNodeScope(LayoutNode node)
     {
         LayoutNodeScopeStack.Push(node.Scope);
@@ -111,16 +111,15 @@ public partial class Gui : ILayoutNodeEnterExit
     {
         id ??= NodeId(filePath, lineNumber, CurrentNode.Pass2NodeCount++);
         LayoutNode node;
-        var nodeTemp = CurrentNode.Children.FirstOrDefault(child => child.Id == id);
-        if (Pass == Pass.Pass1Build || nodeTemp == null)
+        var nodeExist = CurrentNode.Children.FirstOrDefault(child => child.Id == id);
+        if (Pass == Pass.Pass1Build || nodeExist is null)
         {
             node = new(id, this, CurrentNode, width, height);
             CurrentNode.AddChild(node);
         }
         else
         {
-            node = CurrentNode.Children.FirstOrDefault(child => child.Id == id) ??
-                   throw new Exception($"Layout node with id '{id}' not found");
+            node = nodeExist;
         }
 
         // Only reset DrawList during Pass1Build phase to prevent clearing render commands
