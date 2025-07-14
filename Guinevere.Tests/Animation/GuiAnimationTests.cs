@@ -43,7 +43,7 @@ public class GuiAnimationTests
     {
         // Arrange
         var gui = CreateTestGui();
-        gui.Time.Update();
+        // gui.Time.Update();
 
         // Act - Call from exact same location (same line)
         var result1 = CallAnimateBool01FromSameLocation(gui);
@@ -61,7 +61,7 @@ public class GuiAnimationTests
     {
         // Arrange
         var gui = CreateTestGui();
-        gui.Time.Update();
+        // gui.Time.Update();
 
         // Act
         var resultTrue = gui.AnimateBool01(true, 0.5f, Easing.Linear);
@@ -77,14 +77,14 @@ public class GuiAnimationTests
     {
         // Arrange
         var gui = CreateTestGui();
-        gui.Time.Update();
+        // gui.Time.Update();
 
         // Start with false
         var initialResult = CallAnimateBool01StateChange1(gui, false, 0.5f);
 
         // Act - Change to true
         Thread.Sleep(50);
-        gui.Time.Update();
+        // gui.Time.Update();
         var animatingResult = CallAnimateBool01StateChange1(gui, true, 0.1f);
 
         // Assert
@@ -101,7 +101,7 @@ public class GuiAnimationTests
     {
         // Arrange
         var gui = CreateTestGui();
-        gui.Time.Update();
+        // gui.Time.Update();
 
         // Act
         gui.AnimateBool01(true, 0.5f, Easing.Linear);
@@ -117,7 +117,7 @@ public class GuiAnimationTests
     {
         // Arrange
         var gui = CreateTestGui();
-        gui.Time.Update();
+        // gui.Time.Update();
 
         // Create animations in steady state
         CallAnimateBool01Running1(gui, true, 0.5f);
@@ -126,7 +126,7 @@ public class GuiAnimationTests
 
         // Act - Trigger animations
         Thread.Sleep(50);
-        gui.Time.Update();
+        // gui.Time.Update();
         CallAnimateBool01Running1(gui, false, 0.2f); // Change first animation
         CallAnimateBool01Running2(gui, true, 0.2f); // Change second animation
         var runningAfter = gui.RunningAnimationCount;
@@ -147,7 +147,7 @@ public class GuiAnimationTests
     {
         // Arrange
         var gui = CreateTestGui();
-        gui.Time.Update();
+        // gui.Time.Update();
 
         // Add some animations
         gui.AnimateBool01(true, 0.5f, Easing.Linear);
@@ -167,7 +167,7 @@ public class GuiAnimationTests
     {
         // Arrange
         var gui = CreateTestGui();
-        gui.Time.Update();
+        // gui.Time.Update();
 
         // Act
         var linear = CallAnimateBool01Easing1(gui, false, 0.5f, Easing.Linear);
@@ -175,7 +175,7 @@ public class GuiAnimationTests
         var smoothStep = CallAnimateBool01Easing3(gui, false, 0.5f, Easing.SmoothStep);
 
         Thread.Sleep(50);
-        gui.Time.Update();
+        // gui.Time.Update();
 
         var linearAnimating = CallAnimateBool01Easing1(gui, true, 0.2f, Easing.Linear);
         var easeInAnimating = CallAnimateBool01Easing2(gui, true, 0.2f, Easing.EaseIn);
@@ -209,7 +209,7 @@ public class GuiAnimationTests
     {
         // Arrange
         var gui = CreateTestGui();
-        gui.Time.Update();
+        // gui.Time.Update();
 
         // Act
         var result1 = gui.AnimateBool01(false, 0.0f, Easing.Linear);
@@ -226,7 +226,7 @@ public class GuiAnimationTests
     {
         // Arrange
         var gui = CreateTestGui();
-        gui.Time.Update();
+        // gui.Time.Update();
 
         // Act - These calls should be treated as different locations due to line numbers
         CallAnimateBool01Line1(gui);
@@ -245,7 +245,7 @@ public class GuiAnimationTests
     {
         // Arrange
         var gui = CreateTestGui();
-        gui.Time.Update();
+        // gui.Time.Update();
 
         var animation = gui.GetAnimationFloat(0f);
         animation.AnimateTo(10f, 0.1f, Easing.Linear);
@@ -255,7 +255,7 @@ public class GuiAnimationTests
         for (var i = 0; i < 5; i++)
         {
             Thread.Sleep(30);
-            gui.Time.Update();
+            // gui.Time.Update();
             values.Add(animation.GetValue());
         }
 

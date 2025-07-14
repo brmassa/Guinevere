@@ -86,7 +86,7 @@ public class GuiWindow : IDisposable, IInputHandler, IWindowHandler
                 _canvasRenderer.Resize(_width, _height);
             }
 
-            _gui.Time.Update();
+            _gui.Time.Update(Raylib_cs.Raylib.GetFrameTime());
 
             // Update mouse position tracking
             _prevMousePosition = _currentMousePosition;

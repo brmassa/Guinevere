@@ -61,6 +61,8 @@ public class GuiWindow : IInputHandler, IWindowHandler, IDisposable
         options.WindowBorder = WindowBorder.Hidden;
         options.WindowBorder = WindowBorder.Resizable;
         options.API = GraphicsAPI.Default;
+        // options.FramesPerSecond = 60;
+        // options.UpdatesPerSecond = 60;
 
         _window = Window.Create(options);
 
@@ -104,7 +106,7 @@ public class GuiWindow : IInputHandler, IWindowHandler, IDisposable
     /// <param name="deltaTime">The time elapsed since the last update.</param>
     private void OnUpdate(double deltaTime)
     {
-        _gui.Time.Update();
+        _gui.Time.Update(deltaTime);
     }
 
     /// <summary>
@@ -146,9 +148,6 @@ public class GuiWindow : IInputHandler, IWindowHandler, IDisposable
         // Make sure we're initialized before rendering
         if (!_isInitialized || _gl == null)
             return;
-
-        // Update GUI time
-        _gui.Time.Update();
 
         // Pass2Render our GUI using the canvas renderer
         _renderer.Render(canvas =>

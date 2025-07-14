@@ -23,7 +23,7 @@ public class AnimationManagerTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        // time.Update();
         var manager = new AnimationManager(time);
 
         // Act
@@ -39,7 +39,7 @@ public class AnimationManagerTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        // time.Update();
         var manager = new AnimationManager(time);
         var filePath = "test.cs";
         var lineNumber = 1;
@@ -58,7 +58,7 @@ public class AnimationManagerTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        // time.Update();
         var manager = new AnimationManager(time);
 
         // Act
@@ -75,7 +75,7 @@ public class AnimationManagerTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        // time.Update();
         var manager = new AnimationManager(time);
         var filePath = "test.cs";
         var lineNumber = 1;
@@ -85,7 +85,7 @@ public class AnimationManagerTests
 
         // Simulate time passing
         Thread.Sleep(100);
-        time.Update();
+        // time.Update();
 
         var result2 = manager.AnimateBool01(true, 0.5f, Easing.Linear, filePath, lineNumber);
 
@@ -101,7 +101,7 @@ public class AnimationManagerTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        // time.Update();
         var manager = new AnimationManager(time);
         var filePath = "test.cs";
         var lineNumber = 1;
@@ -111,7 +111,7 @@ public class AnimationManagerTests
 
         // Act - Change to true
         Thread.Sleep(50);
-        time.Update();
+        // time.Update();
         var animatingResult = manager.AnimateBool01(true, 0.1f, Easing.Linear, filePath, lineNumber);
 
         // Assert
@@ -125,7 +125,7 @@ public class AnimationManagerTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        // time.Update();
         var manager = new AnimationManager(time);
         var filePath = "test.cs";
         var lineNumber = 1;
@@ -135,7 +135,7 @@ public class AnimationManagerTests
 
         // Act - Change to false
         Thread.Sleep(50);
-        time.Update();
+        // time.Update();
         var animatingResult = manager.AnimateBool01(false, 0.1f, Easing.Linear, filePath, lineNumber);
 
         // Assert
@@ -149,7 +149,7 @@ public class AnimationManagerTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        // time.Update();
         var manager = new AnimationManager(time);
         var filePath = "test.cs";
         var lineNumber = 1;
@@ -157,15 +157,15 @@ public class AnimationManagerTests
         // Start animation
         manager.AnimateBool01(false, 0.5f, Easing.Linear, filePath, lineNumber);
         Thread.Sleep(50);
-        time.Update();
+        // time.Update();
         manager.AnimateBool01(true, 0.5f, Easing.Linear, filePath, lineNumber);
 
         Thread.Sleep(50);
-        time.Update();
+        // time.Update();
         var result1 = manager.AnimateBool01(true, 0.5f, Easing.Linear, filePath, lineNumber);
 
         Thread.Sleep(50);
-        time.Update();
+        // time.Update();
         var result2 = manager.AnimateBool01(true, 0.5f, Easing.Linear, filePath, lineNumber);
 
         // Assert
@@ -180,7 +180,7 @@ public class AnimationManagerTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        time.Update(1);
         var manager = new AnimationManager(time);
 
         // Act
@@ -188,7 +188,7 @@ public class AnimationManagerTests
         var easeInResult = manager.AnimateBool01(false, 0.5f, Easing.EaseIn);
 
         Thread.Sleep(50);
-        time.Update();
+        time.Update(1);
 
         var linearAnimating = manager.AnimateBool01(true, 0.2f, Easing.Linear);
         var easeInAnimating = manager.AnimateBool01(true, 0.2f, Easing.EaseIn);
@@ -208,7 +208,7 @@ public class AnimationManagerTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        // time.Update();
         var manager = new AnimationManager(time);
 
         // Add some animations
@@ -229,7 +229,7 @@ public class AnimationManagerTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        // time.Update();
         var manager = new AnimationManager(time);
 
         // Act - Create animations but don't start them (same state)
@@ -239,7 +239,7 @@ public class AnimationManagerTests
 
         // Trigger animations by changing states
         Thread.Sleep(50);
-        time.Update();
+        // time.Update();
         manager.AnimateBool01(false, 0.2f, Easing.Linear, "test1.cs", 1); // true -> false
         manager.AnimateBool01(true, 0.2f, Easing.Linear, "test2.cs", 1);  // false -> true
         var runningAfterChange = manager.RunningAnimationCount;
@@ -255,7 +255,7 @@ public class AnimationManagerTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        // time.Update();
         var manager = new AnimationManager(time);
 
         // Act

@@ -108,7 +108,7 @@ public class GuiWindow : IInputHandler, IWindowHandler, IDisposable
     /// <param name="deltaTime">The time elapsed since the last update.</param>
     private void OnUpdate(double deltaTime)
     {
-        _gui.Time.Update();
+        _gui.Time.Update(deltaTime);
     }
 
     /// <summary>
@@ -149,9 +149,6 @@ public class GuiWindow : IInputHandler, IWindowHandler, IDisposable
         // Make sure we're initialized before rendering
         if (!_isInitialized)
             return;
-
-        // Update GUI time
-        _gui.Time.Update();
 
         // Render our GUI using the Vulkan canvas renderer
         try

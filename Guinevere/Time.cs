@@ -7,22 +7,17 @@ namespace Guinevere;
 /// </summary>
 public class Time
 {
-    private const float SmoothingInterval = 0.1f;
+    private const float SmoothingInterval = .1f;
     private float _smoothingTimer;
-    private int _frameCountSinceLastSmooth;
-
-    private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
-    private float _lastFrameTime;
+    private int _framesSinceLastSmooth;
 
     /// <summary>
     /// Gets the time in seconds that elapsed since the last frame update.
-    /// This value is affected by <see cref="TimeScale"/>.
     /// </summary>
     public float DeltaTime { get; private set; }
 
     /// <summary>
-    /// Gets the total scaled time in seconds since the Time instance was created.
-    /// This value is affected by <see cref="TimeScale"/>.
+    /// Gets the total time in seconds since the Time instance was created.
     /// </summary>
     public float Elapsed { get; private set; }
 
@@ -46,27 +41,18 @@ public class Time
     /// <summary>
     /// Updates the time measurements. Called once per frame.
     /// </summary>
-    public void Update()
+    public void Update(double deltaTime)
     {
-        // Get current time first
-        float currentTime = (float)_stopwatch.Elapsed.TotalSeconds;
-
-        // Calculate delta time before updating elapsed
-        DeltaTime = currentTime - _lastFrameTime;
-
-        // Update the other time values
-        Elapsed = currentTime;
-        _lastFrameTime = currentTime;
-
-        // Update counters
-        Frames++;
+        DeltaTime = (float)deltaTime;
+        Elapsed += (float)deltaTime;
 
         // Update smooth FPS calculation
+        Frames++;
+        _framesSinceLastSmooth++;
         _smoothingTimer += DeltaTime;
-        _frameCountSinceLastSmooth++;
         if (!(_smoothingTimer >= SmoothingInterval)) return;
-        SmoothFps = _frameCountSinceLastSmooth / _smoothingTimer;
-        _frameCountSinceLastSmooth = 0;
+        SmoothFps = _framesSinceLastSmooth / _smoothingTimer;
+        _framesSinceLastSmooth = 0;
         _smoothingTimer = 0f;
     }
 }
