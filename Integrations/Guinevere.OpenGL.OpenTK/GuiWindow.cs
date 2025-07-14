@@ -67,7 +67,7 @@ public class GuiWindow : GameWindow, IInputHandler, IWindowHandler, IDisposable
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
-        _gui.Time.Update();
+        _gui.Time.Update(args.Time);
     }
 
     /// <summary>

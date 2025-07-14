@@ -93,7 +93,7 @@ public class AnimationFloatTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update(); // Initialize time
+        time.Update(.1);
         var animationFloat = new AnimationFloat(0f, time);
         var targetValue = 10.0f;
         var duration = 1.0f;
@@ -103,7 +103,7 @@ public class AnimationFloatTests
 
         // Simulate time progression
         Thread.Sleep(500); // 0.5 seconds
-        time.Update();
+        time.Update(.1);
         var midValue = animationFloat.GetValue();
 
         // Assert
@@ -116,7 +116,7 @@ public class AnimationFloatTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update(); // Initialize time
+        time.Update(1); // Initialize time
         var animationFloat = new AnimationFloat(0f, time);
         var targetValue = 10.0f;
         var duration = 0.1f; // Short duration for testing
@@ -126,7 +126,7 @@ public class AnimationFloatTests
 
         // Simulate time progression beyond duration
         Thread.Sleep(200); // 0.2 seconds (more than duration)
-        time.Update();
+        time.Update(1);
         var finalValue = animationFloat.GetValue();
 
         // Assert
@@ -203,22 +203,22 @@ public class AnimationFloatTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        time.Update(.01);
         var animationFloat = new AnimationFloat(0f, time);
         var targetValue = 10.0f;
         var duration = 0.1f;
 
         // Test Linear easing
         animationFloat.AnimateTo(targetValue, duration, Easing.Linear);
-        Thread.Sleep(50); // Half duration
-        time.Update();
+        // Thread.Sleep(50); // Half-duration
+        time.Update(.050);
         var linearMidValue = animationFloat.GetValue();
 
         // Reset and test EaseIn
         animationFloat.SetValue(0f);
         animationFloat.AnimateTo(targetValue, duration, Easing.EaseIn);
-        Thread.Sleep(50); // Half duration
-        time.Update();
+        // Thread.Sleep(50); // Half-duration
+        time.Update(.050);
         var easeInMidValue = animationFloat.GetValue();
 
         // Assert
@@ -231,7 +231,7 @@ public class AnimationFloatTests
     {
         // Arrange
         var time = CreateTestTime();
-        time.Update();
+        time.Update(1);
         var animationFloat = new AnimationFloat(0f, time);
         var firstTarget = 5.0f;
         var secondTarget = 10.0f;
@@ -239,13 +239,13 @@ public class AnimationFloatTests
 
         // Act
         animationFloat.AnimateTo(firstTarget, duration, Easing.Linear);
-        Thread.Sleep(120); // Wait for first animation to complete
-        time.Update();
+        // Thread.Sleep(120); // Wait for the first animation to complete
+        time.Update(120);
         var firstValue = animationFloat.GetValue();
 
         animationFloat.AnimateTo(secondTarget, duration, Easing.Linear);
-        Thread.Sleep(50); // Halfway through second animation
-        time.Update();
+        // Thread.Sleep(50); // Halfway through the second animation
+        time.Update(.050);
         var secondValue = animationFloat.GetValue();
 
         // Assert
