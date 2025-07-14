@@ -287,7 +287,7 @@ public static partial class ControlsExtensions
     {
         var nodeId = string.IsNullOrEmpty(id) ? Gui.NodeId("TextInput", 0) : id;
 
-        var cursorColorFinal = cursorColor ?? textColor ?? gui.GetEffectiveTextColor();
+        var cursorColorFinal = cursorColor ?? textColor ?? gui.CurrentNodeScope.Get<LayoutNodeScopeTextColor>().Value;
         using (gui.Node(width, height).Padding(padding).Enter())
         {
             var state = GetOrCreateState(nodeId, text);
@@ -345,7 +345,7 @@ public static partial class ControlsExtensions
     {
         var nodeId = string.IsNullOrEmpty(id) ? Gui.NodeId("PasswordInput", 0) : id;
 
-        var cursorColorFinal = cursorColor ?? textColor ?? gui.GetEffectiveTextColor();
+        var cursorColorFinal = cursorColor ?? textColor ?? gui.CurrentNodeScope.Get<LayoutNodeScopeTextColor>().Value;
         using (gui.Node(width, height).Padding(padding).Enter())
         {
             var state = GetOrCreateState(nodeId, text);

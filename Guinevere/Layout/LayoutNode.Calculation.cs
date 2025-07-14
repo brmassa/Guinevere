@@ -5,8 +5,6 @@ namespace Guinevere;
 /// </summary>
 public partial class LayoutNode
 {
-    #region Main Layout Entry Point
-
     /// <summary>
     /// Calculates and sets the rectangle for this layout node
     /// </summary>
@@ -44,11 +42,12 @@ public partial class LayoutNode
         var currentScope = _parent?.Scope;
         while (currentScope != null)
         {
-            var localOffset = _gui.GetEffectiveLocalScrollOffset(currentScope);
+            var localOffset = currentScope.Get<LayoutNodeScopeLocalScrollOffset>().Value;
             if (localOffset != Vector2.Zero)
             {
                 scrollOffset += localOffset;
             }
+
             currentScope = currentScope.Node.Parent?.Scope;
         }
 
@@ -72,10 +71,6 @@ public partial class LayoutNode
         _rect = new Rect(0, 0, myWidth, myHeight);
     }
 
-    #endregion
-
-    #region Dimension Calculations
-
     private float CalculateWidth(float availableWidth) =>
         Style.ExpandWidth || Style.IsExpanded
             ? availableWidth * Style.ExpandWidthPercentage
@@ -89,10 +84,6 @@ public partial class LayoutNode
             : Style.Height >= 0
                 ? Style.Height
                 : CalculateContentHeight(availableHeight);
-
-    #endregion
-
-    #region Content Size Calculations
 
     private float CalculateContentWidth(float availableWidth)
     {
@@ -166,10 +157,6 @@ public partial class LayoutNode
         return marginHeight + contentHeight;
     }
 
-    #endregion
-
-    #region Children Layout
-
     private void LayoutChildren()
     {
         if (ChildNodes.Count == 0) return;
@@ -184,10 +171,6 @@ public partial class LayoutNode
             LayoutChildrenHorizontally(contentRect);
         }
     }
-
-    #endregion
-
-    #region Vertical Layout
 
     private void LayoutChildrenVertically(Rect contentRect)
     {
@@ -355,10 +338,6 @@ public partial class LayoutNode
         );
     }
 
-    #endregion
-
-    #region Horizontal Layout
-
     private void LayoutChildrenHorizontally(Rect contentRect)
     {
         if (ChildNodes.Count == 0) return;
@@ -445,7 +424,8 @@ public partial class LayoutNode
     {
         if (context.ExpandingChildren.Count == 1 && ChildNodes.Count == 1)
         {
-            var availableWidthForChild = Math.Max(0, context.AvailableWidth - child.Style.MarginLeft - child.Style.MarginRight);
+            var availableWidthForChild =
+                Math.Max(0, context.AvailableWidth - child.Style.MarginLeft - child.Style.MarginRight);
             return availableWidthForChild * child.Style.ExpandWidthPercentage;
         }
 
@@ -516,19 +496,11 @@ public partial class LayoutNode
         );
     }
 
-    #endregion
-
-    #region Helper Methods
-
     private float CalculateTotalExpandPercentage<T>(List<T> expandingChildren, Func<T, float> percentageSelector)
     {
         var total = expandingChildren.Sum(percentageSelector);
         return total <= 0 && expandingChildren.Count > 0 ? expandingChildren.Count : total;
     }
-
-    #endregion
-
-    #region Layout Context Classes
 
     private class VerticalLayoutContext
     {
@@ -551,6 +523,4 @@ public partial class LayoutNode
         public float Width { get; set; }
         public float Height { get; set; }
     }
-
-    #endregion
 }

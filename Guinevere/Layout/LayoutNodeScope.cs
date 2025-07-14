@@ -13,69 +13,6 @@ public class LayoutNodeScope(ILayoutNodeEnterExit? nodeManager, LayoutNode node)
     /// </summary>
     public LayoutNode Node { get; } = node;
 
-    /// <summary>
-    /// Gets or sets the text color for the current layout node within the scope.
-    /// The value is used for rendering text and can be inherited from parent scopes if not explicitly set.
-    /// </summary>
-    public Color? TextColor { get; set; }
-
-    /// <summary>
-    /// Gets or sets the size of the text for rendering within the current layout node.
-    /// This property applies to the node and its children, inheriting the value from parent nodes
-    /// if it is not explicitly specified in the current scope.
-    /// </summary>
-    public float? TextSize { get; set; }
-
-    /// <summary>
-    /// Gets or sets the font used for rendering text within the current layout node.
-    /// This property affects the node and its children, inheriting the value from parent nodes
-    /// if it is not explicitly defined in the current scope.
-    /// </summary>
-    public Font? TextFont { get; set; }
-
-    /// <summary>
-    /// Gets or sets the font used for rendering icons in the current layout node.
-    /// This property applies to the node and its children, and the value is inherited
-    /// from parent nodes if not explicitly set.
-    /// </summary>
-    public Font? IconFont { get; set; }
-
-    /// <summary>
-    /// Gets or sets the Z-index of the layout node, which determines its rendering order
-    /// in relation to sibling nodes. Nodes with higher Z-index values will be rendered
-    /// in front of nodes with lower Z-index values.
-    /// </summary>
-    public int? ZIndex { get; set; }
-
-    /// <summary>
-    /// Gets or sets the node ID of the scrollable container that affects this node.
-    /// This is used to cascade scroll transforms to child nodes.
-    /// </summary>
-    public string? ScrollContainerId { get; set; }
-
-    /// <summary>
-    /// Gets or sets whether this node should be clipped to its parent container bounds.
-    /// This cascades to child nodes unless explicitly overridden.
-    /// </summary>
-    public bool? IsClipped { get; set; }
-
-    /// <summary>
-    /// Gets or sets the cumulative scroll offset applied to this node and its children.
-    /// This represents the total scroll offset from all scrollable parent containers.
-    /// </summary>
-    public Vector2? CumulativeScrollOffset { get; set; }
-
-    /// <summary>
-    /// Gets or sets whether this node is a scrollable container.
-    /// If true, this node can contribute its own scroll offset to child nodes.
-    /// </summary>
-    public bool? IsScrollContainer { get; set; }
-
-    /// <summary>
-    /// Gets or sets the local scroll offset for this node (if it's a scroll container).
-    /// This is the scroll offset that this specific node contributes.
-    /// </summary>
-    public Vector2? LocalScrollOffset { get; set; }
 
     /// <summary>
     /// Releases all resources used by the <see cref="LayoutNodeScope"/> instance and exits the current layout node context.
@@ -112,9 +49,42 @@ public class LayoutNodeScope(ILayoutNodeEnterExit? nodeManager, LayoutNode node)
     /// </summary>
     /// <param name="index">The Z-index value to assign to the layout node.</param>
     /// <returns>Returns the current <see cref="LayoutNodeScope"/> instance for method chaining.</returns>
-    public LayoutNodeScope SetZIndex(int index)
+    public LayoutNodeScope SetZIndex(int index) => Set(new LayoutNodeScopeZIndex { Value = index });
+
+    private readonly Dictionary<Type, object> _records = new();
+
+    /// <summary>
+    /// Stores a record of the specified generic type <typeparamref name="T"/> within the current layout node scope.
+    /// </summary>
+    /// <typeparam name="T">The type of the record to store, which must be a reference type.</typeparam>
+    /// <param name="record">The instance of the record to store. It replaces any existing record of the same type in this scope.</param>
+    public LayoutNodeScope Set<T>(T record) where T : class
     {
-        ZIndex = index;
+        _records[typeof(T)] = record;
         return this;
+    }
+
+    /// <summary>
+    /// Retrieves a cascaded value of a specified type from the current scope or any of its parent scopes.
+    /// </summary>
+    /// <typeparam name="TValue">The type of the value to retrieve. Must implement <see cref="ILayoutNodeScopeValue{T}"/>.</typeparam>
+    /// <returns>
+    /// The instance of the requested value if found, starting from the current scope and moving up the parent hierarchy.
+    /// Returns the default value of <typeparamref name="TValue"/> if no value is found.
+    /// </returns>
+    public TValue Get<TValue>() where TValue : class, ILayoutNodeScopeValue<TValue>
+    {
+        var type = typeof(TValue);
+        var current = this;
+
+        while (current != null)
+        {
+            if (current._records.TryGetValue(type, out var val))
+                return (TValue)val;
+
+            current = current.Node.Parent?.Scope;
+        }
+
+        return TValue.Default;
     }
 }

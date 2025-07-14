@@ -126,7 +126,7 @@ public partial class Gui
 
     private void NodeFlatList(LayoutNode node, List<(int, LayoutNode)> list)
     {
-        list.Add((GetEffectiveZIndex(node.Scope), node));
+        list.Add((node.Scope.Get<LayoutNodeScopeZIndex>().Value, node));
 
         foreach (var child in node.Children)
             NodeFlatList(child, list);

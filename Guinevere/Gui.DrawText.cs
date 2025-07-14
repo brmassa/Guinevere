@@ -16,7 +16,7 @@ public partial class Gui
         bool clip = false)
         => DrawTextOrGlyph(new(
             text,
-            font ?? GetEffectiveTextFont(),
+            font ?? CurrentNodeScope.Get<LayoutNodeScopeTextFont>().Value,
             size, color, centerInRect, clip, wrapWidth));
 
     /// <summary>
@@ -32,7 +32,7 @@ public partial class Gui
         bool clip = false)
         => DrawTextOrGlyph(new(
             iconCode.ToString(),
-            font ?? GetEffectiveIconFont(),
+            font ?? CurrentNodeScope.Get<LayoutNodeScopeIconFont>().Value,
             size, color, centerInRect, clip, 0));
 
     private record struct DrawConfig(
@@ -103,11 +103,11 @@ public partial class Gui
 
     private LayoutNode DrawTextOrGlyph(DrawConfig cfg)
     {
-        var size = cfg.Size > 0 ? cfg.Size : GetEffectiveTextSize();
-        var color = cfg.Color ?? GetEffectiveTextColor();
+        var size = cfg.Size > 0 ? cfg.Size : CurrentNodeScope.Get<LayoutNodeScopeTextSize>().Value;
+        var color = cfg.Color ?? CurrentNodeScope.Get<LayoutNodeScopeTextColor>().Value;
 
         var mainFont = new Font(new SKFont(cfg.Font.SkFont.Typeface, size));
-        var iconFont = new Font(new SKFont(GetEffectiveIconFont().SkFont.Typeface, size));
+        var iconFont = new Font(new SKFont(CurrentNodeScope.Get<LayoutNodeScopeIconFont>().Value.SkFont.Typeface, size));
 
         // Handle text wrapping if wrapWidth is specified
         var lines = cfg.WrapWidth > 0

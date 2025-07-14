@@ -13,7 +13,8 @@ public abstract class Program
 
         var textInput = "Type here...";
         var passwordInput = "";
-        var textArea = "Multi-line text area\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8\nLine 9\nLine 10\nLine 11\nLine 12\nLine 13\nLine 14\nLine 15\nLine 16\nLine 17\nLine 18\nLine 19\nLine 20";
+        var textArea =
+            "Multi-line text area\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8\nLine 9\nLine 10\nLine 11\nLine 12\nLine 13\nLine 14\nLine 15\nLine 16\nLine 17\nLine 18\nLine 19\nLine 20";
         var activeTabIndex = 0;
 
         win.RunGui(() =>
@@ -56,7 +57,7 @@ public abstract class Program
 
                                 // Special characters and formatting
                                 gui.DrawText("Special Characters & Formatting:", 18);
-                                gui.DrawText("Unicode: ★ ♥ ♦ ♣ ♠ → ← ↑ ↓", 14);
+                                gui.DrawText("Unicode: 🚩❓💣★ ♥ ♦ ♣ ♠ → ← ↑ ↓", 14);
                                 gui.DrawText("Numbers: 0123456789", 14);
                                 gui.DrawText("Symbols: !@#$%^&*()_+-=[]{}|;':\",./<>?", 14);
                                 gui.DrawText("Mixed: çáããüaáéíóú! 🌟", 14);

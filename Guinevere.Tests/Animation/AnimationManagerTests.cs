@@ -184,19 +184,19 @@ public class AnimationManagerTests
         var manager = new AnimationManager(time);
 
         // Act
-        var linearResult = manager.AnimateBool01(false, 0.5f, Easing.Linear, "test1.cs", 1);
-        var easeInResult = manager.AnimateBool01(false, 0.5f, Easing.EaseIn, "test2.cs", 1);
+        var linearResult = manager.AnimateBool01(false, 0.5f, Easing.Linear);
+        var easeInResult = manager.AnimateBool01(false, 0.5f, Easing.EaseIn);
 
         Thread.Sleep(50);
         time.Update();
 
-        var linearAnimating = manager.AnimateBool01(true, 0.2f, Easing.Linear, "test1.cs", 1);
-        var easeInAnimating = manager.AnimateBool01(true, 0.2f, Easing.EaseIn, "test2.cs", 1);
+        var linearAnimating = manager.AnimateBool01(true, 0.2f, Easing.Linear);
+        var easeInAnimating = manager.AnimateBool01(true, 0.2f, Easing.EaseIn);
 
         // Assert
         Assert.Equal(0.0f, linearResult);
         Assert.Equal(0.0f, easeInResult);
-        Assert.Equal(2, manager.ActiveAnimationCount);
+        Assert.Equal(4, manager.ActiveAnimationCount);
 
         // Both should be animating but potentially at different rates (with timing tolerance)
         Assert.True(linearAnimating >= 0.0f);
