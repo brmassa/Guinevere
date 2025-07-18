@@ -31,8 +31,6 @@
         "Clean",
         "CleanSamples",
         "Compile",
-        "CreateCommit",
-        "CreateGitHubRelease",
         "CreateSamplesReadme",
         "CreateTag",
         "DailyBuild",

@@ -16,38 +16,16 @@ A **GPU accelerated immediate mode GUI system** built on SkiaSharp, designed for
 - **Multiple Graphics API Support**
 - **Multiple Framework Integrations**
 
-| Package            | Graphics API | Framework  | Use Case                                    |
-|--------------------|--------------|------------|---------------------------------------------|
-| **OpenGl.SilkNET** | OpenGL       | Silk.NET   | High-performance applications (Recommended) |
-| **OpenGl.OpenTK**  | OpenGL       | OpenTK 4.x | Game development, tools                     |
-| **OpenGl.Raylib**  | OpenGL       | Raylib-cs  | Simple games, prototypes                    |
-| **Vulkan.SilkNET** | Vulkan       | Silk.NET   | Maximum performance, modern graphics        |
+| Package            | Graphics API | C# Framework | Use Case                                    |
+|--------------------|--------------|--------------|---------------------------------------------|
+| **OpenGl.SilkNET** | OpenGL       | Silk.NET     | High-performance applications (Recommended) |
+| **OpenGl.OpenTK**  | OpenGL       | OpenTK 4.x   | Game development, tools                     |
+| **OpenGl.Raylib**  | OpenGL       | Raylib-cs    | Simple games, prototypes                    |
+| **Vulkan.SilkNET** | Vulkan       | Silk.NET     | Maximum performance, modern graphics        |
 
 ## Quick Start
 
 ### Basic Usage
-
-```csharp[README.md](README.md)
-using Guinevere;
-using Guinevere.OpenGL.SilkNET;
-
-namespace Sample;
-
-public abstract class Program
-{
-    public static void Main()
-    {
-        var gui = new Gui();
-        using var win = new GuiWindow(gui);
-
-        win.RunGui(() =>
-        {
-            gui.DrawRect(gui.ScreenRect, Color.FromArgb(255, 29, 29, 29));
-            gui.DrawText("Hello, world!");
-        });
-    }
-}
-```
 
 ```csharp
 using Guinevere;
@@ -75,19 +53,6 @@ public abstract class Program
 
 The repository includes comprehensive samples demonstrating various features.
 
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
-
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
@@ -99,13 +64,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - [Raylib-cs](https://github.com/ChrisDill/Raylib-cs): C# bindings
 - [Silk.NET](https://github.com/dotnet/Silk.NET): Modern .NET bindings for graphics APIs
 - [NUKE](https://nuke.build): Build automation system
-
-## Issue Reporting
-
-If you encounter any issues, please [open an issue](https://github.com/brmassa/guinevere/issues) on GitHub with:
-
-- Clear description of the problem
-- Steps to reproduce
-- Expected vs actual behavior
-- System information (OS, .NET version, GPU)
-- Sample code if applicable
