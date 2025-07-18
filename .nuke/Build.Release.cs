@@ -169,14 +169,15 @@ partial class Build
     private Target GitHubCreateCommit => td => td
         .DependsOn(CheckNewCommits, UpdateProjectVersions, UpdateChangelog)
         .OnlyWhenStatic(() => HasNewCommits)
+        .Requires(() => !string.IsNullOrWhiteSpace(GitHubToken))
         .Executes(() =>
         {
             // Configure git user for CI/CD environment
-            GitTasks.Git("config --global user.name \"GitHub Actions\"");
-            GitTasks.Git("config --global user.email \"actions@github.com\"");
+            GitTasks.Git("config --global user.name \"github-actions\"");
+            GitTasks.Git("config --global user.email \"github-actions@github.com\"");
 
             // Use Git commands to commit changes locally
-            GitTasks.Git("add .");
+            GitTasks.Git("add -A");
             GitTasks.Git($"commit -m \"chore: Automatic commit creation in {Date} [skip ci]\"");
             GitTasks.Git("push origin HEAD");
 

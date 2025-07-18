@@ -18,7 +18,7 @@ name: daily-release
 
 on:
     schedule:
-        - cron: "0 18 * * *" # 15h BRT (18h UTC)
+        -   cron: "0 18 * * *"
     workflow_dispatch:
 
 jobs:
@@ -26,27 +26,27 @@ jobs:
         name: ubuntu-latest
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-            - uses: actions/setup-dotnet@v4
-              with:
-                  dotnet-version: "9.0.x"
-            - name: "Cache: .nuke/temp, ~/.nuget/packages"
-              uses: actions/cache@v4
-              with:
-                  path: |
-                      .nuke/temp
-                      ~/.nuget/packages
-                  key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj', '**/Directory.Packages.props') }}
-            - name: "Run: Test, GitHubCreateRelease"
-              run: ./build.cmd Test GitHubCreateRelease
-              env:
-                  GitHubToken: ${{ secrets.GITHUB_TOKEN }}
-            - name: "Publish: coverage.xml"
-              uses: actions/upload-artifact@v4
-              with:
-                  name: coverage.xml
-                  path: coverage/coverage.xml
+            -   uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
+            -   uses: actions/setup-dotnet@v4
+                with:
+                    dotnet-version: "9.0.x"
+            -   name: "Cache: .nuke/temp, ~/.nuget/packages"
+                uses: actions/cache@v4
+                with:
+                    path: |
+                        .nuke/temp
+                        ~/.nuget/packages
+                    key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj', '**/Directory.Packages.props') }}
+            -   name: "Run: Test, GitHubCreateRelease"
+                run: ./build.cmd Test GitHubCreateRelease
+                env:
+                    GitHubToken: ${{ secrets.GITHUB_TOKEN }}
+            -   name: "Publish: coverage.xml"
+                uses: actions/upload-artifact@v4
+                with:
+                    name: coverage.xml
+                    path: coverage/coverage.xml
         permissions:
             contents: write
