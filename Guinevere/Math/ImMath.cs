@@ -14,8 +14,10 @@ public static class ImMath
     /// <param name="value2">The second value to compare.</param>
     /// <returns>True if the absolute difference between the two values is less than the smallest positive single precision number; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool ApproximatelyEquals(float value1, float value2) =>
-        Math.Abs(value1 - value2) < float.Epsilon;
+    public static bool ApproximatelyEquals(float value1, float value2)
+    {
+        return Math.Abs(value1 - value2) < float.Epsilon;
+    }
 
     /// <summary>
     /// Determines whether two floating-point vectors are approximately equal, accounting for precision limitations.
@@ -24,8 +26,10 @@ public static class ImMath
     /// <param name="b">The second vector to compare.</param>
     /// <returns>True if all corresponding components of the vectors are approximately equal; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool ApproximatelyEquals(Vector2 a, Vector2 b) =>
-        ApproximatelyEquals(a.X, b.X) && ApproximatelyEquals(a.Y, b.Y);
+    public static bool ApproximatelyEquals(Vector2 a, Vector2 b)
+    {
+        return ApproximatelyEquals(a.X, b.X) && ApproximatelyEquals(a.Y, b.Y);
+    }
 
     /// <summary>
     /// Determines whether two floating-point numbers are approximately equal, accounting for precision limitations.
@@ -34,8 +38,10 @@ public static class ImMath
     /// <param name="b">The second value to compare.</param>
     /// <returns>True if the absolute difference between the two values is less than the smallest positive single precision number; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool ApproximatelyEquals(Vector3 a, Vector3 b) =>
-        ApproximatelyEquals(a.X, b.X) && ApproximatelyEquals(a.Y, b.Y) && ApproximatelyEquals(a.Z, b.Z);
+    public static bool ApproximatelyEquals(Vector3 a, Vector3 b)
+    {
+        return ApproximatelyEquals(a.X, b.X) && ApproximatelyEquals(a.Y, b.Y) && ApproximatelyEquals(a.Z, b.Z);
+    }
 
     /// <summary>
     /// Determines whether two floating-point numbers are approximately equal, accounting for precision limitations.
@@ -44,9 +50,11 @@ public static class ImMath
     /// <param name="b">The second value to compare.</param>
     /// <returns>True if the absolute difference between the two values is less than the smallest positive single precision number; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool ApproximatelyEquals(Vector4 a, Vector4 b) =>
-        ApproximatelyEquals(a.X, b.X) && ApproximatelyEquals(a.Y, b.Y) && ApproximatelyEquals(a.Z, b.Z) &&
-        ApproximatelyEquals(a.W, b.W);
+    public static bool ApproximatelyEquals(Vector4 a, Vector4 b)
+    {
+        return ApproximatelyEquals(a.X, b.X) && ApproximatelyEquals(a.Y, b.Y) && ApproximatelyEquals(a.Z, b.Z) &&
+               ApproximatelyEquals(a.W, b.W);
+    }
 
     /// <summary>
     /// Linearly interpolates between two values based on a specified interpolation factor.
@@ -56,7 +64,10 @@ public static class ImMath
     /// <param name="duration">The interpolation factor, typically in the range [0, 1]. A value of 0 will return <paramref name="a"/>, and a value of 1 will return <paramref name="b"/>.</param>
     /// <returns>The interpolated value between <paramref name="a"/> and <paramref name="b"/> based on <paramref name="duration"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Lerp(float a, float b, float duration) => (1 - duration) * a + duration * b;
+    public static float Lerp(float a, float b, float duration)
+    {
+        return (1 - duration) * a + duration * b;
+    }
 
     /// <summary>
     /// A constant factor used to convert an angle measurement from degrees to radians.
@@ -74,5 +85,8 @@ public static class ImMath
     /// <param name="value">The value to be clamped.</param>
     /// <returns>The clamped value within the range of 0 to 1.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Clamp01(float value) => Math.Clamp(value, 0, 1);
+    public static float Clamp01(float value)
+    {
+        return Math.Clamp(value, 0, 1);
+    }
 }

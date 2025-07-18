@@ -15,10 +15,12 @@ public partial class Gui
     public Shape DrawRectBorder(Rect screenRect, Color color, float thickness = 1f,
         float radius = 0.0f,
         Corner corners = Corner.All)
-        => DrawRectBorder(
-            new(screenRect.X, screenRect.Y),
-            new(screenRect.W, screenRect.H),
+    {
+        return DrawRectBorder(
+            new Vector2(screenRect.X, screenRect.Y),
+            new Vector2(screenRect.W, screenRect.H),
             color, thickness, radius, corners);
+    }
 
     /// <summary>
     /// Draws a rectangle border
@@ -35,10 +37,12 @@ public partial class Gui
         return shape;
     }
 
-    private Shape DrawRect(float x, float y, float w, float h, float radius = 0.0f, Corner corners = Corner.All) =>
-        ImMath.ApproximatelyEquals(radius, 0.0f)
+    private Shape DrawRect(float x, float y, float w, float h, float radius = 0.0f, Corner corners = Corner.All)
+    {
+        return ImMath.ApproximatelyEquals(radius, 0.0f)
             ? Shape.Rect(x, y, w, h)
             : Shape.RoundRect(x, y, w, h, radius, corners);
+    }
 
     /// <summary>
     /// Draws a filled rectangle
@@ -48,10 +52,12 @@ public partial class Gui
         Rect screenRect,
         Color? color,
         float radius = 0.0f, Corner corners = Corner.All)
-        => DrawRectFilled(
+    {
+        return DrawRectFilled(
             screenRect.X, screenRect.Y,
             screenRect.BottomRight.X, screenRect.BottomRight.Y,
             color, radius, corners);
+    }
 
     /// <summary>
     /// Draws a filled rectangle
@@ -106,7 +112,9 @@ public partial class Gui
         Rect rect,
         Color color,
         float radius = 0.0f, Corner corners = Corner.All)
-        => DrawRectFilled(rect.X, rect.Y, rect.BottomRight.X, rect.BottomRight.Y, color, radius, corners);
+    {
+        return DrawRectFilled(rect.X, rect.Y, rect.BottomRight.X, rect.BottomRight.Y, color, radius, corners);
+    }
 
     /// <summary>
     /// Draws a filled rectangle (alias for DrawRectFilled)
@@ -117,7 +125,9 @@ public partial class Gui
         Vector2 position, Vector2 size,
         Color color,
         float radius = 0.0f, Corner corners = Corner.All)
-        => DrawRectFilled(position.X, position.Y, size.X, size.Y, color, radius, corners);
+    {
+        return DrawRectFilled(position.X, position.Y, size.X, size.Y, color, radius, corners);
+    }
 
     /// <summary>
     /// Draws a filled rectangle (alias for DrawRectFilled)
@@ -127,7 +137,10 @@ public partial class Gui
     public Shape DrawRect(Rect rect,
         Color? color = null,
         float radius = 0.0f, Corner corners = Corner.All)
-        => DrawRectFilled(rect.Position.X, rect.Size.Y, rect.BottomRight.X, rect.BottomRight.Y, color, radius, corners);
+    {
+        return DrawRectFilled(rect.Position.X, rect.Size.Y, rect.BottomRight.X, rect.BottomRight.Y, color, radius,
+            corners);
+    }
 
 
     /// <summary>
@@ -162,7 +175,9 @@ public partial class Gui
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Shape DrawCircle(Vector2 center, float radius,
         Color color)
-        => DrawCircleFilled(center, radius, color);
+    {
+        return DrawCircleFilled(center, radius, color);
+    }
 
     /// <summary>
     /// Draws a filled triangle (alias for DrawTriangleFilled)
@@ -171,7 +186,9 @@ public partial class Gui
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DrawTriangle(Vector2 a, Vector2 b, Vector2 c,
         Color colorA, Color? colorB = null, Color? colorC = null)
-        => DrawTriangleFilled(a, b, c, colorA, colorB, colorC);
+    {
+        DrawTriangleFilled(a, b, c, colorA, colorB, colorC);
+    }
 
     /// <summary>
     /// Draws a filled rectangle
@@ -211,10 +228,7 @@ public partial class Gui
             StrokeCap = SKStrokeCap.Round
         };
 
-        if (Pass == Pass.Pass2Render)
-        {
-            Canvas!.DrawLine(start.X, start.Y, end.X, end.Y, paint);
-        }
+        if (Pass == Pass.Pass2Render) Canvas!.DrawLine(start.X, start.Y, end.X, end.Y, paint);
     }
 
     /// <summary>
@@ -228,14 +242,10 @@ public partial class Gui
         var newShape = shape.Copy();
         newShape.Node = CurrentNode;
         foreach (var (_, layerList) in newShape.Layers)
-        {
-            foreach (var (layerPath, _) in layerList)
-            {
-                layerPath.Transform(SKMatrix.CreateTranslation(
-                    position.X,
-                    position.Y));
-            }
-        }
+        foreach (var (layerPath, _) in layerList)
+            layerPath.Transform(SKMatrix.CreateTranslation(
+                position.X,
+                position.Y));
 
         AddDraw(newShape);
         return newShape;
@@ -259,13 +269,9 @@ public partial class Gui
         if (Pass != Pass.Pass2Render) return;
         node ??= CurrentNode;
         if (prepend)
-        {
             node.DrawList.Prepend(shape);
-        }
         else
-        {
             node.DrawList.Add(shape);
-        }
     }
 
     private void AddDraw(IDrawListEntry entry, LayoutNode? node = null, bool prepend = false)
@@ -273,12 +279,8 @@ public partial class Gui
         if (Pass != Pass.Pass2Render) return;
         node ??= CurrentNode;
         if (prepend)
-        {
             node.DrawList.Prepend(entry);
-        }
         else
-        {
             node.DrawList.Add(entry);
-        }
     }
 }

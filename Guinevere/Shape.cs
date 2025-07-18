@@ -44,12 +44,8 @@ public partial class Shape : IDrawable
         // Render all layers in Z-order
         // Scroll offsets are now handled during layout calculation
         foreach (var (_, layerList) in Layers)
-        {
-            foreach (var (path, paint) in layerList)
-            {
-                canvas.DrawPath(path, paint);
-            }
-        }
+        foreach (var (path, paint) in layerList)
+            canvas.DrawPath(path, paint);
     }
 
     /// <summary>
@@ -80,10 +76,7 @@ public partial class Shape : IDrawable
     /// <param name="paint">The paint to use for the path.</param>
     internal void AddToLayer(int zIndex, SKPath path, SKPaint paint)
     {
-        if (!Layers.ContainsKey(zIndex))
-        {
-            Layers[zIndex] = new List<(SKPath, SKPaint)>();
-        }
+        if (!Layers.ContainsKey(zIndex)) Layers[zIndex] = new List<(SKPath, SKPaint)>();
 
         Layers[zIndex].Add((path, paint));
     }
@@ -126,7 +119,7 @@ public partial class Shape : IDrawable
             (corners & Corner.TopLeft) == Corner.TopLeft ? new SKPoint(radius, radius) : SKPoint.Empty,
             (corners & Corner.TopRight) == Corner.TopRight ? new SKPoint(radius, radius) : SKPoint.Empty,
             (corners & Corner.BottomRight) == Corner.BottomRight ? new SKPoint(radius, radius) : SKPoint.Empty,
-            (corners & Corner.BottomLeft) == Corner.BottomLeft ? new SKPoint(radius, radius) : SKPoint.Empty,
+            (corners & Corner.BottomLeft) == Corner.BottomLeft ? new SKPoint(radius, radius) : SKPoint.Empty
         };
         roundRect.SetRectRadii(rect, radii);
 
@@ -143,7 +136,7 @@ public partial class Shape : IDrawable
     public static Shape Circle(float radius, Vector2? center = null)
     {
         var path = new SKPath();
-        var pos = center ?? new(0, 0);
+        var pos = center ?? new Vector2(0, 0);
         path.AddCircle(pos.X, pos.Y, radius);
         return new Shape(path);
     }
@@ -261,7 +254,10 @@ public partial class Shape : IDrawable
     /// <returns>A new <see cref="Shape"/> representing the specified triangle.</returns>
     [PublicAPI]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Shape Triangle(Vector2 a, Vector2 b, Vector2 c) => Triangle(a.X, a.Y, b.X, b.Y, c.X, c.Y);
+    public static Shape Triangle(Vector2 a, Vector2 b, Vector2 c)
+    {
+        return Triangle(a.X, a.Y, b.X, b.Y, c.X, c.Y);
+    }
 
     /// <summary>
     /// Creates a triangular shape defined by three distinct vertices specified by their X and Y coordinates.

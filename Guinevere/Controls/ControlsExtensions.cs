@@ -13,10 +13,12 @@ public static partial class ControlsExtensions
         Color? pressedColor = null,
         Color? pressedBorderColor = null,
         Color? color = null,
-        float fontSize = 16,
-        float radius = 4) =>
-        ButtonCore(gui, text, width, height, backgroundColor, borderColor, hoverColor,
+        float? fontSize = null,
+        float radius = 4)
+    {
+        return ButtonCore(gui, text, width, height, backgroundColor, borderColor, hoverColor,
             pressedColor, pressedBorderColor, color, fontSize, radius);
+    }
 
     /// <summary>
     /// Creates an icon button that can be clicked with internal state management
@@ -24,14 +26,17 @@ public static partial class ControlsExtensions
     public static void IconButton(this Gui gui, char? icon, ref bool clicked,
         float size = 32,
         Color? backgroundColor = null,
+        Color? borderColor = null,
         Color? hoverColor = null,
         Color? pressedColor = null,
-        Color? borderColor = null,
+        Color? pressedBorderColor = null,
         Color? color = null,
-        float fontSize = 16,
-        float radius = 4) =>
-        clicked = IconButtonCore(gui, icon, size, backgroundColor, hoverColor, pressedColor,
-            borderColor, color, fontSize, radius);
+        float? fontSize = null,
+        float radius = 4)
+    {
+        clicked = IconButtonCore(gui, icon, size, backgroundColor, borderColor, hoverColor,
+            pressedColor, pressedBorderColor, color, fontSize, radius);
+    }
 
     /// <summary>
     /// Creates an icon button that returns the clicked state without modifying the input
@@ -39,48 +44,63 @@ public static partial class ControlsExtensions
     public static bool IconButton(this Gui gui, string icon,
         float size = 32,
         Color? backgroundColor = null,
+        Color? borderColor = null,
         Color? hoverColor = null,
         Color? pressedColor = null,
-        Color? borderColor = null,
+        Color? pressedBorderColor = null,
         Color? color = null,
         float fontSize = 16,
-        float radius = 4) =>
-        IconButtonCore(gui, icon, size, backgroundColor, hoverColor, pressedColor,
-            borderColor, color, fontSize, radius);
+        float radius = 4)
+    {
+        return IconButtonCore(gui, icon, size, backgroundColor, borderColor, hoverColor,
+            pressedColor, pressedBorderColor, color, fontSize, radius);
+    }
 
     private static bool ButtonCore(Gui gui, Text text, float width, float height,
-        Color? backgroundColor, Color? borderColor, Color? hoverColor, Color? pressedColor,
-        Color? pressedBorderColor, Color? color, float fontSize, float radius)
+        Color? backgroundColor, Color? borderColor,
+        Color? hoverColor,
+        Color? pressedColor, Color? pressedBorderColor,
+        Color? color,
+        float? fontSize, float radius)
     {
-        var (buttonWidth, buttonHeight) = CalculateButtonDimensions(text, width, height, fontSize);
+        var node = gui.Node();
+        var fontSizeEffective = fontSize ?? node.Scope.Get<LayoutNodeScopeTextSize>().Value;
+        var (buttonWidth, buttonHeight) = CalculateButtonDimensions(text, width, height, fontSizeEffective);
+
+        using (node.Width(buttonWidth).Height(buttonHeight).Enter())
+        {
+            if (gui.Pass != Pass.Pass2Render) return false;
+
+            var interactable = gui.GetInteractable();
+            RenderButtonBackground(gui, interactable, backgroundColor, hoverColor, pressedColor, radius);
+            RenderButtonBorder(gui, interactable, borderColor, pressedBorderColor);
+            RenderButtonText(gui, text, fontSizeEffective, color);
+
+            return interactable.OnClick();
+        }
+    }
+
+    private static bool IconButtonCore(Gui gui, Text? icon, float size,
+        Color? backgroundColor, Color? borderColor,
+        Color? hoverColor,
+        Color? pressedColor, Color? pressedBorderColor,
+        Color? color,
+        float? fontSize, float radius)
+    {
+        var node = gui.Node();
+        var fontSizeEffective = fontSize ?? node.Scope.Get<LayoutNodeScopeTextSize>().Value;
+        var (buttonWidth, buttonHeight) = CalculateButtonDimensions(icon, size, size, fontSizeEffective);
 
         using (gui.Node(buttonWidth, buttonHeight).Enter())
         {
             if (gui.Pass != Pass.Pass2Render) return false;
 
-            var interactionState = GetButtonInteractionState(gui);
-            RenderButtonBackground(gui, interactionState, backgroundColor, hoverColor, pressedColor, radius);
-            RenderButtonBorder(gui, interactionState, borderColor, pressedBorderColor);
-            RenderButtonText(gui, text, fontSize, color);
+            var interactable = gui.GetInteractable();
+            RenderIconButtonBackground(gui, interactable, backgroundColor, hoverColor, pressedColor, radius);
+            RenderButtonBorder(gui, interactable, borderColor, pressedBorderColor);
+            RenderButtonIcon(gui, icon, fontSizeEffective, color);
 
-            return interactionState.clicked;
-        }
-    }
-
-    private static bool IconButtonCore(Gui gui, Text? icon, float size, Color? backgroundColor,
-        Color? hoverColor, Color? pressedColor, Color? borderColor, Color? iconColor,
-        float fontSize, float radius)
-    {
-        using (gui.Node(size, size).Enter())
-        {
-            if (gui.Pass != Pass.Pass2Render) return false;
-
-            var interactionState = GetButtonInteractionState(gui);
-            RenderIconButtonBackground(gui, interactionState, backgroundColor, hoverColor, pressedColor, radius);
-            RenderIconButtonBorder(gui, interactionState, borderColor);
-            RenderButtonIcon(gui, icon, fontSize, iconColor);
-
-            return interactionState.clicked;
+            return interactable.OnClick();
         }
     }
 
@@ -101,47 +121,48 @@ public static partial class ControlsExtensions
         );
     }
 
-    private static (bool hovered, bool pressed, bool clicked) GetButtonInteractionState(Gui gui)
-    {
-        var interactable = gui.GetInteractable();
-        return (interactable.OnHover(), interactable.OnHold(), interactable.OnClick());
-    }
+    // private static (bool hovered, bool pressed, bool clicked) GetButtonInteractionState(Gui gui)
+    // {
+    //     var interactable = gui.GetInteractable();
+    //     return (interactable.OnHover(), interactable.OnHold(), interactable.OnClick());
+    // }
 
-    private static void RenderButtonBackground(Gui gui, (bool hovered, bool pressed, bool clicked) state,
+    private static void RenderButtonBackground(Gui gui, InteractableElement interactable,
         Color? backgroundColor, Color? hoverColor, Color? pressedColor, float radius)
     {
-        var buttonColor = GetButtonBackgroundColor(state, backgroundColor, hoverColor, pressedColor);
+        var buttonColor = GetButtonBackgroundColor(interactable, backgroundColor, hoverColor, pressedColor);
         gui.DrawBackgroundRect(buttonColor, radius);
     }
 
-    private static void RenderIconButtonBackground(Gui gui, (bool hovered, bool pressed, bool clicked) state,
+    private static void RenderIconButtonBackground(Gui gui, InteractableElement interactable,
         Color? backgroundColor, Color? hoverColor, Color? pressedColor, float radius)
     {
-        if (!ShouldDrawIconButtonBackground(state, backgroundColor)) return;
+        if (!ShouldDrawIconButtonBackground(interactable, backgroundColor)) return;
 
-        var buttonColor = GetIconButtonBackgroundColor(state, backgroundColor, hoverColor, pressedColor);
+        var buttonColor = GetButtonBackgroundColor(interactable, backgroundColor, hoverColor, pressedColor);
         gui.DrawBackgroundRect(buttonColor, radius);
     }
 
-    private static void RenderButtonBorder(Gui gui, (bool hovered, bool pressed, bool clicked) state,
+    private static void RenderButtonBorder(Gui gui, InteractableElement interactable,
         Color? borderColor, Color? pressedBorderColor)
     {
-        if (!state.hovered && !state.pressed) return;
+        if (!interactable.On(Interactions.Hover | Interactions.Click))
+            return;
 
         var rect = gui.CurrentNode.Rect;
-        var borderColorFinal = GetButtonBorderColor(state, borderColor, pressedBorderColor);
+        var borderColorFinal = GetButtonBorderColor(interactable, borderColor, pressedBorderColor);
         gui.DrawRectBorder(rect.Position, rect.Size, borderColorFinal, 1f, 4f);
     }
 
-    private static void RenderIconButtonBorder(Gui gui, (bool hovered, bool pressed, bool clicked) state,
-        Color? borderColor)
-    {
-        if (!state.hovered && !state.pressed) return;
-        if (!borderColor.HasValue) return;
-
-        var rect = gui.CurrentNode.Rect;
-        gui.DrawRectBorder(rect.Position, rect.Size, borderColor.Value, 1f, 4f);
-    }
+    // private static void RenderIconButtonBorder(Gui gui, InteractableElement interactable,
+    //     Color? borderColor)
+    // {
+    //     if (!interactable.On(Interactions.Hover | Interactions.Click))
+    //         return;
+    //
+    //     var rect = gui.CurrentNode.Rect;
+    //     gui.DrawRectBorder(rect.Position, rect.Size, borderColor.Value, 1f, 4f);
+    // }
 
     private static void RenderButtonText(Gui gui, Text? text, float fontSize, Color? color)
     {
@@ -172,39 +193,35 @@ public static partial class ControlsExtensions
     }
 
     // Color calculation helpers
-    private static Color GetButtonBackgroundColor((bool hovered, bool pressed, bool clicked) state,
-        Color? backgroundColor, Color? hoverColor, Color? pressedColor) =>
-        state switch
-        {
-            { pressed: true } when pressedColor.HasValue => pressedColor.Value,
-            { hovered: true } when hoverColor.HasValue => hoverColor.Value,
-            _ => backgroundColor ?? Color.FromArgb(255, 100, 149, 237)
-        };
+    private static Color GetButtonBackgroundColor(InteractableElement interactable,
+        Color? backgroundColor, Color? hoverColor, Color? pressedColor)
+    {
+        if (interactable.OnClick() && pressedColor.HasValue)
+            return pressedColor.Value;
+        if (interactable.OnHover() && hoverColor.HasValue)
+            return hoverColor.Value;
+        return backgroundColor ?? Color.FromArgb(255, 100, 149, 237);
+    }
 
-    private static Color GetIconButtonBackgroundColor((bool hovered, bool pressed, bool clicked) state,
-        Color? backgroundColor, Color? hoverColor, Color? pressedColor) =>
-        state switch
-        {
-            { pressed: true } when pressedColor.HasValue => pressedColor.Value,
-            { hovered: true } when hoverColor.HasValue => hoverColor.Value,
-            _ => backgroundColor ?? Color.FromArgb(50, 128, 128, 128)
-        };
+    private static Color GetButtonBorderColor(InteractableElement interactable,
+        Color? borderColor, Color? pressedBorderColor)
+    {
+        if (interactable.OnClick())
+            return pressedBorderColor ?? Color.FromArgb(255, 60, 109, 197);
+        return borderColor ?? Color.FromArgb(255, 120, 169, 255);
+    }
 
-    private static Color GetButtonBorderColor((bool hovered, bool pressed, bool clicked) state,
-        Color? borderColor, Color? pressedBorderColor) =>
-        state switch
-        {
-            { pressed: true } => pressedBorderColor ?? Color.FromArgb(255, 60, 109, 197),
-            _ => borderColor ?? Color.FromArgb(255, 120, 169, 255)
-        };
+    private static bool ShouldDrawIconButtonBackground(InteractableElement interactable,
+        Color? backgroundColor)
+    {
+        return backgroundColor.HasValue || interactable.On(Interactions.Hover | Interactions.Click);
+    }
 
-    private static bool ShouldDrawIconButtonBackground((bool hovered, bool pressed, bool clicked) state,
-        Color? backgroundColor) =>
-        backgroundColor.HasValue || state.hovered || state.pressed;
-
-    private static Vector2 CalculateTextCenterPosition(Rect rect, SKRect textBounds) =>
-        new(
+    private static Vector2 CalculateTextCenterPosition(Rect rect, SKRect textBounds)
+    {
+        return new Vector2(
             rect.X + (rect.W - textBounds.Width) * 0.5f,
             rect.Y + (rect.H + textBounds.Height) * 0.5f
         );
+    }
 }

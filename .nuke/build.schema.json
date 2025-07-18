@@ -35,6 +35,16 @@
         "CreateGitHubRelease",
         "CreateSamplesReadme",
         "CreateTag",
+        "DailyBuild",
+        "DailyCheck",
+        "DailyCI",
+        "DailyPublish",
+        "DailyRelease",
+        "DailyStatus",
+        "ExtractChangelogUnreleased",
+        "GitHubCreateCommit",
+        "GitHubCreateRelease",
+        "GitHubCreateTag",
         "PackageSamples",
         "PackNuGet",
         "Publish",
@@ -137,13 +147,17 @@
           "description": "Minimum coverage threshold (default: 80)",
           "format": "int32"
         },
-        "GitHubOwner": {
+        "ForceDailyRelease": {
+          "type": "boolean",
+          "description": "Force daily release even without changes"
+        },
+        "GitHubApiBaseUrl": {
           "type": "string",
-          "description": "GitHub repository owner"
+          "description": "GitHub API URL"
         },
         "GitHubRepository": {
           "type": "string",
-          "description": "GitHub repository name"
+          "description": "GitHub repository"
         },
         "GitHubToken": {
           "type": "string",
@@ -195,6 +209,10 @@
         "SamplesOutputDirectory": {
           "type": "string",
           "description": "Samples output directory (default: ./samples-output)"
+        },
+        "SkipDailyReleaseOnNoChanges": {
+          "type": "boolean",
+          "description": "Skip daily release if no changes found"
         },
         "SkipGitHubRelease": {
           "type": "boolean",

@@ -1,7 +1,9 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -22,17 +24,58 @@ partial class Build
     [Parameter("GitHub token for creating releases")]
     public readonly string GitHubToken;
 
-    [Parameter("GitHub repository owner")]
-    public readonly string GitHubOwner = "brmassa";
+    [Parameter("GitHub repository")]
+    public readonly string GitHubRepository = "brmassa/guinevere";
 
-    [Parameter("GitHub repository name")]
-    public readonly string GitHubRepository = "guinevere";
+    [Parameter("GitHub API URL")]
+    private static readonly string GitHubApiBaseUrl = "https://api.github.com";
 
     [Parameter("Skip GitHub release creation")]
     public readonly bool SkipGitHubRelease;
 
+    private static string Date =>
+        DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
     /// <summary>
-    /// Creates a GitHub release with all assets
+    /// Creates a GitHub release with all assets following SumTree pattern
+    /// </summary>
+    public Target GitHubCreateRelease => td => td
+        .DependsOn(GitHubCreateTag, ExtractChangelogUnreleased)
+        .OnlyWhenStatic(() => HasNewCommits)
+        .Requires(() => GitHubToken)
+        .Executes(async () =>
+        {
+            try
+            {
+                using var httpClient = HttpClientGitHubToken();
+                var message = $"{ChangelogUnreleased}";
+                var release = $"{TagName} / {Date}";
+                var response = await httpClient.PostAsJsonAsync(
+                    GitHubApiUrl($"repos/{GitHubRepository}/releases"),
+                    new
+                    {
+                        tag_name = TagName,
+                        name = release,
+                        body = message,
+                        draft = false,
+                        prerelease = IsPreRelease()
+                    }).ConfigureAwait(false);
+
+                _ = response.EnsureSuccessStatusCode();
+                Log.Information(
+                    "Release {release} created with the description '{message}'",
+                    release, message);
+            }
+            catch (HttpRequestException ex)
+            {
+                Log.Error(ex, "{StatusCode}: {Message}", ex.StatusCode,
+                    ex.Message);
+                throw;
+            }
+        });
+
+    /// <summary>
+    /// Creates a GitHub release with all assets (legacy method)
     /// </summary>
     private Target CreateGitHubRelease => td => td
         .DependsOn(PackNuGet, PackageSamples, UpdateChangelog)
@@ -63,7 +106,41 @@ partial class Build
         });
 
     /// <summary>
-    /// Creates a tag and pushes it to GitHub
+    /// Creates a tag in the GitHub repository following SumTree pattern
+    /// </summary>
+    private Target GitHubCreateTag => td => td
+        .DependsOn(CheckNewCommits, GitHubCreateCommit)
+        .OnlyWhenStatic(() => HasNewCommits)
+        .Requires(() => GitHubToken)
+        .Executes(async () =>
+        {
+            try
+            {
+                using var httpClient = HttpClientGitHubToken();
+                var message = $"Automatic tag creation: '{TagName}' in {Date}";
+                var response = await httpClient.PostAsJsonAsync(
+                    GitHubApiUrl($"repos/{GitHubRepository}/git/refs"),
+                    new
+                    {
+                        @ref = $"refs/tags/{TagName}",
+                        sha = GitTasks.Git("rev-parse HEAD").FirstOrDefault().Text
+                    }).ConfigureAwait(false);
+
+                _ = response.EnsureSuccessStatusCode();
+                Log.Information(
+                    "Tag {tag} created with the message '{message}'",
+                    TagName, message);
+            }
+            catch (HttpRequestException ex)
+            {
+                Log.Error(ex, "{StatusCode}: {Message}", ex.StatusCode,
+                    ex.Message);
+                throw;
+            }
+        });
+
+    /// <summary>
+    /// Creates a tag and pushes it to GitHub (legacy method)
     /// </summary>
     private Target CreateTag => td => td
         .DependsOn(CreateCommit)
@@ -87,6 +164,25 @@ partial class Build
                 Log.Error(ex, "Error creating or pushing tag");
                 throw;
             }
+        });
+
+    private Target GitHubCreateCommit => td => td
+        .DependsOn(CheckNewCommits, UpdateProjectVersions, UpdateChangelog)
+        .OnlyWhenStatic(() => HasNewCommits)
+        .Executes(() =>
+        {
+            // Configure git user for CI/CD environment
+            GitTasks.Git("config --global user.name \"GitHub Actions\"");
+            GitTasks.Git("config --global user.email \"actions@github.com\"");
+
+            // Use Git commands to commit changes locally
+            GitTasks.Git("add .");
+            GitTasks.Git($"commit -m \"chore: Automatic commit creation in {Date} [skip ci]\"");
+            GitTasks.Git("push origin HEAD");
+
+            Log.Information(
+                "Commit in branch {branch} created and pushed",
+                Repository?.Branch ?? "main");
         });
 
     /// <summary>
@@ -124,7 +220,7 @@ partial class Build
         try
         {
             var response = await client.PostAsync(
-                $"https://api.github.com/repos/{GitHubOwner}/{GitHubRepository}/releases",
+                $"https://api.github.com/repos/{GitHubRepository}/releases",
                 content);
 
             if (response.IsSuccessStatusCode)
@@ -132,14 +228,14 @@ partial class Build
                 var responseJson = await response.Content.ReadAsStringAsync();
                 using var doc = JsonDocument.Parse(responseJson);
                 var id = doc.RootElement.GetProperty("id").GetInt64();
-                
+
                 Log.Information("Created GitHub release with ID: {ReleaseId}", id);
                 return id;
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                Log.Error("Failed to create GitHub release. Status: {StatusCode}, Content: {Content}", 
+                Log.Error("Failed to create GitHub release. Status: {StatusCode}, Content: {Content}",
                     response.StatusCode, errorContent);
                 return null;
             }
@@ -157,7 +253,7 @@ partial class Build
     private async Task UploadNuGetPackagesAsync(long releaseId)
     {
         var packages = PackagesDirectory.GlobFiles("*.nupkg").ToList();
-        
+
         Log.Information("Uploading {Count} NuGet packages to GitHub release", packages.Count);
 
         foreach (var package in packages)
@@ -172,7 +268,7 @@ partial class Build
     private async Task UploadSamplePackagesAsync(long releaseId)
     {
         var samplePackages = SamplesOutput.GlobFiles("*.zip").ToList();
-        
+
         Log.Information("Uploading {Count} sample packages to GitHub release", samplePackages.Count);
 
         foreach (var package in samplePackages)
@@ -198,7 +294,7 @@ partial class Build
 
         try
         {
-            var uploadUrl = $"https://uploads.github.com/repos/{GitHubOwner}/{GitHubRepository}/releases/{releaseId}/assets?name={fileName}";
+            var uploadUrl = $"https://uploads.github.com/repos/{GitHubRepository}/releases/{releaseId}/assets?name={fileName}";
             var response = await client.PostAsync(uploadUrl, content);
 
             if (response.IsSuccessStatusCode)
@@ -208,7 +304,7 @@ partial class Build
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                Log.Error("Failed to upload asset {FileName}. Status: {StatusCode}, Content: {Content}", 
+                Log.Error("Failed to upload asset {FileName}. Status: {StatusCode}, Content: {Content}",
                     fileName, response.StatusCode, errorContent);
             }
         }
@@ -232,7 +328,7 @@ partial class Build
 
             var changelogContent = File.ReadAllText(ChangelogFile);
             var versionSection = ExtractVersionSection(changelogContent, VersionFull);
-            
+
             return string.IsNullOrEmpty(versionSection) ? GetDefaultReleaseNotes() : versionSection;
         }
         catch (Exception ex)
@@ -297,7 +393,7 @@ This release includes the latest improvements and bug fixes for the Guinevere GP
 ### NuGet Packages
 - **org.mass4.Guinevere**: Core Guinevere library
 - **org.mass4.Guinevere.OpenGL.OpenTK**: OpenTK integration
-- **org.mass4.Guinevere.OpenGL.Raylib**: Raylib integration  
+- **org.mass4.Guinevere.OpenGL.Raylib**: Raylib integration
 - **org.mass4.Guinevere.OpenGL.SilkNET**: Silk.NET OpenGL integration
 - **org.mass4.Guinevere.Vulkan.SilkNET**: Silk.NET Vulkan integration
 
@@ -325,4 +421,27 @@ For questions, issues, or contributions, please visit our [GitHub repository](ht
         VersionFull.Contains("beta", StringComparison.OrdinalIgnoreCase) ||
         VersionFull.Contains("rc", StringComparison.OrdinalIgnoreCase) ||
         VersionFull.Contains("preview", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Creates an HTTP client and set the authentication header.
+    /// </summary>
+    private HttpClient HttpClientGitHubToken()
+    {
+        var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {GitHubToken}");
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "Guinevere-Build-System");
+        return httpClient;
+    }
+
+    /// <summary>
+    /// Generate the GitHub API URL.
+    /// </summary>
+    /// <param name="url">The URL to append to the base URL.</param>
+    /// <returns></returns>
+    private string GitHubApiUrl(string url)
+    {
+        var apiUrl = $"{GitHubApiBaseUrl}/{url}";
+        Log.Information("GitHub API call: {url}", apiUrl);
+        return apiUrl;
+    }
 }

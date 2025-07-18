@@ -60,7 +60,9 @@ public partial class Gui
 
         // Clear the previous tree completely
         if (RootNode is null)
+        {
             RootNode = CreateRootNode(ScreenRect);
+        }
         else
         {
             RootNode.ClearRoot();
@@ -91,10 +93,7 @@ public partial class Gui
     public void SetStage(Pass newPass)
     {
         Pass = newPass;
-        if (RootNode is not null)
-        {
-            RootNode!.Pass2NodeCount = 0;
-        }
+        if (RootNode is not null) RootNode!.Pass2NodeCount = 0;
     }
 
     /// <summary>

@@ -24,7 +24,32 @@ partial class Build
     /// <summary>
     /// The current version, using GitVersion with fallback.
     /// </summary>
-    private string VersionFull => GitVersion?.MajorMinorPatch ?? CurrentFullVersion;
+    private string VersionFull
+    {
+        get
+        {
+            if (GitVersion?.MajorMinorPatch != null)
+            {
+                var gitVersionValue = GitVersion.MajorMinorPatch;
+                var calculatedVersion = CalculateNextVersion();
+
+                // Use fallback if GitVersion gives unreasonable result (0.x.x when we have tagged releases > 1.0)
+                if (gitVersionValue.StartsWith("0.") && !calculatedVersion.StartsWith("0."))
+                {
+                    Log.Warning("GitVersion returned {GitVersion} but fallback calculated {Fallback}. Using fallback.",
+                        gitVersionValue, calculatedVersion);
+                    return calculatedVersion;
+                }
+
+                Log.Debug("Using GitVersion: {Version}", gitVersionValue);
+                return gitVersionValue;
+            }
+
+            var fallbackVersion = CalculateNextVersion();
+            Log.Debug("Using fallback version calculation: {Version}", fallbackVersion);
+            return fallbackVersion;
+        }
+    }
 
     private string VersionMajor => GitVersion?.Major.ToString(CultureInfo.InvariantCulture) ?? GetFallbackMajor();
 
@@ -39,7 +64,7 @@ partial class Build
     /// <summary>
     /// Checks if there are new commits since the last tag.
     /// </summary>
-    private bool HasNewCommits => GitVersion != null ? GitVersion.CommitsSinceVersionSource != "0" : true;
+    private bool HasNewCommits => GitVersion != null ? GitVersion.CommitsSinceVersionSource != "0" : GetCommitsSinceLastTag() > 0;
 
     private string CurrentVersion;
 
@@ -65,6 +90,62 @@ partial class Build
     }
 
     private string CurrentFullVersion => CurrentTag.TrimStart('v');
+
+    /// <summary>
+    /// Calculates the next version by incrementing from the last tag
+    /// </summary>
+    private string CalculateNextVersion()
+    {
+        var commitsSinceTag = GetCommitsSinceLastTag();
+        Log.Debug("Commits since last tag: {Count}", commitsSinceTag);
+
+        if (commitsSinceTag == 0)
+        {
+            Log.Debug("No commits since tag, returning current version: {Version}", CurrentFullVersion);
+            return CurrentFullVersion;
+        }
+
+        var currentVersion = CurrentFullVersion;
+        Log.Debug("Current tag version: {Version}", currentVersion);
+        var parts = currentVersion.Split('.');
+
+        if (parts.Length >= 2)
+        {
+            if (int.TryParse(parts[0], out var major) && int.TryParse(parts[1], out var minor))
+            {
+                // Increment minor version for new commits
+                var nextVersion = $"{major}.{minor + 1}.0";
+                Log.Debug("Calculated next version: {Version}", nextVersion);
+                return nextVersion;
+            }
+        }
+
+        // Fallback to current version if parsing fails
+        Log.Warning("Could not parse version {Version}, returning as-is", currentVersion);
+        return currentVersion;
+    }
+
+    /// <summary>
+    /// Gets the number of commits since the last tag
+    /// </summary>
+    private int GetCommitsSinceLastTag()
+    {
+        try
+        {
+            // Count commits between tag and HEAD
+            var commitCountText = GitTasks.Git($"rev-list --count {CurrentTag}..HEAD")
+                .FirstOrDefault().Text;
+
+            if (int.TryParse(commitCountText, out var directCount))
+                return directCount;
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Could not calculate commits since last tag");
+        }
+
+        return 1; // Assume there are changes if we can't determine
+    }
 
     /// <summary>
     /// Gets fallback major version when GitVersion is not available.
@@ -111,10 +192,10 @@ partial class Build
     private bool IsValidVersion(string version)
     {
         if (string.IsNullOrEmpty(version)) return false;
-        
+
         var parts = version.Split('.');
         if (parts.Length < 2 || parts.Length > 4) return false;
-        
+
         return parts.Take(3).All(part => int.TryParse(part, out _));
     }
 
@@ -127,7 +208,7 @@ partial class Build
             Log.Information("Current version:  {Version}", CurrentFullVersion);
             Log.Information("Current tag:      {Version}", CurrentTag);
             Log.Information("Next version:     {Version}", VersionFull);
-            
+
             if (GitVersion == null)
             {
                 Log.Warning("GitVersion is not available - using fallback version from git tags");
@@ -177,7 +258,7 @@ partial class Build
         {
             Log.Information("Projects: {ProjectsCount}",
                 Solution.Projects.Count);
-            
+
             var projectsToVersion = new List<Project>
             {
                 Solution.Guinevere,

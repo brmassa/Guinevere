@@ -17,6 +17,13 @@ namespace Guinevere.Nuke;
     InvokedTargets = [nameof(TestReport), nameof(Compile), nameof(Restore), nameof(Publish)],
     FetchDepth = 0,
     AutoGenerate = false)]
+[GitHubActions(
+    "daily-release",
+    GitHubActionsImage.UbuntuLatest,
+    FetchDepth = 0,
+    AutoGenerate = false,
+    OnCronSchedule = "0 18 * * *", // 15h BRT (18h UTC)
+    InvokedTargets = [nameof(Test), nameof(GitHubCreateRelease)])]
 // [GitHubActions(
 //     "release",
 //     GitHubActionsImage.UbuntuLatest,

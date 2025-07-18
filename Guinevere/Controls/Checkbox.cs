@@ -12,9 +12,11 @@ public static partial class ControlsExtensions
         Color? borderColor = null,
         Color? labelColor = null,
         float fontSize = 14,
-        float spacing = 8) =>
+        float spacing = 8)
+    {
         CheckboxCore(gui, ref isChecked, label, size, backgroundColor, checkColor,
             borderColor, labelColor, fontSize, spacing);
+    }
 
     /// <summary>
     /// Creates a checkbox that returns the toggled state without modifying the input
@@ -52,9 +54,12 @@ public static partial class ControlsExtensions
         }
     }
 
-    private static float CalculateCheckboxWidth(string label, float size, float fontSize, float spacing) =>
-        string.IsNullOrEmpty(label) ? size :
-        size + spacing + MeasureTextWidth(new SKFont { Size = fontSize }, label);
+    private static float CalculateCheckboxWidth(string label, float size, float fontSize, float spacing)
+    {
+        return string.IsNullOrEmpty(label)
+            ? size
+            : size + spacing + MeasureTextWidth(new SKFont { Size = fontSize }, label);
+    }
 
     private static void HandleCheckboxInteraction(Gui gui, ref bool isChecked)
     {
@@ -94,8 +99,10 @@ public static partial class ControlsExtensions
         }
     }
 
-    private static Color GetCheckboxBackgroundColor(bool isChecked, Color? backgroundColor) =>
-        backgroundColor ?? (isChecked ? Color.FromArgb(255, 100, 149, 237) : Color.White);
+    private static Color GetCheckboxBackgroundColor(bool isChecked, Color? backgroundColor)
+    {
+        return backgroundColor ?? (isChecked ? Color.FromArgb(255, 100, 149, 237) : Color.White);
+    }
 
     private static void DrawCheckmark(Gui gui, Rect rect, float size, Color checkColor)
     {
@@ -109,11 +116,12 @@ public static partial class ControlsExtensions
     }
 
     private static (Vector2 p1, Vector2 p2, Vector2 p3) CalculateCheckmarkPoints(
-        float centerX, float centerY, float checkSize) => (
-        new Vector2(centerX - checkSize * 0.5f, centerY),
-        new Vector2(centerX - checkSize * 0.1f, centerY + checkSize * 0.4f),
-        new Vector2(centerX + checkSize * 0.6f, centerY - checkSize * 0.4f)
-    );
-
-
+        float centerX, float centerY, float checkSize)
+    {
+        return (
+            new Vector2(centerX - checkSize * 0.5f, centerY),
+            new Vector2(centerX - checkSize * 0.1f, centerY + checkSize * 0.4f),
+            new Vector2(centerX + checkSize * 0.6f, centerY - checkSize * 0.4f)
+        );
+    }
 }

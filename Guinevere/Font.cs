@@ -14,7 +14,7 @@ public class Font
     ///
     /// </summary>
     internal Font()
-        : this(new())
+        : this(new SKFont())
     {
     }
 

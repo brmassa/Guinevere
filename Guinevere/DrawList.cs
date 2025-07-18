@@ -11,35 +11,53 @@ public sealed class DrawList
     /// Adds a drawable shape to the draw list.
     /// </summary>
     /// <param name="shape">The drawable object to add.</param>
-    public void Add(IDrawable shape) => _entries.Add(new DrawableEntry(shape));
+    public void Add(IDrawable shape)
+    {
+        _entries.Add(new DrawableEntry(shape));
+    }
 
     /// <summary>
     /// Adds a drawable shape to the beginning of the draw list.
     /// </summary>
     /// <param name="shape">The drawable object to prepend to the draw list.</param>
-    public void Prepend(IDrawable shape) => _entries = _entries.Prepend(new DrawableEntry(shape)).ToList();
+    public void Prepend(IDrawable shape)
+    {
+        _entries = _entries.Prepend(new DrawableEntry(shape)).ToList();
+    }
 
     /// <summary>
     /// Adds any draw list entry to the draw list.
     /// </summary>
     /// <param name="entry">The draw list entry to add.</param>
-    public void Add(IDrawListEntry entry) => _entries.Add(entry);
+    public void Add(IDrawListEntry entry)
+    {
+        _entries.Add(entry);
+    }
 
     /// <summary>
     /// Adds any draw list entry to the beginning of the draw list.
     /// </summary>
     /// <param name="entry">The draw list entry to prepend to the draw list.</param>
-    public void Prepend(IDrawListEntry entry) => _entries = _entries.Prepend(entry).ToList();
+    public void Prepend(IDrawListEntry entry)
+    {
+        _entries = _entries.Prepend(entry).ToList();
+    }
 
     /// <summary>
     /// Adds a clip operation to the draw list using the specified shape.
     /// </summary>
-    public void AddClip(Shape shape, Vector2 positon) => _entries.Add(new ClipOperation(shape, positon));
+    public void AddClip(Shape shape, Vector2 positon)
+    {
+        _entries.Add(new ClipOperation(shape, positon));
+    }
 
     /// <summary>
     /// Adds a clip operation to the draw list using the specified shape.
     /// </summary>
-    public void AddClip(Rect rect) => _entries.Add(new ClipOperation(rect));
+    public void AddClip(Rect rect)
+    {
+        _entries.Add(new ClipOperation(rect));
+    }
 
     /// <summary>
     /// Renders all drawable entries in the list onto the specified canvas.
@@ -49,9 +67,6 @@ public sealed class DrawList
     /// <param name="canvas">The canvas to render the drawable entries onto.</param>
     public void Render(Gui gui, LayoutNode node, SKCanvas canvas)
     {
-        foreach (var entry in _entries)
-        {
-            entry.Execute(gui, node, canvas);
-        }
+        foreach (var entry in _entries) entry.Execute(gui, node, canvas);
     }
 }

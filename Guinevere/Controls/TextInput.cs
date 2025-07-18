@@ -15,10 +15,12 @@ public static partial class ControlsExtensions
         public bool ShowCursor = true;
     }
 
-    private static InputState GetOrCreateState(string nodeId, string initialText) =>
-        InputStates.TryGetValue(nodeId, out var state)
+    private static InputState GetOrCreateState(string nodeId, string initialText)
+    {
+        return InputStates.TryGetValue(nodeId, out var state)
             ? state
             : InputStates[nodeId] = new InputState { Text = initialText };
+    }
 
     private static void UpdateCursorBlink(InputState state, float deltaTime)
     {
@@ -123,7 +125,7 @@ public static partial class ControlsExtensions
                     s.Text = s.Text.Insert(s.CursorPosition, c.ToString());
                     s.CursorPosition++;
                 }
-                else if (c == '\r' || c == '\n') // Handle Enter for new lines
+                else if (c is '\r' or '\n') // Handle Enter for new lines
                 {
                     s.Text = s.Text.Insert(s.CursorPosition, "\n");
                     s.CursorPosition++;
@@ -205,8 +207,8 @@ public static partial class ControlsExtensions
     {
         var finalDisplayText = string.IsNullOrEmpty(displayText) ? placeholder : displayText;
         var finalColor = string.IsNullOrEmpty(displayText)
-            ? (placeholderColor ?? Color.Gray)
-            : (textColor ?? Color.Black);
+            ? placeholderColor ?? Color.Gray
+            : textColor ?? Color.Black;
 
         if (!string.IsNullOrEmpty(finalDisplayText))
             gui.DrawText(finalDisplayText, fontSize, finalColor, centerInRect: false);
@@ -267,13 +269,11 @@ public static partial class ControlsExtensions
 
         // Ensure cursor is within the visible area
         if (cursorY >= 0 && cursorY < innerRect.Height)
-        {
             // Use a nested node for cursor positioning to avoid coordinate transformation issues
             using (gui.Node(2, cursorHeight).Margin(textWidth, cursorY, 0, 0).Enter())
             {
                 gui.DrawRect(gui.CurrentNode.Rect, cursorColor ?? Color.White);
             }
-        }
     }
 
     /// <summary>
@@ -438,7 +438,8 @@ public static partial class ControlsExtensions
             // Only process input if enabled
             if (enabled)
             {
-                state = HandleFocusAndClick(state, interactable, gui, CalculateCursorPositionFromClickMultiline, state.Text, fontSize);
+                state = HandleFocusAndClick(state, interactable, gui, CalculateCursorPositionFromClickMultiline,
+                    state.Text, fontSize);
                 state = HandleKeyboardInputMultiline(state, gui);
             }
 
@@ -447,10 +448,7 @@ public static partial class ControlsExtensions
             DrawInputText(gui, state.Text, placeholder, fontSize, textColor, placeholderColor);
 
             // Only draw cursor if enabled
-            if (enabled)
-            {
-                DrawCursorMultiline(gui, state, state.Text, fontSize, cursorColor);
-            }
+            if (enabled) DrawCursorMultiline(gui, state, state.Text, fontSize, cursorColor);
 
             text = state.Text;
         }
@@ -496,5 +494,8 @@ public static partial class ControlsExtensions
     /// <summary>
     /// Clears all input states - useful for cleanup
     /// </summary>
-    public static void ClearInputStates(this Gui gui) => InputStates.Clear();
+    public static void ClearInputStates(this Gui gui)
+    {
+        InputStates.Clear();
+    }
 }

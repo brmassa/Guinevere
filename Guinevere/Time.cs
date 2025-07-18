@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Guinevere;
+﻿namespace Guinevere;
 
 /// <summary>
 /// Provides time measurement and frame rate calculation utilities for game loops.

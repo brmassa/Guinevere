@@ -88,7 +88,7 @@ public class ScrollState
     /// <summary>
     /// Gets the maximum scroll position.
     /// </summary>
-    public Vector2 MaxScroll => new Vector2(
+    public Vector2 MaxScroll => new(
         Math.Max(0, ContentSize.X - ViewportSize.X),
         Math.Max(0, ContentSize.Y - ViewportSize.Y)
     );
@@ -126,10 +126,10 @@ public class ScrollState
 
         var track = new Rect(trackX, trackY, ScrollbarThickness, trackHeight);
 
-        var thumbHeight = Math.Max(ScrollbarMinThumbSize, (ViewportSize.Y / ContentSize.Y) * trackHeight);
+        var thumbHeight = Math.Max(ScrollbarMinThumbSize, ViewportSize.Y / ContentSize.Y * trackHeight);
         var thumbY = trackY;
         if (MaxScroll.Y > 0)
-            thumbY += (ScrollOffset.Y / MaxScroll.Y) * (trackHeight - thumbHeight);
+            thumbY += ScrollOffset.Y / MaxScroll.Y * (trackHeight - thumbHeight);
 
         var thumb = new Rect(trackX + ScrollbarPadding, thumbY, ScrollbarThickness - 2 * ScrollbarPadding,
             thumbHeight);
@@ -148,10 +148,10 @@ public class ScrollState
 
         var track = new Rect(trackX, trackY, trackWidth, ScrollbarThickness);
 
-        var thumbWidth = Math.Max(ScrollbarMinThumbSize, (ViewportSize.X / ContentSize.X) * trackWidth);
+        var thumbWidth = Math.Max(ScrollbarMinThumbSize, ViewportSize.X / ContentSize.X * trackWidth);
         var thumbX = trackX;
         if (MaxScroll.X > 0)
-            thumbX += (ScrollOffset.X / MaxScroll.X) * (trackWidth - thumbWidth);
+            thumbX += ScrollOffset.X / MaxScroll.X * (trackWidth - thumbWidth);
 
         var thumb = new Rect(thumbX, trackY + ScrollbarPadding, thumbWidth,
             ScrollbarThickness - 2 * ScrollbarPadding);
@@ -189,7 +189,7 @@ public class ScrollState
         if (!IsDraggingScrollbarY) return;
 
         var (track, _) = CalculateVerticalScrollbar(containerRect);
-        var thumbHeight = Math.Max(ScrollbarMinThumbSize, (ViewportSize.Y / ContentSize.Y) * track.H);
+        var thumbHeight = Math.Max(ScrollbarMinThumbSize, ViewportSize.Y / ContentSize.Y * track.H);
 
         var dragDelta = mousePos.Y - DragStartMousePos.Y;
         var scrollableHeight = track.H - thumbHeight;
@@ -199,7 +199,7 @@ public class ScrollState
             var scrollRatio = dragDelta / scrollableHeight;
             ScrollOffset = new Vector2(
                 ScrollOffset.X,
-                DragStartScrollOffset.Y + (scrollRatio * MaxScroll.Y)
+                DragStartScrollOffset.Y + scrollRatio * MaxScroll.Y
             );
             ClampScrollPosition();
         }
@@ -213,7 +213,7 @@ public class ScrollState
         if (!IsDraggingScrollbarX) return;
 
         var (track, _) = CalculateHorizontalScrollbar(containerRect);
-        var thumbWidth = Math.Max(ScrollbarMinThumbSize, (ViewportSize.X / ContentSize.X) * track.W);
+        var thumbWidth = Math.Max(ScrollbarMinThumbSize, ViewportSize.X / ContentSize.X * track.W);
 
         var dragDelta = mousePos.X - DragStartMousePos.X;
         var scrollableWidth = track.W - thumbWidth;
@@ -222,7 +222,7 @@ public class ScrollState
         {
             var scrollRatio = dragDelta / scrollableWidth;
             ScrollOffset = new Vector2(
-                DragStartScrollOffset.X + (scrollRatio * MaxScroll.X),
+                DragStartScrollOffset.X + scrollRatio * MaxScroll.X,
                 ScrollOffset.Y
             );
             ClampScrollPosition();

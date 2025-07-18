@@ -67,7 +67,10 @@ public readonly struct InteractableElement
     /// <returns>
     /// True if the cursor is within the interactive region of the element; otherwise, false.
     /// </returns>
-    public bool OnHover() => _shape.Contains(_gui.Input.MousePosition.X, _gui.Input.MousePosition.Y);
+    public bool OnHover()
+    {
+        return _shape.Contains(_gui.Input.MousePosition.X, _gui.Input.MousePosition.Y);
+    }
 
     /// <summary>
     /// Determines whether the specified mouse button is currently being held down
@@ -75,7 +78,10 @@ public readonly struct InteractableElement
     /// </summary>
     /// <param name="button">The mouse button to check, defaulting to the left button if not specified.</param>
     /// <returns>True if the specified mouse button is being held down; otherwise, false.</returns>
-    public bool OnHold(MouseButton button = MouseButton.Left) => IsHeld(button);
+    public bool OnHold(MouseButton button = MouseButton.Left)
+    {
+        return IsHeld(button);
+    }
 
     /// <summary>
     /// Determines if the interactive element is currently being held by the user,
@@ -106,21 +112,15 @@ public readonly struct InteractableElement
         // Stage 1: Start dragging only if hovering AND mouse is pressed this frame
         if (isHovering && mouseDown)
         {
-             _gui.SetDragState(_id, true);
+            _gui.SetDragState(_id, true);
             return true;
         }
 
         // Stage 2: Continue dragging if we were already dragging AND mouse is still down
-        if (isDragging && mouseDown)
-        {
-            return true;
-        }
+        if (isDragging && mouseDown) return true;
 
         // Stop dragging when mouse is released
-        if (isDragging && !mouseDown)
-        {
-             _gui.SetDragState(_id, false);
-        }
+        if (isDragging && !mouseDown) _gui.SetDragState(_id, false);
 
         return false;
     }
@@ -130,5 +130,8 @@ public readonly struct InteractableElement
     /// </summary>
     /// <param name="button">The mouse button to check for the click interaction. Defaults to <see cref="MouseButton.Left"/>.</param>
     /// <returns>True if the specified mouse button was clicked and the interactive element is hovered; otherwise, false.</returns>
-    public bool OnClick(MouseButton button = MouseButton.Left) => OnHover() && _gui.Input.IsMouseButtonPressed(button);
+    public bool OnClick(MouseButton button = MouseButton.Left)
+    {
+        return OnHover() && _gui.Input.IsMouseButtonPressed(button);
+    }
 }

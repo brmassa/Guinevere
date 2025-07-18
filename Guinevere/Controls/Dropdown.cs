@@ -32,10 +32,12 @@ public static partial class ControlsExtensions
         float borderRadius = 4,
         int maxVisibleItems = 6,
         [CallerFilePath] string filePath = "",
-        [CallerLineNumber] int lineNumber = 0) =>
+        [CallerLineNumber] int lineNumber = 0)
+    {
         DropdownCore(gui, options, ref selectedIndex, width, height, placeholder, backgroundColor,
             borderColor, textColor, placeholderColor, dropdownColor, hoverColor, selectedColor,
             fontSize, padding, borderRadius, maxVisibleItems, filePath, lineNumber);
+    }
 
     /// <summary>
     /// Creates a dropdown that returns the selected index without modifying the input
@@ -85,19 +87,20 @@ public static partial class ControlsExtensions
 
             // Always create dropdown list node for consistency
             if (options.Length > 0)
-            {
                 RenderDropdownList(gui, state, options, width, height, visibleItems,
                     dropdownColor, borderColor, hoverColor, selectedColor, textColor,
                     fontSize, padding, borderRadius);
-            }
 
             selectedIndex = state.SelectedIndex;
         }
     }
 
-    private static DropdownState GetOrCreateDropdownState(string id, int initialIndex) =>
-        DropdownStates.TryGetValue(id, out var state) ? state :
-        DropdownStates[id] = new DropdownState { SelectedIndex = initialIndex };
+    private static DropdownState GetOrCreateDropdownState(string id, int initialIndex)
+    {
+        return DropdownStates.TryGetValue(id, out var state)
+            ? state
+            : DropdownStates[id] = new DropdownState { SelectedIndex = initialIndex };
+    }
 
     private static void RenderDropdownButton(Gui gui, DropdownState state, string[] options,
         int selectedIndex, string placeholder, float width, float height,
@@ -114,13 +117,13 @@ public static partial class ControlsExtensions
                 var rect = gui.CurrentNode.Rect;
 
                 // Handle button click
-                if (isClicked)
-                {
-                    state.IsOpen = !state.IsOpen;
-                }
+                if (isClicked) state.IsOpen = !state.IsOpen;
 
                 var bgColor = backgroundColor ?? (isHovered ? Color.FromArgb(255, 248, 248, 248) : Color.White);
-                var borderColorFinal = borderColor ?? (isHovered ? Color.FromArgb(255, 170, 170, 170) : Color.FromArgb(255, 200, 200, 200));
+                var borderColorFinal = borderColor ??
+                                       (isHovered
+                                           ? Color.FromArgb(255, 170, 170, 170)
+                                           : Color.FromArgb(255, 200, 200, 200));
 
                 gui.DrawBackgroundRect(bgColor, borderRadius);
                 gui.DrawRectBorder(rect, borderColorFinal, 1f, borderRadius);
@@ -137,8 +140,10 @@ public static partial class ControlsExtensions
                 gui.DrawTriangle(arrowTop, arrowBottom, arrowPoint, arrowColor, arrowColor, arrowColor);
             }
 
-            var displayText = (selectedIndex >= 0 && selectedIndex < options.Length) ? options[selectedIndex] : placeholder;
-            var displayColor = (selectedIndex >= 0) ? (textColor ?? Color.Black) : (placeholderColor ?? Color.Gray);
+            var displayText = selectedIndex >= 0 && selectedIndex < options.Length
+                ? options[selectedIndex]
+                : placeholder;
+            var displayColor = selectedIndex >= 0 ? textColor ?? Color.Black : placeholderColor ?? Color.Gray;
 
             gui.DrawText(displayText, fontSize, displayColor, centerInRect: false);
         }
@@ -180,11 +185,17 @@ public static partial class ControlsExtensions
 
                 // Handle keyboard navigation
                 if (gui.Input.IsKeyPressed(KeyboardKey.Escape))
+                {
                     state.IsOpen = false;
+                }
                 else if (gui.Input.IsKeyPressed(KeyboardKey.Down))
+                {
                     state.HoveredIndex = Math.Min(state.HoveredIndex + 1, options.Length - 1);
+                }
                 else if (gui.Input.IsKeyPressed(KeyboardKey.Up))
+                {
                     state.HoveredIndex = Math.Max(state.HoveredIndex - 1, 0);
+                }
                 else if (gui.Input.IsKeyPressed(KeyboardKey.Enter) && state.HoveredIndex >= 0)
                 {
                     state.SelectedIndex = state.HoveredIndex;
@@ -194,7 +205,6 @@ public static partial class ControlsExtensions
 
             // Always create item nodes for consistency, but only render when open
             for (var i = 0; i < visibleItems; i++)
-            {
                 using (gui.Node(width, height).Padding(padding).Enter())
                 {
                     if (gui.Pass == Pass.Pass2Render && state.IsOpen)
@@ -211,7 +221,7 @@ public static partial class ControlsExtensions
                             gui.DrawBackgroundRect(selectedColorFinal);
                         }
 
-                        var itemTextColor = (i == state.SelectedIndex) ? Color.White : (textColor ?? Color.Black);
+                        var itemTextColor = i == state.SelectedIndex ? Color.White : textColor ?? Color.Black;
                         gui.DrawText(options[i], fontSize, itemTextColor, centerInRect: false);
                     }
                     else if (gui.Pass != Pass.Pass2Render)
@@ -220,26 +230,23 @@ public static partial class ControlsExtensions
                         gui.DrawText(options[i], fontSize, Color.Transparent, centerInRect: false);
                     }
                 }
-            }
 
             // Handle click outside to close
             if (gui.Pass == Pass.Pass2Render && state.IsOpen && gui.Input.IsMouseButtonPressed(MouseButton.Left))
             {
                 var mousePos = gui.Input.MousePosition;
                 var mainRect = gui.CurrentNode.Parent?.Rect ?? new Rect();
-                if (!IsMouseInRect(mousePos, mainRect))
-                {
-                    state.IsOpen = false;
-                }
+                if (!IsMouseInRect(mousePos, mainRect)) state.IsOpen = false;
             }
         }
     }
 
 
-
-    private static bool IsMouseInRect(Vector2 mousePos, Rect rect) =>
-        mousePos.X >= rect.X && mousePos.X <= rect.X + rect.W &&
-        mousePos.Y >= rect.Y && mousePos.Y <= rect.Y + rect.H;
+    private static bool IsMouseInRect(Vector2 mousePos, Rect rect)
+    {
+        return mousePos.X >= rect.X && mousePos.X <= rect.X + rect.W &&
+               mousePos.Y >= rect.Y && mousePos.Y <= rect.Y + rect.H;
+    }
 
     /// <summary>
     /// Creates a searchable dropdown/combobox (simplified version)
@@ -260,13 +267,18 @@ public static partial class ControlsExtensions
         float borderRadius = 4,
         int maxVisibleItems = 6,
         [CallerFilePath] string filePath = "",
-        [CallerLineNumber] int lineNumber = 0) =>
-        gui.Dropdown(options, selectedIndex, width, height, placeholder, backgroundColor,
+        [CallerLineNumber] int lineNumber = 0)
+    {
+        return gui.Dropdown(options, selectedIndex, width, height, placeholder, backgroundColor,
             borderColor, textColor, placeholderColor, dropdownColor, hoverColor, selectedColor,
             fontSize, padding, borderRadius, maxVisibleItems, filePath, lineNumber);
+    }
 
     /// <summary>
     /// Clears all dropdown states (useful for cleanup)
     /// </summary>
-    public static void ClearDropdownStates(this Gui gui) => DropdownStates.Clear();
+    public static void ClearDropdownStates(this Gui gui)
+    {
+        DropdownStates.Clear();
+    }
 }

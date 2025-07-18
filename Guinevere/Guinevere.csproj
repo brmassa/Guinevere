@@ -33,14 +33,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Layout\Scope\LayoutNodeScopeValueIconFont.cs" />
-      <Compile Remove="Layout\Scope\LayoutNodeScopeValueFontSize.cs" />
-      <Compile Remove="Layout\Scope\LayoutNodeScopeValueFontColor.cs" />
-      <Compile Remove="Layout\Scope\LayoutNodeScopeValueFont.cs" />
-      <Compile Remove="Layout\Scope\LayoutNodeScopeValue.cs" />
+        <Compile Remove="Layout\Scope\LayoutNodeScopeValueIconFont.cs"/>
+        <Compile Remove="Layout\Scope\LayoutNodeScopeValueFontSize.cs"/>
+        <Compile Remove="Layout\Scope\LayoutNodeScopeValueFontColor.cs"/>
+        <Compile Remove="Layout\Scope\LayoutNodeScopeValueFont.cs"/>
+        <Compile Remove="Layout\Scope\LayoutNodeScopeValue.cs"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Layout\Scope\" />
+        <Folder Include="Layout\Scope\"/>
     </ItemGroup>
 </Project>

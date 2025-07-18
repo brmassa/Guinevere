@@ -92,26 +92,25 @@ public static partial class ControlsExtensions
         [CallerLineNumber] int lineNumber = 0)
     {
         gui.Tabs(ref activeTabIndex, builder =>
-        {
-            foreach (var title in tabTitles)
             {
-                builder.Tab(title);
-            }
-        }, height, backgroundColor, activeTabColor, inactiveTabColor, borderColor,
-        textColor, activeTextColor, fontSize, borderRadius, showBorder, filePath, lineNumber);
+                foreach (var title in tabTitles) builder.Tab(title);
+            }, height, backgroundColor, activeTabColor, inactiveTabColor, borderColor,
+            textColor, activeTextColor, fontSize, borderRadius, showBorder, filePath, lineNumber);
     }
 
     // Core implementation helpers
-    private static TabsState GetOrCreateTabsState(string id, int initialActiveIndex, float tabBarHeight) =>
-        TabsStates.TryGetValue(id, out var state) ? state :
-        TabsStates[id] = new TabsState
-        {
-            ActiveTabIndex = initialActiveIndex,
-            TabBarHeight = tabBarHeight
-        };
+    private static TabsState GetOrCreateTabsState(string id, int initialActiveIndex, float tabBarHeight)
+    {
+        return TabsStates.TryGetValue(id, out var state)
+            ? state
+            : TabsStates[id] = new TabsState { ActiveTabIndex = initialActiveIndex, TabBarHeight = tabBarHeight };
+    }
 
-    private static float CalculateTabsHeight(TabsState state, float tabBarHeight) =>
-        tabBarHeight + (state.Tabs.Any(t => t.Content != null) ? 200 : 0); // Default content height
+    private static float CalculateTabsHeight(TabsState state, float tabBarHeight)
+    {
+        return tabBarHeight + (state.Tabs.Any(t => t.Content != null) ? 200 : 0);
+        // Default content height
+    }
 
     private static void RenderTabBar(Gui gui, TabsState state, Color? backgroundColor,
         Color? activeTabColor, Color? inactiveTabColor, Color? borderColor,
@@ -129,10 +128,8 @@ public static partial class ControlsExtensions
             }
 
             for (var i = 0; i < state.Tabs.Count; i++)
-            {
                 RenderTabButton(gui, state, i, activeTabColor, inactiveTabColor,
                     textColor, activeTextColor, fontSize, borderRadius);
-            }
         }
     }
 
@@ -153,24 +150,15 @@ public static partial class ControlsExtensions
                 var isHovered = interactable.OnHover();
                 var isClicked = interactable.OnClick();
 
-                if (isClicked && tab.Enabled)
-                {
-                    state.ActiveTabIndex = tabIndex;
-                }
+                if (isClicked && tab.Enabled) state.ActiveTabIndex = tabIndex;
 
                 var tabColor = GetTabBackgroundColor(isActive, isHovered, tab.BackgroundColor,
                     activeTabColor, inactiveTabColor);
 
-                if (tabColor.HasValue)
-                {
-                    gui.DrawBackgroundRect(tabColor.Value, borderRadius);
-                }
+                if (tabColor.HasValue) gui.DrawBackgroundRect(tabColor.Value, borderRadius);
 
                 // Add active tab indicator
-                if (isActive)
-                {
-                    DrawActiveTabIndicator(gui, activeTabColor);
-                }
+                if (isActive) DrawActiveTabIndicator(gui, activeTabColor);
             }
 
             var finalTextColor = GetTabTextColor(isActive, tab.Enabled, tab.TextColor,
@@ -212,10 +200,12 @@ public static partial class ControlsExtensions
     }
 
     private static Color? GetTabBackgroundColor(bool isActive, bool isHovered, Color? tabColor,
-        Color? activeTabColor, Color? inactiveTabColor) =>
-        tabColor ?? (isActive ? activeTabColor ?? Color.White :
-        isHovered ? Color.FromArgb(255, 245, 245, 245) :
-        inactiveTabColor);
+        Color? activeTabColor, Color? inactiveTabColor)
+    {
+        return tabColor ?? (isActive ? activeTabColor ?? Color.White :
+            isHovered ? Color.FromArgb(255, 245, 245, 245) :
+            inactiveTabColor);
+    }
 
     private static Color GetTabTextColor(bool isActive, bool enabled, Color? tabTextColor,
         Color? activeTextColor, Color? textColor)
@@ -235,7 +225,10 @@ public static partial class ControlsExtensions
     /// <summary>
     /// Clears all tabs states (useful for cleanup)
     /// </summary>
-    public static void ClearTabsStates(this Gui gui) => TabsStates.Clear();
+    public static void ClearTabsStates(this Gui gui)
+    {
+        TabsStates.Clear();
+    }
 }
 
 /// <summary>
@@ -341,10 +334,8 @@ public static partial class ControlsExtensions
             }
 
             for (var i = 0; i < state.Tabs.Count; i++)
-            {
                 RenderVerticalTabButton(gui, state, i, tabWidth, activeTabColor, inactiveTabColor,
                     textColor, activeTextColor, fontSize, borderRadius);
-            }
         }
     }
 
@@ -363,18 +354,12 @@ public static partial class ControlsExtensions
                 var isHovered = interactable.OnHover();
                 var isClicked = interactable.OnClick();
 
-                if (isClicked && tab.Enabled)
-                {
-                    state.ActiveTabIndex = tabIndex;
-                }
+                if (isClicked && tab.Enabled) state.ActiveTabIndex = tabIndex;
 
                 var tabColor = GetTabBackgroundColor(isActive, isHovered, tab.BackgroundColor,
                     activeTabColor, inactiveTabColor);
 
-                if (tabColor.HasValue)
-                {
-                    gui.DrawBackgroundRect(tabColor.Value, borderRadius);
-                }
+                if (tabColor.HasValue) gui.DrawBackgroundRect(tabColor.Value, borderRadius);
 
                 if (isActive)
                 {
@@ -398,10 +383,8 @@ public static partial class ControlsExtensions
         using (gui.Node().Height(state.TabBarHeight).Direction(Axis.Horizontal).Gap(spacing).Padding(spacing).Enter())
         {
             for (var i = 0; i < state.Tabs.Count; i++)
-            {
                 RenderPillTabButton(gui, state, i, activeTabColor, inactiveTabColor,
                     textColor, activeTextColor, fontSize);
-            }
         }
     }
 
@@ -421,14 +404,11 @@ public static partial class ControlsExtensions
                 var isHovered = interactable.OnHover();
                 var isClicked = interactable.OnClick();
 
-                if (isClicked && tab.Enabled)
-                {
-                    state.ActiveTabIndex = tabIndex;
-                }
+                if (isClicked && tab.Enabled) state.ActiveTabIndex = tabIndex;
 
                 var tabColor = isActive ? activeTabColor :
-                              isHovered ? Color.FromArgb(100, activeTabColor.R, activeTabColor.G, activeTabColor.B) :
-                              inactiveTabColor;
+                    isHovered ? Color.FromArgb(100, activeTabColor.R, activeTabColor.G, activeTabColor.B) :
+                    inactiveTabColor;
 
                 gui.DrawBackgroundRect(tabColor, (state.TabBarHeight - 16) * 0.5f); // Fully rounded
             }

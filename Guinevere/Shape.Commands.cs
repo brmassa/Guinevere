@@ -53,10 +53,7 @@ public partial class Shape
     /// <param name="shape">The shape to expand.</param>
     /// <param name="amount">The amount to expand the shape by.</param>
     /// <returns>A new <see cref="Shape"/> expanded by the specified amount.</returns>
-    public static Shape operator +(Shape shape, float amount)
-    {
-        return shape.Expand(amount);
-    }
+    public static Shape operator +(Shape shape, float amount) => shape.Expand(amount);
 
     /// <summary>
     /// Contracts a shape by the specified amount.
@@ -64,10 +61,7 @@ public partial class Shape
     /// <param name="shape">The shape to contract.</param>
     /// <param name="amount">The amount to contract the shape by.</param>
     /// <returns>A new <see cref="Shape"/> contracted by the specified amount.</returns>
-    public static Shape operator -(Shape shape, float amount)
-    {
-        return shape.Expand(-amount);
-    }
+    public static Shape operator -(Shape shape, float amount) => shape.Expand(-amount);
 
     /// <summary>
     /// Expands a shape by the specified amount.
@@ -114,7 +108,7 @@ public partial class Shape
         else
         {
             // Contract inward by scaling down
-            var scaleFactor = 1 + (amount / Math.Max(Path.Bounds.Width, Path.Bounds.Height));
+            var scaleFactor = 1 + amount / Math.Max(Path.Bounds.Width, Path.Bounds.Height);
             scaleFactor = Math.Max(0.1f, scaleFactor); // Prevent negative scaling
 
             var bounds = Path.Bounds;
@@ -137,8 +131,7 @@ public partial class Shape
         var newPath = new SKPath(Path);
         SKPaint? newPaint = null;
         if (Paint != null)
-        {
-            newPaint = new SKPaint()
+            newPaint = new SKPaint
             {
                 Color = Paint.Color,
                 Style = Paint.Style,
@@ -147,29 +140,26 @@ public partial class Shape
                 Shader = Paint.Shader,
                 ImageFilter = Paint.ImageFilter
             };
-        }
 
         var shape = new Shape(newPath, newPaint ?? new SKPaint());
 
         // Copy all layers
         foreach (var (zIndex, layerList) in Layers)
+        foreach (var (layerPath, layerPaint) in layerList)
         {
-            foreach (var (layerPath, layerPaint) in layerList)
-            {
-                if (zIndex == 0) continue; // Skip main layer as it's already added in constructor
+            if (zIndex == 0) continue; // Skip main layer as it's already added in constructor
 
-                var copiedPath = new SKPath(layerPath);
-                var copiedPaint = new SKPaint()
-                {
-                    Color = layerPaint.Color,
-                    Style = layerPaint.Style,
-                    IsAntialias = layerPaint.IsAntialias,
-                    StrokeWidth = layerPaint.StrokeWidth,
-                    Shader = layerPaint.Shader,
-                    ImageFilter = layerPaint.ImageFilter
-                };
-                shape.AddToLayer(zIndex, copiedPath, copiedPaint);
-            }
+            var copiedPath = new SKPath(layerPath);
+            var copiedPaint = new SKPaint
+            {
+                Color = layerPaint.Color,
+                Style = layerPaint.Style,
+                IsAntialias = layerPaint.IsAntialias,
+                StrokeWidth = layerPaint.StrokeWidth,
+                Shader = layerPaint.Shader,
+                ImageFilter = layerPaint.ImageFilter
+            };
+            shape.AddToLayer(zIndex, copiedPath, copiedPaint);
         }
 
         return shape;
@@ -185,10 +175,7 @@ public partial class Shape
     /// <returns>A new <see cref="Shape"/> representing the union of the two input shapes.</returns>
     public static Shape Union(Shape shape1, Shape shape2, int smoothness)
     {
-        if (smoothness <= 0)
-        {
-            return shape1 + shape2;
-        }
+        if (smoothness <= 0) return shape1 + shape2;
 
         // First create a basic union
         var unionPath = new SKPath();
@@ -249,7 +236,10 @@ public partial class Shape
     /// <param name="other">The other shape to union with this shape.</param>
     /// <param name="smoothness">The level of smoothness for the union operation.</param>
     /// <returns>A new <see cref="Shape"/> representing the union of the two shapes.</returns>
-    public Shape Union(Shape other, int smoothness = 0) => Union(this, other, smoothness);
+    public Shape Union(Shape other, int smoothness = 0)
+    {
+        return Union(this, other, smoothness);
+    }
 
     /// <summary>
     /// Rotates the shape by a specified angle.
@@ -281,14 +271,12 @@ public partial class Shape
 
         // Transform all layers
         foreach (var (_, layerList) in shape.Layers)
-        {
             for (var i = 0; i < layerList.Count; i++)
             {
                 var (layerPath, layerPaint) = layerList[i];
                 layerPath.Transform(scaleMatrix);
                 layerList[i] = (layerPath, layerPaint);
             }
-        }
 
         return shape;
     }
@@ -299,7 +287,10 @@ public partial class Shape
     /// <param name="scale">The uniform scaling factor.</param>
     /// <returns>The updated <see cref="Shape"/> after applying the scaling.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Shape Scale(float scale) => Scale(scale, scale);
+    public Shape Scale(float scale)
+    {
+        return Scale(scale, scale);
+    }
 
     /// <summary>
     /// Creates a morphed shape by blending this shape with another shape based on the specified amount.

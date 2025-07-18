@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using Nuke.Common;
 using Serilog;
 
@@ -99,4 +100,66 @@ partial class Build
 
     private string GetVersionLink(string previousVersion, string currentVersion) =>
         $"{RepositoryCompareLink}{previousVersion}...{currentVersion}";
+
+    [CanBeNull] string ChangelogLatestVersion;
+
+    [CanBeNull] string ChangelogUnreleased;
+
+    private Target ExtractChangelogUnreleased => td => td
+        .Before(UpdateChangelog)
+        .Executes(() =>
+        {
+            if (!File.Exists(ChangelogFile))
+            {
+                throw new FileNotFoundException($"Error: File '{ChangelogFile}' not found.");
+            }
+
+            var fileContents = File.ReadAllText(ChangelogFile);
+            ChangelogUnreleased = GetUnreleasedChangelog(fileContents);
+
+            Log.Information("Unreleased changelog:");
+            Log.Information("{changelog}", ChangelogUnreleased);
+        });
+
+    private string GetUnreleasedChangelog(string fileContents)
+    {
+        var lines = fileContents.Split([Environment.NewLine], StringSplitOptions.None);
+        var startIndex = -1;
+        var endIndex = -1;
+
+        // Find the Unreleased section
+        for (var i = 0; i < lines.Length; i++)
+        {
+            if (lines[i].Equals(UnreleasedSection, StringComparison.OrdinalIgnoreCase))
+            {
+                startIndex = i + 1; // Start after the header
+                break;
+            }
+        }
+
+        if (startIndex == -1)
+        {
+            Log.Warning("No Unreleased section found in changelog");
+            return "- Initial release";
+        }
+
+        // Find the next version section or end of file
+        for (var i = startIndex; i < lines.Length; i++)
+        {
+            if (lines[i].StartsWith("## v[") && i > startIndex)
+            {
+                endIndex = i;
+                break;
+            }
+        }
+
+        if (endIndex == -1) endIndex = lines.Length;
+
+        // Extract and clean the section
+        var sectionLines = lines[startIndex..endIndex]
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .ToArray();
+
+        return string.Join(Environment.NewLine, sectionLines).Trim();
+    }
 }

@@ -14,144 +14,210 @@ public static class Easing
     /// <param name="t">Normalized time (0 to 1)</param>
     /// <returns>Linear interpolated value</returns>
     [PublicAPI]
-    public static float Linear(float t) => t;
+    public static float Linear(float t)
+    {
+        return t;
+    }
 
 
     /// <summary>
     /// Quadratic ease-in: Accelerates from zero velocity.
     /// </summary>
     [PublicAPI]
-    public static float EaseIn(float t) => t * t;
+    public static float EaseIn(float t)
+    {
+        return t * t;
+    }
 
     /// <summary>
     /// Quadratic ease-out: Decelerates to zero velocity.
     /// </summary>
     [PublicAPI]
-    public static float EaseOut(float t) => 1 - MathF.Pow(1 - t, 2);
+    public static float EaseOut(float t)
+    {
+        return 1 - MathF.Pow(1 - t, 2);
+    }
 
     /// <summary>
     /// Quadratic ease-in-out: Accelerates until halfway, then decelerates.
     /// </summary>
     [PublicAPI]
-    public static float EaseInOut(float t) => t < 0.5f ? 2 * t * t : 1 - MathF.Pow(-2 * t + 2, 2) / 2;
+    public static float EaseInOut(float t)
+    {
+        return t < 0.5f ? 2 * t * t : 1 - MathF.Pow(-2 * t + 2, 2) / 2;
+    }
 
 
     /// <summary>
     /// Cubic ease-in: More pronounced acceleration from zero velocity.
     /// </summary>
     [PublicAPI]
-    public static float CubicIn(float t) => t * t * t;
+    public static float CubicIn(float t)
+    {
+        return t * t * t;
+    }
 
     /// <summary>
     /// Cubic ease-out: More pronounced deceleration to zero velocity.
     /// </summary>
     [PublicAPI]
-    public static float CubicOut(float t) => 1 - MathF.Pow(1 - t, 3);
+    public static float CubicOut(float t)
+    {
+        return 1 - MathF.Pow(1 - t, 3);
+    }
 
     /// <summary>
     /// Cubic ease-in-out: Stronger acceleration until halfway, then stronger deceleration.
     /// </summary>
     [PublicAPI]
-    public static float CubicInOut(float t) => t < 0.5f ? 4 * t * t * t : 1 - MathF.Pow(-2 * t + 2, 3) / 2;
+    public static float CubicInOut(float t)
+    {
+        return t < 0.5f ? 4 * t * t * t : 1 - MathF.Pow(-2 * t + 2, 3) / 2;
+    }
 
 
     /// <summary>
     /// Quartic ease-in: Very pronounced acceleration from zero velocity.
     /// </summary>
     [PublicAPI]
-    public static float QuartIn(float t) => t * t * t * t;
+    public static float QuartIn(float t)
+    {
+        return t * t * t * t;
+    }
 
     /// <summary>
     /// Quartic ease-out: Very pronounced deceleration to zero velocity.
     /// </summary>
     [PublicAPI]
-    public static float QuartOut(float t) => 1 - MathF.Pow(1 - t, 4);
+    public static float QuartOut(float t)
+    {
+        return 1 - MathF.Pow(1 - t, 4);
+    }
 
     /// <summary>
     /// Quartic ease-in-out: Dramatic acceleration until halfway, then dramatic deceleration.
     /// </summary>
     [PublicAPI]
-    public static float QuartInOut(float t) => t < 0.5f ? 8 * t * t * t * t : 1 - MathF.Pow(-2 * t + 2, 4) / 2;
+    public static float QuartInOut(float t)
+    {
+        return t < 0.5f ? 8 * t * t * t * t : 1 - MathF.Pow(-2 * t + 2, 4) / 2;
+    }
 
 
     /// <summary>
     /// Quintic ease-in: Extremely pronounced acceleration from zero velocity.
     /// </summary>
     [PublicAPI]
-    public static float QuintIn(float t) => t * t * t * t * t;
+    public static float QuintIn(float t)
+    {
+        return t * t * t * t * t;
+    }
 
     /// <summary>
     /// Quintic ease-out: Extremely pronounced deceleration to zero velocity.
     /// </summary>
     [PublicAPI]
-    public static float QuintOut(float t) => 1 - MathF.Pow(1 - t, 5);
+    public static float QuintOut(float t)
+    {
+        return 1 - MathF.Pow(1 - t, 5);
+    }
 
     /// <summary>
     /// Quintic ease-in-out: Extreme acceleration until halfway, then extreme deceleration.
     /// </summary>
     [PublicAPI]
-    public static float QuintInOut(float t) => t < 0.5f ? 16 * t * t * t * t * t : 1 - MathF.Pow(-2 * t + 2, 5) / 2;
+    public static float QuintInOut(float t)
+    {
+        return t < 0.5f ? 16 * t * t * t * t * t : 1 - MathF.Pow(-2 * t + 2, 5) / 2;
+    }
 
 
     /// <summary>
     /// Sinusoidal ease-in: Gradual acceleration using a sine curve.
     /// </summary>
     [PublicAPI]
-    public static float SineIn(float t) => 1 - MathF.Cos((t * MathF.PI) / 2);
+    public static float SineIn(float t)
+    {
+        return 1 - MathF.Cos((t * MathF.PI) / 2);
+    }
 
     /// <summary>
     /// Sinusoidal ease-out: Gradual deceleration using a sine curve.
     /// </summary>
     [PublicAPI]
-    public static float SineOut(float t) => MathF.Sin((t * MathF.PI) / 2);
+    public static float SineOut(float t)
+    {
+        return MathF.Sin((t * MathF.PI) / 2);
+    }
 
     /// <summary>
     /// Sinusoidal ease-in-out: Gentle acceleration and deceleration based on a sine curve.
     /// </summary>
     [PublicAPI]
-    public static float SineInOut(float t) => -(MathF.Cos(MathF.PI * t) - 1) / 2;
+    public static float SineInOut(float t)
+    {
+        return -(MathF.Cos(MathF.PI * t) - 1) / 2;
+    }
 
 
     /// <summary>
     /// Exponential ease-in: Acceleration with an exponential growth curve.
     /// </summary>
     [PublicAPI]
-    public static float ExpoIn(float t) => t == 0f ? 0f : MathF.Pow(2, 10 * t - 10);
+    public static float ExpoIn(float t)
+    {
+        return t == 0f ? 0f : MathF.Pow(2, 10 * t - 10);
+    }
 
     /// <summary>
     /// Exponential ease-out: Deceleration with an exponential decay curve.
     /// </summary>
     [PublicAPI]
-    public static float ExpoOut(float t) => ImMath.ApproximatelyEquals(t, 1f) ? 1f : 1 - MathF.Pow(2, -10 * t);
+    public static float ExpoOut(float t)
+    {
+        return ImMath.ApproximatelyEquals(t, 1f) ? 1f : 1 - MathF.Pow(2, -10 * t);
+    }
 
     /// <summary>
     /// Exponential ease-in-out: Exponential acceleration until halfway, then exponential deceleration.
     /// </summary>
     [PublicAPI]
-    public static float ExpoInOut(float t) => t == 0f ? 0f :
-        ImMath.ApproximatelyEquals(t, 1f) ? 1f :
-        t < 0.5f ? MathF.Pow(2, 20 * t - 10) / 2 : (2 - MathF.Pow(2, -20 * t + 10)) / 2;
+    public static float ExpoInOut(float t)
+    {
+        return t == 0f ? 0f :
+            ImMath.ApproximatelyEquals(t, 1f) ? 1f :
+            t < 0.5f ? MathF.Pow(2, 20 * t - 10) / 2 : (2 - MathF.Pow(2, -20 * t + 10)) / 2;
+    }
 
 
     /// <summary>
     /// Circular ease-in: Acceleration following a quarter-circle curve.
     /// </summary>
     [PublicAPI]
-    public static float CircIn(float t) => 1 - MathF.Sqrt(1 - MathF.Pow(t, 2));
+    public static float CircIn(float t)
+    {
+        return 1 - MathF.Sqrt(1 - MathF.Pow(t, 2));
+    }
 
     /// <summary>
     /// Circular ease-out: Deceleration following a quarter-circle curve.
     /// </summary>
     [PublicAPI]
-    public static float CircOut(float t) => MathF.Sqrt(1 - MathF.Pow(t - 1, 2));
+    public static float CircOut(float t)
+    {
+        return MathF.Sqrt(1 - MathF.Pow(t - 1, 2));
+    }
 
     /// <summary>
     /// Circular ease-in-out: Acceleration and deceleration following a semicircle curve.
     /// </summary>
     [PublicAPI]
-    public static float CircInOut(float t) => t < 0.5f
-        ? (1 - MathF.Sqrt(1 - MathF.Pow(2 * t, 2))) / 2
-        : (MathF.Sqrt(1 - MathF.Pow(-2 * t + 2, 2)) + 1) / 2;
+    public static float CircInOut(float t)
+    {
+        return t < 0.5f
+            ? (1 - MathF.Sqrt(1 - MathF.Pow(2 * t, 2))) / 2
+            : (MathF.Sqrt(1 - MathF.Pow(-2 * t + 2, 2)) + 1) / 2;
+    }
 
 
     /// <summary>
@@ -185,7 +251,7 @@ public static class Easing
         const float c1 = 1.70158f;
         const float c2 = c1 * 1.525f;
         return t < 0.5f
-            ? (MathF.Pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
+            ? MathF.Pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2) / 2
             : (MathF.Pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2;
     }
 
@@ -196,7 +262,7 @@ public static class Easing
     [PublicAPI]
     public static float ElasticIn(float t)
     {
-        const float c4 = (2 * MathF.PI) / 3;
+        const float c4 = 2 * MathF.PI / 3;
         return t == 0f ? 0f :
             ImMath.ApproximatelyEquals(t, 1f) ? 1f :
             -MathF.Pow(2, 10 * t - 10) * MathF.Sin((t * 10 - 10.75f) * c4);
@@ -208,7 +274,7 @@ public static class Easing
     [PublicAPI]
     public static float ElasticOut(float t)
     {
-        const float c4 = (2 * MathF.PI) / 3;
+        const float c4 = 2 * MathF.PI / 3;
         return t == 0f ? 0f :
             ImMath.ApproximatelyEquals(t, 1f) ? 1f :
             MathF.Pow(2, -10 * t) * MathF.Sin((t * 10 - 0.75f) * c4) + 1;
@@ -220,11 +286,11 @@ public static class Easing
     [PublicAPI]
     public static float ElasticInOut(float t)
     {
-        const float c5 = (2 * MathF.PI) / 4.5f;
+        const float c5 = 2 * MathF.PI / 4.5f;
         return t == 0f ? 0f :
             ImMath.ApproximatelyEquals(t, 1f) ? 1f :
             t < 0.5f ? -(MathF.Pow(2, 20 * t - 10) * MathF.Sin((20 * t - 11.125f) * c5)) / 2 :
-            (MathF.Pow(2, -20 * t + 10) * MathF.Sin((20 * t - 11.125f) * c5)) / 2 + 1;
+            MathF.Pow(2, -20 * t + 10) * MathF.Sin((20 * t - 11.125f) * c5) / 2 + 1;
     }
 
 
@@ -250,14 +316,19 @@ public static class Easing
     /// Bounce ease-in: Bounces multiple times at the start before accelerating.
     /// </summary>
     [PublicAPI]
-    public static float BounceIn(float t) => 1 - BounceOut(1 - t);
+    public static float BounceIn(float t)
+    {
+        return 1 - BounceOut(1 - t);
+    }
 
     /// <summary>
     /// Bounce ease-in-out: Bounces at both the beginning and end of the animation.
     /// </summary>
     [PublicAPI]
-    public static float BounceInOut(float t) =>
-        t < 0.5f ? (1 - BounceOut(1 - 2 * t)) / 2 : (1 + BounceOut(2 * t - 1)) / 2;
+    public static float BounceInOut(float t)
+    {
+        return t < 0.5f ? (1 - BounceOut(1 - 2 * t)) / 2 : (1 + BounceOut(2 * t - 1)) / 2;
+    }
 
 
     /// <summary>
@@ -265,7 +336,10 @@ public static class Easing
     /// Useful for binary state transitions.
     /// </summary>
     [PublicAPI]
-    public static float Step(float t) => t < 0.5f ? 0f : 1f;
+    public static float Step(float t)
+    {
+        return t < 0.5f ? 0f : 1f;
+    }
 
     /// <summary>
     /// Smoothstep: Smooth Hermite interpolation.

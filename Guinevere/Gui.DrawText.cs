@@ -14,10 +14,12 @@ public partial class Gui
         float wrapWidth = 0,
         bool centerInRect = true,
         bool clip = false)
-        => DrawTextOrGlyph(new(
+    {
+        return DrawTextOrGlyph(new DrawConfig(
             text,
             font ?? CurrentNodeScope.Get<LayoutNodeScopeTextFont>().Value,
             size, color, centerInRect, clip, wrapWidth));
+    }
 
     /// <summary>
     /// Draws a glyph (icon) as a layout node: in Pass1Build phase, creates a node sized to the glyph; in Pass2Render phase, draws the glyph in the node's rect.
@@ -30,10 +32,12 @@ public partial class Gui
         Font? font = null,
         bool centerInRect = true,
         bool clip = false)
-        => DrawTextOrGlyph(new(
+    {
+        return DrawTextOrGlyph(new DrawConfig(
             iconCode.ToString(),
             font ?? CurrentNodeScope.Get<LayoutNodeScopeIconFont>().Value,
             size, color, centerInRect, clip, 0));
+    }
 
     private record struct DrawConfig(
         string Text,
@@ -58,8 +62,10 @@ public partial class Gui
     /// <param name="font">The font to check for character support.</param>
     /// <param name="character">The character to test for support.</param>
     /// <returns>True if the font supports the character, false if fallback is needed.</returns>
-    private static bool IsCharacterSupported(Font font, char character) =>
-        font.SkFont.Typeface.GetGlyph(character) != 0;
+    private static bool IsCharacterSupported(Font font, char character)
+    {
+        return font.SkFont.Typeface.GetGlyph(character) != 0;
+    }
 
     /// <summary>
     /// Splits text into runs where each run uses the same font (either main font or icon font fallback).
@@ -107,7 +113,8 @@ public partial class Gui
         var color = cfg.Color ?? CurrentNodeScope.Get<LayoutNodeScopeTextColor>().Value;
 
         var mainFont = new Font(new SKFont(cfg.Font.SkFont.Typeface, size));
-        var iconFont = new Font(new SKFont(CurrentNodeScope.Get<LayoutNodeScopeIconFont>().Value.SkFont.Typeface, size));
+        var iconFont =
+            new Font(new SKFont(CurrentNodeScope.Get<LayoutNodeScopeIconFont>().Value.SkFont.Typeface, size));
 
         // Handle text wrapping if wrapWidth is specified
         var lines = cfg.WrapWidth > 0
@@ -124,10 +131,7 @@ public partial class Gui
         }
 
         // If wrapping is enabled, use the wrap width as max width
-        if (cfg.WrapWidth > 0)
-        {
-            maxWidth = Math.Min(maxWidth, cfg.WrapWidth);
-        }
+        if (cfg.WrapWidth > 0) maxWidth = Math.Min(maxWidth, cfg.WrapWidth);
 
         var totalHeight = lines.Length * lineHeight;
 
@@ -147,10 +151,7 @@ public partial class Gui
             var pos = node.InnerRect.Position;
             pos.Y += (i + 1) * lineHeight; // Move down for each line
 
-            if (cfg.Center)
-            {
-                pos.X += Math.Max((node.InnerRect.W - lineWidth) * 0.5f, 0f);
-            }
+            if (cfg.Center) pos.X += Math.Max((node.InnerRect.W - lineWidth) * 0.5f, 0f);
 
             DrawLineWithFallback(line, pos, mainFont, iconFont, paint, cfg.Clip, node);
         }
@@ -234,10 +235,7 @@ public partial class Gui
                 }
             }
 
-            if (!string.IsNullOrEmpty(currentLine))
-            {
-                lines.Add(currentLine);
-            }
+            if (!string.IsNullOrEmpty(currentLine)) lines.Add(currentLine);
         }
 
         return lines.ToArray();
@@ -286,10 +284,7 @@ public partial class Gui
                 }
             }
 
-            if (!string.IsNullOrEmpty(currentLine))
-            {
-                lines.Add(currentLine);
-            }
+            if (!string.IsNullOrEmpty(currentLine)) lines.Add(currentLine);
         }
 
         return lines.ToArray();

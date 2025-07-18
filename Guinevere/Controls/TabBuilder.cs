@@ -38,16 +38,20 @@ public class TabBuilder
     /// <param name="title">The title of the tab to be displayed.</param>
     /// <param name="content">The action that defines the content to be displayed within the tab.</param>
     /// <returns>A TabBuilder instance with the tab added, enabling further configuration.</returns>
-    public TabBuilder Tab(string title, Action content) =>
-        Tab(title, content, enabled: true);
+    public TabBuilder Tab(string title, Action content)
+    {
+        return Tab(title, content, true);
+    }
 
     /// <summary>
     /// Adds a new disabled tab to the current tab list.
     /// </summary>
     /// <param name="title">The title displayed on the tab.</param>
     /// <returns>A TabBuilder instance with the disabled tab added, allowing for further configuration.</returns>
-    public TabBuilder DisabledTab(string title) =>
-        Tab(title, content: null, enabled: false);
+    public TabBuilder DisabledTab(string title)
+    {
+        return Tab(title, null, false);
+    }
 
     /// <summary>
     /// Adds a new tab that is closable to the current tab list.
@@ -55,8 +59,13 @@ public class TabBuilder
     /// <param name="title">The title displayed on the tab.</param>
     /// <param name="content">The content to be displayed when the tab is selected. This parameter is optional.</param>
     /// <returns>A TabBuilder instance with the closable tab added, allowing for further configuration.</returns>
-    public TabBuilder ClosableTab(string title, Action? content = null) =>
-        Tab(title, content, enabled: true, closable: true);
+    public TabBuilder ClosableTab(string title, Action? content = null)
+    {
+        return Tab(title, content, true, true);
+    }
 
-    internal List<TabInfo> GetTabs() => [.._tabs];
+    internal List<TabInfo> GetTabs()
+    {
+        return [.._tabs];
+    }
 }

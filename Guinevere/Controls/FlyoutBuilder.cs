@@ -12,13 +12,7 @@ public class FlyoutBuilder
     /// </summary>
     public FlyoutBuilder Item(string text, Action? action = null, string shortcut = "", bool enabled = true)
     {
-        Items.Add(new FlyoutItem
-        {
-            Text = text,
-            Action = action,
-            Shortcut = shortcut,
-            Enabled = enabled
-        });
+        Items.Add(new FlyoutItem { Text = text, Action = action, Shortcut = shortcut, Enabled = enabled });
         return this;
     }
 
@@ -30,12 +24,7 @@ public class FlyoutBuilder
         var submenuBuilder = new FlyoutBuilder();
         buildSubmenu(submenuBuilder);
 
-        Items.Add(new FlyoutItem
-        {
-            Text = text,
-            Submenu = submenuBuilder.Items,
-            Enabled = enabled
-        });
+        Items.Add(new FlyoutItem { Text = text, Submenu = submenuBuilder.Items, Enabled = enabled });
         return this;
     }
 
