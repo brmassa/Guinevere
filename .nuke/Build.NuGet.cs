@@ -22,7 +22,7 @@ partial class Build
 
     [Parameter("Skip NuGet symbol packages")] public readonly bool SkipSymbols;
 
-    private static AbsolutePath PackagesDirectory => RootDirectory / "publish" / "packages";
+    private static AbsolutePath PackagesDirectory => RootDirectory / "packages";
 
     /// <summary>
     /// Gets the list of projects that should be packaged as NuGet packages
