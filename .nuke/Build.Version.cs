@@ -279,29 +279,4 @@ partial class Build
                 msbuildProject.Save(project.Path);
             });
         });
-
-    public Target CreateCommit => td => td
-        .DependsOn(CheckNewCommits, UpdateProjectVersions)
-        .OnlyWhenStatic(() => HasNewCommits)
-        .Executes(() =>
-        {
-            // try
-            // {
-            //     // Add all the changes to the current branch
-            //     GitTasks.Git("add -A");
-
-            //     // Commit the changes to the current branch
-            //     GitTasks.Git(
-            //         $"config --global user.name \"{GitLab.GitLabUserLogin}\"");
-            //     GitTasks.Git(
-            //         $"config --global user.email \"{GitLab.GitLabUserEmail}\"");
-            //     GitTasks.Git(
-            //         $"commit -m \"chore: Automatic commit creation: {Date}\"");
-            // }
-            // catch (Exception ex)
-            // {
-            //     Log.Error(ex, "Error creating commit");
-            //     throw;
-            // }
-        });
 }

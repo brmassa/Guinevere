@@ -22,7 +22,7 @@ partial class Build
     /// </summary>
     private Target DailyRelease => td => td
         .OnlyWhenStatic(() => ForceDailyRelease || HasNewCommits || !SkipDailyReleaseOnNoChanges)
-        .DependsOn(CheckNewCommits, CI, PackNuGet, PackageSamples, CreateTag, CreateGitHubRelease, PublishNuGet)
+        .DependsOn(CheckNewCommits, CI, PackNuGet, PackageSamples, CreateTag, Release, PublishNuGet)
         .Executes(() =>
         {
             if (!HasNewCommits && !ForceDailyRelease)
@@ -69,7 +69,7 @@ partial class Build
     /// Only runs if there are new commits or forced
     /// </summary>
     private Target DailyPublish => td => td
-        .DependsOn(DailyBuild, CreateTag, CreateGitHubRelease, PublishNuGet)
+        .DependsOn(DailyBuild, CreateTag, GitHubCreateRelease, PublishNuGet)
         .OnlyWhenStatic(() => ForceDailyRelease || HasNewCommits)
         .Executes(() =>
         {

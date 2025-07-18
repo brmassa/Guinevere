@@ -48,7 +48,7 @@ partial class Build
             try
             {
                 using var httpClient = HttpClientGitHubToken();
-                var message = $"{ChangelogUnreleased}";
+                var body = ChangelogUnreleased;
                 var release = $"{TagName} / {Date}";
                 var response = await httpClient.PostAsJsonAsync(
                     GitHubApiUrl($"repos/{GitHubRepository}/releases"),
@@ -56,7 +56,7 @@ partial class Build
                     {
                         tag_name = TagName,
                         name = release,
-                        body = message,
+                        body = body,
                         draft = false,
                         prerelease = IsPreRelease()
                     }).ConfigureAwait(false);
@@ -64,44 +64,13 @@ partial class Build
                 _ = response.EnsureSuccessStatusCode();
                 Log.Information(
                     "Release {release} created with the description '{message}'",
-                    release, message);
+                    release, body);
             }
             catch (HttpRequestException ex)
             {
                 Log.Error(ex, "{StatusCode}: {Message}", ex.StatusCode,
                     ex.Message);
                 throw;
-            }
-        });
-
-    /// <summary>
-    /// Creates a GitHub release with all assets (legacy method)
-    /// </summary>
-    private Target CreateGitHubRelease => td => td
-        .DependsOn(PackNuGet, PackageSamples, UpdateChangelog)
-        .OnlyWhenStatic(() => !string.IsNullOrEmpty(GitHubToken))
-        .OnlyWhenStatic(() => HasNewCommits)
-        .OnlyWhenStatic(() => !SkipGitHubRelease)
-        .Executes(async () =>
-        {
-            var tagName = TagName;
-            var releaseName = $"Guinevere v{VersionFull}";
-            var releaseBody = GetReleaseNotes();
-
-            Log.Information("Creating GitHub release: {ReleaseName}", releaseName);
-
-            // Create the release
-            var releaseId = await CreateGitHubReleaseAsync(tagName, releaseName, releaseBody);
-
-            if (releaseId.HasValue)
-            {
-                // Upload NuGet packages
-                await UploadNuGetPackagesAsync(releaseId.Value);
-
-                // Upload sample packages
-                await UploadSamplePackagesAsync(releaseId.Value);
-
-                Log.Information("Successfully created GitHub release with all assets");
             }
         });
 
@@ -143,7 +112,7 @@ partial class Build
     /// Creates a tag and pushes it to GitHub (legacy method)
     /// </summary>
     private Target CreateTag => td => td
-        .DependsOn(CreateCommit)
+        .DependsOn(GitHubCreateCommit)
         .OnlyWhenStatic(() => HasNewCommits)
         .Executes(() =>
         {
@@ -173,12 +142,12 @@ partial class Build
         .Executes(() =>
         {
             // Configure git user for CI/CD environment
-            GitTasks.Git("config --global user.name \"github-actions\"");
-            GitTasks.Git("config --global user.email \"github-actions@github.com\"");
+            GitTasks.Git("config --global user.name `GitHub Actions` ");
+            GitTasks.Git("config --global user.email `actions@github.com` ");
 
             // Use Git commands to commit changes locally
-            GitTasks.Git("add -A");
-            GitTasks.Git($"commit -m \"chore: Automatic commit creation in {Date} [skip ci]\"");
+            GitTasks.Git("add .");
+            GitTasks.Git($"""commit -m "chore: Automatic commit creation in {Date} [skip ci]" """);
             GitTasks.Git("push origin HEAD");
 
             Log.Information(
@@ -190,7 +159,7 @@ partial class Build
     /// Complete release process: commit, tag, and create GitHub release
     /// </summary>
     private Target PublishAll => td => td
-        .DependsOn(Test, Compile, PackNuGet, PackageSamples, CreateTag, CreateGitHubRelease, PublishNuGet)
+        .DependsOn(Test, Compile, PackNuGet, PackageSamples, CreateTag, GitHubCreateRelease, PublishNuGet)
         .Executes(() =>
         {
             Log.Information("Completed full release process for version {Version}", VersionFull);
@@ -316,30 +285,6 @@ partial class Build
     }
 
     /// <summary>
-    /// Gets the release notes from the changelog
-    /// </summary>
-    private string GetReleaseNotes()
-    {
-        try
-        {
-            if (!File.Exists(ChangelogFile))
-            {
-                return GetDefaultReleaseNotes();
-            }
-
-            var changelogContent = File.ReadAllText(ChangelogFile);
-            var versionSection = ExtractVersionSection(changelogContent, VersionFull);
-
-            return string.IsNullOrEmpty(versionSection) ? GetDefaultReleaseNotes() : versionSection;
-        }
-        catch (Exception ex)
-        {
-            Log.Warning(ex, "Could not extract release notes from changelog, using default");
-            return GetDefaultReleaseNotes();
-        }
-    }
-
-    /// <summary>
     /// Extracts the section for a specific version from the changelog
     /// </summary>
     private static string ExtractVersionSection(string changelogContent, string version)
@@ -379,40 +324,6 @@ partial class Build
 
         return string.Join('\n', sectionLines).Trim();
     }
-
-    /// <summary>
-    /// Gets default release notes when changelog is not available
-    /// </summary>
-    private string GetDefaultReleaseNotes() => $@"# Guinevere v{VersionFull}
-
-## What's New
-
-This release includes the latest improvements and bug fixes for the Guinevere GPU accelerated IM GUI system.
-
-## Downloads
-
-### NuGet Packages
-- **org.mass4.Guinevere**: Core Guinevere library
-- **org.mass4.Guinevere.OpenGL.OpenTK**: OpenTK integration
-- **org.mass4.Guinevere.OpenGL.Raylib**: Raylib integration
-- **org.mass4.Guinevere.OpenGL.SilkNET**: Silk.NET OpenGL integration
-- **org.mass4.Guinevere.Vulkan.SilkNET**: Silk.NET Vulkan integration
-
-### Sample Applications
-- **Guinevere-Samples-{VersionFull}-win-x64.zip**: Windows samples
-- **Guinevere-Samples-{VersionFull}-linux-x64.zip**: Linux samples
-
-## About Guinevere
-
-Guinevere is a GPU accelerated immediate mode GUI system built on SkiaSharp. It provides high-performance rendering with modern graphics APIs support.
-
-- **Website**: https://mass4.org
-- **Source Code**: https://github.com/brmassa/guinevere
-- **Author**: Bruno Massa (massa@brunomassa.com)
-
-## Support
-
-For questions, issues, or contributions, please visit our [GitHub repository](https://github.com/brmassa/guinevere).";
 
     /// <summary>
     /// Determines if this is a pre-release version
