@@ -36,7 +36,10 @@ public readonly struct UnitValue(UnitType mode, float value)
     /// </summary>
     /// <param name="percentage">The scaling percentage to apply. Default is 1 (100%).</param>
     /// <returns>A new <see cref="UnitValue"/> with <see cref="UnitType.Auto"/> mode.</returns>
-    public static UnitValue FitContent(float percentage = 1) => new(UnitType.Auto, percentage);
+    public static UnitValue FitContent(float percentage = 1)
+    {
+        return new UnitValue(UnitType.Auto, percentage);
+    }
 
     /// <summary>
     /// Creates a unit value that expands to fill available space with an optional scaling percentage.
@@ -44,7 +47,10 @@ public readonly struct UnitValue(UnitType mode, float value)
     /// </summary>
     /// <param name="percentage">The scaling percentage to apply. Default is 1 (100%).</param>
     /// <returns>A new <see cref="UnitValue"/> with <see cref="UnitType.Expand"/> mode.</returns>
-    public static UnitValue Expand(float percentage = 1) => new(UnitType.Expand, percentage);
+    public static UnitValue Expand(float percentage = 1)
+    {
+        return new UnitValue(UnitType.Expand, percentage);
+    }
 
     /// <summary>
     /// Creates a unit value based on a ratio relative to other elements.
@@ -52,21 +58,30 @@ public readonly struct UnitValue(UnitType mode, float value)
     /// </summary>
     /// <param name="ratio">The ratio value. Higher values take proportionally more space.</param>
     /// <returns>A new <see cref="UnitValue"/> with <see cref="UnitType.Ratio"/> mode.</returns>
-    public static UnitValue Ratio(float ratio) => new(UnitType.Ratio, ratio);
+    public static UnitValue Ratio(float ratio)
+    {
+        return new UnitValue(UnitType.Ratio, ratio);
+    }
 
     /// <summary>
     /// Creates a unit value based on a percentage of the parent container's size.
     /// </summary>
     /// <param name="percentage">The percentage value (e.g., 0.5 for 50%, 1.0 for 100%).</param>
     /// <returns>A new <see cref="UnitValue"/> with <see cref="UnitType.Percentage"/> mode.</returns>
-    public static UnitValue Percentage(float percentage) => new(UnitType.Percentage, percentage);
+    public static UnitValue Percentage(float percentage)
+    {
+        return new UnitValue(UnitType.Percentage, percentage);
+    }
 
     /// <summary>
     /// Creates a unit value with an absolute pixel measurement.
     /// </summary>
     /// <param name="pixels">The number of pixels.</param>
     /// <returns>A new <see cref="UnitValue"/> with <see cref="UnitType.Pixels"/> mode.</returns>
-    public static UnitValue Pixels(float pixels) => new(UnitType.Pixels, pixels);
+    public static UnitValue Pixels(float pixels)
+    {
+        return new UnitValue(UnitType.Pixels, pixels);
+    }
 
     /// <summary>
     /// Adds an integer value to the unit value, preserving the original unit type.
@@ -127,7 +142,8 @@ public readonly struct UnitValue(UnitType mode, float value)
     /// <param name="unitValue">The unit value to add to.</param>
     /// <param name="value">The float value to add.</param>
     /// <returns>A new <see cref="UnitValue"/> with the same mode and the sum of the values.</returns>
-    public static UnitValue operator +(UnitValue unitValue, float value) => new(unitValue.Mode, unitValue.Value + value);
+    public static UnitValue operator +(UnitValue unitValue, float value) =>
+        new(unitValue.Mode, unitValue.Value + value);
 
     /// <summary>
     /// Adds a double value to the unit value, preserving the original unit type.
@@ -135,7 +151,8 @@ public readonly struct UnitValue(UnitType mode, float value)
     /// <param name="unitValue">The unit value to add to.</param>
     /// <param name="value">The double value to add.</param>
     /// <returns>A new <see cref="UnitValue"/> with the same mode and the sum of the values.</returns>
-    public static UnitValue operator +(UnitValue unitValue, double value) => new(unitValue.Mode, unitValue.Value + (float)value);
+    public static UnitValue operator +(UnitValue unitValue, double value) =>
+        new(unitValue.Mode, unitValue.Value + (float)value);
 
     /// <summary>
     /// Adds an integer value to the unit value, preserving the original unit type.
@@ -151,7 +168,8 @@ public readonly struct UnitValue(UnitType mode, float value)
     /// <param name="value">The float value to add.</param>
     /// <param name="unitValue">The unit value to add to.</param>
     /// <returns>A new <see cref="UnitValue"/> with the same mode and the sum of the values.</returns>
-    public static UnitValue operator +(float value, UnitValue unitValue) => new(unitValue.Mode, unitValue.Value + value);
+    public static UnitValue operator +(float value, UnitValue unitValue) =>
+        new(unitValue.Mode, unitValue.Value + value);
 
     /// <summary>
     /// Adds a double value to the unit value, preserving the original unit type.
@@ -159,5 +177,6 @@ public readonly struct UnitValue(UnitType mode, float value)
     /// <param name="value">The double value to add.</param>
     /// <param name="unitValue">The unit value to add to.</param>
     /// <returns>A new <see cref="UnitValue"/> with the same mode and the sum of the values.</returns>
-    public static UnitValue operator +(double value, UnitValue unitValue) => new(unitValue.Mode, unitValue.Value + (float)value);
+    public static UnitValue operator +(double value, UnitValue unitValue) =>
+        new(unitValue.Mode, unitValue.Value + (float)value);
 }

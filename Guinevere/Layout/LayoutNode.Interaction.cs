@@ -8,7 +8,10 @@ public partial class LayoutNode
     /// <returns>
     /// True if the click interaction is successful, otherwise false.
     /// </returns>
-    public bool OnClick() => _gui.GetInteractable(this).OnClick();
+    public bool OnClick()
+    {
+        return _gui.GetInteractable(this).OnClick();
+    }
 
     /// <summary>
     /// Handles a hover interaction on the current layout node.
@@ -16,5 +19,8 @@ public partial class LayoutNode
     /// <returns>
     /// True if the hover interaction is successful; otherwise, false.
     /// </returns>
-    public bool OnHover() => _gui.GetInteractable(this).OnHover();
+    public bool OnHover()
+    {
+        return _gui.GetInteractable(this).OnHover();
+    }
 }

@@ -42,8 +42,10 @@ public partial class Gui
     /// <param name="defaultValue">The default float value to insert if the identifier does not exist.</param>
     /// <param name="id">The identifier associated with the float value. This is typically the name of the variable passed as <paramref name="defaultValue"/>.</param>
     /// <returns>A reference to the float value associated with the specified identifier.</returns>
-    public ref float GetFloat(float defaultValue, [CallerArgumentExpression(nameof(defaultValue))] string id = "") =>
-        ref GetValue(defaultValue, id);
+    public ref float GetFloat(float defaultValue, [CallerArgumentExpression(nameof(defaultValue))] string id = "")
+    {
+        return ref GetValue(defaultValue, id);
+    }
 
     /// <summary>
     /// Sets the value of type <see cref="float"/> associated with the specified identifier.
@@ -51,8 +53,10 @@ public partial class Gui
     /// </summary>
     /// <param name="value">The value to associate with the specified identifier.</param>
     /// <param name="id">The identifier associated with the value. By default, this is the name of the variable passed as <paramref name="value"/>.</param>
-    public void SetFloat(float value, [CallerArgumentExpression(nameof(value))] string id = "") =>
+    public void SetFloat(float value, [CallerArgumentExpression(nameof(value))] string id = "")
+    {
         SetValue(value, id);
+    }
 
     private Dictionary<string, T> GetStore<T>()
     {

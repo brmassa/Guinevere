@@ -38,5 +38,5 @@ public class FlyoutItem
     /// <summary>
     /// Gets whether this item has a submenu
     /// </summary>
-    public bool HasSubmenu => Submenu != null && Submenu.Count > 0;
+    public bool HasSubmenu => Submenu is { Count: > 0 };
 }

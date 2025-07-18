@@ -13,9 +13,11 @@ public static partial class ControlsExtensions
         Color? thumbColor = null,
         Color? labelColor = null,
         float fontSize = 14,
-        float spacing = 8) =>
+        float spacing = 8)
+    {
         ToggleCore(gui, ref isOn, label, width, height, onColor, offColor,
             thumbColor, labelColor, fontSize, spacing);
+    }
 
     /// <summary>
     /// Creates a toggle switch that returns the toggled state without modifying the input
@@ -54,9 +56,12 @@ public static partial class ControlsExtensions
         }
     }
 
-    private static float CalculateToggleWidth(string label, float width, float fontSize, float spacing) =>
-        string.IsNullOrEmpty(label) ? width :
-        width + spacing + MeasureTextWidth(new SKFont { Size = fontSize }, label);
+    private static float CalculateToggleWidth(string label, float width, float fontSize, float spacing)
+    {
+        return string.IsNullOrEmpty(label)
+            ? width
+            : width + spacing + MeasureTextWidth(new SKFont { Size = fontSize }, label);
+    }
 
     private static void HandleToggleInteraction(Gui gui, ref bool isOn)
     {
@@ -114,8 +119,8 @@ public static partial class ControlsExtensions
         var thumbRadius = height * 0.4f;
         var thumbY = rect.Y + height * 0.5f;
         var thumbX = isOn
-            ? rect.X + width - thumbRadius - 2  // Right side when on
-            : rect.X + thumbRadius + 2;         // Left side when off
+            ? rect.X + width - thumbRadius - 2 // Right side when on
+            : rect.X + thumbRadius + 2; // Left side when off
 
         return (new Vector2(thumbX, thumbY), thumbRadius);
     }

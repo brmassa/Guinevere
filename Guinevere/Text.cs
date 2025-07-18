@@ -52,18 +52,12 @@ public class Text(string label, Vector2? position = null, SKFont? font = null, S
     /// </summary>
     /// <param name="text">The string to convert into a Text instance.</param>
     /// <returns>A new instance of the Text class constructed from the specified string.</returns>
-    public static implicit operator Text(string text)
-    {
-        return new Text(text);
-    }
+    public static implicit operator Text(string text) => new(text);
 
     /// <summary>
     /// Defines an implicit conversion operator that allows a string to be converted to a Text instance.
     /// </summary>
     /// <param name="text">The string to be converted to a Text instance.</param>
     /// <returns>A new Text instance representing the given string.</returns>
-    public static implicit operator Text(char text)
-    {
-        return new Text(text.ToString());
-    }
+    public static implicit operator Text(char text) => new(text.ToString());
 }

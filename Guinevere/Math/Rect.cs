@@ -100,11 +100,13 @@ public record Rect
     /// <param name="point">The point to check.</param>
     /// <returns>True if the point is within the rectangle's bounds; otherwise false.</returns>
     [PublicAPI]
-    public bool Contains(Vector2 point) =>
-        point.X >= X &&
-        point.X <= X + W &&
-        point.Y >= Y &&
-        point.Y <= Y + H;
+    public bool Contains(Vector2 point)
+    {
+        return point.X >= X &&
+               point.X <= X + W &&
+               point.Y >= Y &&
+               point.Y <= Y + H;
+    }
 
     /// <summary>
     /// Defines an implicit conversion from an instance of Rect to an instance of Skia's SKRect.
@@ -129,7 +131,10 @@ public record Rect
     /// Returns a string representation of the rectangle, including its position and size, formatted to one decimal place.
     /// </summary>
     /// <returns>A string in the format "Rect(x:{X}, y:{Y}, w:{W}, h:{H})", where X, Y, W, and H are the rectangle's properties.</returns>
-    public override string ToString() => $"Rect(x:{X:F1}, y:{Y:F1}, w:{W:F1}, h:{H:F1})";
+    public override string ToString()
+    {
+        return $"Rect(x:{X:F1}, y:{Y:F1}, w:{W:F1}, h:{H:F1})";
+    }
 
     /// <summary>
     /// Converts a Rect instance explicitly to its string representation using the ToString method.
@@ -178,7 +183,7 @@ public record Rect
         if (value == 0)
             throw new DivideByZeroException("Cannot divide rectangle components by zero.");
 
-        return new(rect.X / value, rect.Y / value, rect.W / value, rect.H / value);
+        return new Rect(rect.X / value, rect.Y / value, rect.W / value, rect.H / value);
     }
 
     /// <summary>

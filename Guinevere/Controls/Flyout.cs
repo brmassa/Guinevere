@@ -64,10 +64,8 @@ public static partial class ControlsExtensions
 
             // Render menu items
             for (var i = 0; i < builder.Items.Count; i++)
-            {
                 RenderFlyoutItem(gui, state, builder.Items[i], i, menuWidth, itemHeight,
                     textColor, hoverColor, separatorColor, disabledColor, fontSize, padding);
-            }
         }
 
         // Handle click outside to close
@@ -110,8 +108,10 @@ public static partial class ControlsExtensions
         }
     }
 
-    private static FlyoutState GetOrCreateFlyoutState(string id) =>
-        FlyoutStates.TryGetValue(id, out var state) ? state : FlyoutStates[id] = new FlyoutState();
+    private static FlyoutState GetOrCreateFlyoutState(string id)
+    {
+        return FlyoutStates.TryGetValue(id, out var state) ? state : FlyoutStates[id] = new FlyoutState();
+    }
 
     private static void HandleFlyoutInteraction(Gui gui, FlyoutState state, List<FlyoutItem> items, Rect rect,
         float itemHeight, ref bool isOpen)
@@ -125,10 +125,7 @@ public static partial class ControlsExtensions
             var relativeY = mousePos.Y - rect.Y;
             var itemIndex = Math.Max(0, Math.Min((int)(relativeY / itemHeight), items.Count - 1));
 
-            if (!items[itemIndex].IsSeparator)
-            {
-                state.HoveredIndex = itemIndex;
-            }
+            if (!items[itemIndex].IsSeparator) state.HoveredIndex = itemIndex;
 
             if (gui.Input.IsMouseButtonPressed(MouseButton.Left) && state.HoveredIndex >= 0)
             {
@@ -171,7 +168,7 @@ public static partial class ControlsExtensions
                 }
 
                 var isHovered = index == state.HoveredIndex;
-                var itemColor = item.Enabled ? (textColor ?? Color.Black) : (disabledColor ?? Color.Gray);
+                var itemColor = item.Enabled ? textColor ?? Color.Black : disabledColor ?? Color.Gray;
 
                 if (isHovered && item.Enabled)
                 {
@@ -185,17 +182,13 @@ public static partial class ControlsExtensions
 
                     if (item.HasSubmenu)
                     {
-                        using (gui.Node().Width(0).Expand().Enter())
-                        {
-                        } // Spacer
+                        gui.Node().Expand();
 
                         gui.DrawText("▶", fontSize * 0.8f, itemColor, centerInRect: false);
                     }
                     else if (!string.IsNullOrEmpty(item.Shortcut))
                     {
-                        using (gui.Node().Width(0).Expand().Enter())
-                        {
-                        } // Spacer
+                        gui.Node().Expand();
 
                         gui.DrawText(item.Shortcut, fontSize * 0.9f, Color.Gray, centerInRect: false);
                     }
@@ -208,10 +201,7 @@ public static partial class ControlsExtensions
     {
         state.HoveredIndex = -1;
 
-        foreach (var submenu in state.Submenus.Values)
-        {
-            CloseFlyoutRecursive(submenu);
-        }
+        foreach (var submenu in state.Submenus.Values) CloseFlyoutRecursive(submenu);
 
         state.Submenus.Clear();
     }
@@ -232,10 +222,7 @@ public static partial class ControlsExtensions
                 itemWidth += shortcutBounds.Width + padding;
             }
 
-            if (item.HasSubmenu)
-            {
-                itemWidth += 20; // Space for arrow
-            }
+            if (item.HasSubmenu) itemWidth += 20; // Space for arrow
 
             maxWidth = Math.Max(maxWidth, itemWidth);
         }

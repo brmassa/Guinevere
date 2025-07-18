@@ -24,14 +24,19 @@ public partial class Gui
     /// Retrieves an interactable element for the current layout node.
     /// </summary>
     /// <returns>An instance of <see cref="InteractableElement"/> that represents the interactable element associated with the current layout node.</returns>
-    public InteractableElement GetInteractable() => GetInteractable(CurrentNode);
+    public InteractableElement GetInteractable()
+    {
+        return GetInteractable(CurrentNode);
+    }
 
     /// <summary>
     /// Retrieves an interactable element for the current layout node.
     /// </summary>
     /// <returns>An instance of <see cref="InteractableElement"/> that represents the interactable element for the current node.</returns>
-    public InteractableElement GetInteractable(LayoutNode node) =>
-        new(node.Rect, this, node.Id);
+    public InteractableElement GetInteractable(LayoutNode node)
+    {
+        return new InteractableElement(node.Rect, this, node.Id);
+    }
 
     /// <summary>
     /// Retrieves an interactable element based on the specified position and shape.
@@ -46,25 +51,28 @@ public partial class Gui
         return new InteractableElement(newShape, this, ShapeId(position));
     }
 
-    private string ShapeId(Vector2 position) => $"{CurrentNode.Id}_{position.X}_{position.Y}";
+    private string ShapeId(Vector2 position)
+    {
+        return $"{CurrentNode.Id}_{position.X}_{position.Y}";
+    }
 
-    internal bool GetDragState(string id) => _dragStates.TryGetValue(id, out var state) && state;
+    internal bool GetDragState(string id)
+    {
+        return _dragStates.TryGetValue(id, out var state) && state;
+    }
 
-    internal bool SetDragState(string id, bool state) =>
-        state ? _dragStates.TryAdd(id, true) : _dragStates.Remove(id);
+    internal bool SetDragState(string id, bool state)
+    {
+        return state ? _dragStates.TryAdd(id, true) : _dragStates.Remove(id);
+    }
 
     private void ClearCompletedDrags()
     {
         var keysToRemove = new List<string>();
         foreach (var kvp in _dragStates)
-        {
             if (!kvp.Value)
                 keysToRemove.Add(kvp.Key);
-        }
 
-        foreach (var key in keysToRemove)
-        {
-            _dragStates.Remove(key);
-        }
+        foreach (var key in keysToRemove) _dragStates.Remove(key);
     }
 }

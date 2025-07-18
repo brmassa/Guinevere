@@ -8,7 +8,10 @@ public readonly struct Angle
     /// <summary>
     /// Represents an angle defined in terms of radians, and provides methods for converting and performing operations with angles.
     /// </summary>
-    public Angle(float radians) => Radian = radians;
+    public Angle(float radians)
+    {
+        Radian = radians;
+    }
 
     /// <summary>
     /// Represents the angle in radians.
@@ -31,28 +34,40 @@ public readonly struct Angle
     /// </summary>
     /// <param name="turns">The angle value in turns, where 1 turn is equivalent to 360 degrees or 2π radians.</param>
     /// <returns>A new <see cref="Angle"/> corresponding to the specified number of turns.</returns>
-    public static Angle Turns(float turns) => new(turns * MathF.PI * 2f);
+    public static Angle Turns(float turns)
+    {
+        return new Angle(turns * MathF.PI * 2f);
+    }
 
     /// <summary>
     /// Creates a new <see cref="Angle"/> instance from the given degree value.
     /// </summary>
     /// <param name="degrees">The angle value in degrees.</param>
     /// <returns>A new <see cref="Angle"/> representing the specified degree value.</returns>
-    public static Angle Degrees(float degrees) => new(degrees * ImMath.Deg2Rad);
+    public static Angle Degrees(float degrees)
+    {
+        return new Angle(degrees * ImMath.Deg2Rad);
+    }
 
     /// <summary>
     /// Creates a new <see cref="Angle"/> instance from the given radian value.
     /// </summary>
     /// <param name="radians">The angle value in radians.</param>
     /// <returns>A new <see cref="Angle"/> representing the specified radian value.</returns>
-    public static Angle Radians(float radians) => new(radians);
+    public static Angle Radians(float radians)
+    {
+        return new Angle(radians);
+    }
 
     /// <summary>
     /// Calculates the direction vector corresponding to the angle represented by this <see cref="Angle"/> instance.
     /// </summary>
     /// <returns>A <see cref="Vector2"/> representing the direction of the angle, where the X and Y components
     /// correspond to the cosine and sine of the angle in radians, respectively.</returns>
-    public Vector2 GetDirectionVector() => new(MathF.Cos(Radian), MathF.Sin(Radian));
+    public Vector2 GetDirectionVector()
+    {
+        return new Vector2(MathF.Cos(Radian), MathF.Sin(Radian));
+    }
 
     /// <summary>
     /// Defines addition operator to combine two <see cref="Angle"/> instances by summing their radian values.

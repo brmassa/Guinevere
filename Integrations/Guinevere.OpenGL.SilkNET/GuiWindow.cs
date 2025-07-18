@@ -300,50 +300,62 @@ public class GuiWindow : IInputHandler, IWindowHandler, IDisposable
     /// </summary>
     /// <param name="keyboardKey">The key to check.</param>
     /// <returns>True if the key was just pressed; otherwise, false.</returns>
-    public bool IsKeyPressed(KeyboardKey keyboardKey) =>
-        _pressedKeys.Contains((Key)(int)keyboardKey);
+    public bool IsKeyPressed(KeyboardKey keyboardKey)
+    {
+        return _pressedKeys.Contains((Key)(int)keyboardKey);
+    }
 
     /// <summary>
     /// Determines whether the specified key is currently held down.
     /// </summary>
     /// <param name="keyboardKey">The key to check.</param>
     /// <returns>True if the key is held down; otherwise, false.</returns>
-    public bool IsKeyDown(KeyboardKey keyboardKey) =>
-        _heldKeys.Contains((Key)(int)keyboardKey);
+    public bool IsKeyDown(KeyboardKey keyboardKey)
+    {
+        return _heldKeys.Contains((Key)(int)keyboardKey);
+    }
 
     /// <summary>
     /// Determines whether the specified key is currently up (not pressed).
     /// </summary>
     /// <param name="keyboardKey">The key to check.</param>
     /// <returns>True if the key is up; otherwise, false.</returns>
-    public bool IsKeyUp(KeyboardKey keyboardKey) =>
-        !_heldKeys.Contains((Key)(int)keyboardKey) &&
-        !_pressedKeys.Contains((Key)(int)keyboardKey);
+    public bool IsKeyUp(KeyboardKey keyboardKey)
+    {
+        return !_heldKeys.Contains((Key)(int)keyboardKey) &&
+               !_pressedKeys.Contains((Key)(int)keyboardKey);
+    }
 
     /// <summary>
     /// Determines whether the specified mouse button was just pressed this frame.
     /// </summary>
     /// <param name="button">The mouse button to check.</param>
     /// <returns>True if the button was just pressed; otherwise, false.</returns>
-    public bool IsMouseButtonPressed(MouseButton button) =>
-        _pressedButtons.Contains((Silk.NET.Input.MouseButton)(int)button);
+    public bool IsMouseButtonPressed(MouseButton button)
+    {
+        return _pressedButtons.Contains((Silk.NET.Input.MouseButton)(int)button);
+    }
 
     /// <summary>
     /// Determines whether the specified mouse button is currently held down.
     /// </summary>
     /// <param name="button">The mouse button to check.</param>
     /// <returns>True if the button is held down; otherwise, false.</returns>
-    public bool IsMouseButtonDown(MouseButton button) =>
-        _heldButtons.Contains((Silk.NET.Input.MouseButton)(int)button);
+    public bool IsMouseButtonDown(MouseButton button)
+    {
+        return _heldButtons.Contains((Silk.NET.Input.MouseButton)(int)button);
+    }
 
     /// <summary>
     /// Determines whether the specified mouse button is currently up (not pressed).
     /// </summary>
     /// <param name="button">The mouse button to check.</param>
     /// <returns>True if the button is up; otherwise, false.</returns>
-    public bool IsMouseButtonUp(MouseButton button) =>
-        !_heldButtons.Contains((Silk.NET.Input.MouseButton)(int)button) &&
-        !_pressedButtons.Contains((Silk.NET.Input.MouseButton)(int)button);
+    public bool IsMouseButtonUp(MouseButton button)
+    {
+        return !_heldButtons.Contains((Silk.NET.Input.MouseButton)(int)button) &&
+               !_pressedButtons.Contains((Silk.NET.Input.MouseButton)(int)button);
+    }
 
     /// <summary>
     /// Gets all characters typed since the last call to this method.

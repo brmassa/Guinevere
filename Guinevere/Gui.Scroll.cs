@@ -12,7 +12,7 @@ public partial class Gui
     /// <returns>The current node for chaining</returns>
     public LayoutNode ScrollX(Color? foregroundColor = null, Color? backgroundColor = null)
     {
-        return ScrollContainer(scrollX: true, scrollY: false, foregroundColor, backgroundColor);
+        return ScrollContainer(true, false, foregroundColor, backgroundColor);
     }
 
     /// <summary>
@@ -23,7 +23,7 @@ public partial class Gui
     /// <returns>The current noden for chaining</returns>
     public LayoutNode ScrollY(Color? foregroundColor = null, Color? backgroundColor = null)
     {
-        return ScrollContainer(scrollX: false, scrollY: true, foregroundColor, backgroundColor);
+        return ScrollContainer(false, true, foregroundColor, backgroundColor);
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public partial class Gui
     /// <returns>The current node for chaining</returns>
     public LayoutNode Scroll(Color? foregroundColor = null, Color? backgroundColor = null)
     {
-        return ScrollContainer(scrollX: true, scrollY: true, foregroundColor, backgroundColor);
+        return ScrollContainer(true, true, foregroundColor, backgroundColor);
     }
 
     /// <summary>
@@ -50,9 +50,7 @@ public partial class Gui
             // Mark that this node needs clipping, but don't apply it yet
             var buildScrollState = GetScrollState(CurrentNode.Id);
             if (buildScrollState != null && (buildScrollState.IsScrollingX || buildScrollState.IsScrollingY))
-            {
                 SetClipped(true, CurrentNode.Scope);
-            }
             return;
         }
 
@@ -67,7 +65,7 @@ public partial class Gui
             var clipRect = CurrentNode.InnerRect;
 
             // Only apply clipping if the rectangle has valid dimensions
-            if (clipRect.W > 0 && clipRect.H > 0)
+            if (clipRect is { W: > 0, H: > 0 })
             {
                 SetClipped(true, CurrentNode.Scope);
                 AddDraw(new ClipOperation(clipRect));
@@ -77,10 +75,7 @@ public partial class Gui
         {
             // Non-scrollable content still needs basic clipping
             var clipRect = CurrentNode.InnerRect;
-            if (clipRect.W > 0 && clipRect.H > 0)
-            {
-                AddDraw(new ClipOperation(clipRect));
-            }
+            if (clipRect is { W: > 0, H: > 0 }) AddDraw(new ClipOperation(clipRect));
         }
     }
 
@@ -357,10 +352,7 @@ public partial class Gui
         if (RootNode != null)
         {
             var node = FindNodeById(RootNode, nodeId);
-            if (node?.Scope != null)
-            {
-                SetLocalScrollOffset(scrollState.ScrollOffset, node.Scope);
-            }
+            if (node?.Scope != null) SetLocalScrollOffset(scrollState.ScrollOffset, node.Scope);
         }
     }
 

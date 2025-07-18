@@ -16,12 +16,12 @@ A **GPU accelerated immediate mode GUI system** built on SkiaSharp, designed for
 - **Multiple Graphics API Support**
 - **Multiple Framework Integrations**
 
-| Package            | Graphics API | Framework   | Use Case                                    |
-|--------------------|--------------|-------------|---------------------------------------------|
-| **OpenGl.SilkNET** | OpenGL       | Silk.NET    | High-performance applications (Recommended) |
-| **OpenGl.OpenTK**  | OpenGL       | OpenTK 4.x  | Game development, tools                     |
-| **OpenGl.Raylib**  | OpenGL       | Raylib-cs   | Simple games, prototypes                    |
-| **Vulkan.SilkNET** | Vulkan       | Silk.NET    | Maximum performance, modern graphics        |
+| Package            | Graphics API | Framework  | Use Case                                    |
+|--------------------|--------------|------------|---------------------------------------------|
+| **OpenGl.SilkNET** | OpenGL       | Silk.NET   | High-performance applications (Recommended) |
+| **OpenGl.OpenTK**  | OpenGL       | OpenTK 4.x | Game development, tools                     |
+| **OpenGl.Raylib**  | OpenGL       | Raylib-cs  | Simple games, prototypes                    |
+| **Vulkan.SilkNET** | Vulkan       | Silk.NET   | Maximum performance, modern graphics        |
 
 ## Quick Start
 
@@ -99,7 +99,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - [Raylib-cs](https://github.com/ChrisDill/Raylib-cs): C# bindings
 - [Silk.NET](https://github.com/dotnet/Silk.NET): Modern .NET bindings for graphics APIs
 - [NUKE](https://nuke.build): Build automation system
-
 
 ## Issue Reporting
 

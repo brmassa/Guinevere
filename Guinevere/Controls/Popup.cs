@@ -42,10 +42,7 @@ public static partial class ControlsExtensions
         if (isOpen != state.IsOpen)
         {
             state.IsOpen = isOpen;
-            if (isOpen && position.HasValue)
-            {
-                state.Position = position.Value;
-            }
+            if (isOpen && position.HasValue) state.Position = position.Value;
         }
 
         // Always create popup structure for consistency
@@ -107,19 +104,17 @@ public static partial class ControlsExtensions
         using (gui.Node(gui.ScreenRect.W, gui.ScreenRect.H).Left(0).Top(0).Enter())
         {
             if (gui.Pass == Pass.Pass2Render)
-            {
                 // Only render overlay when modal is open
                 if (isOpen)
                 {
                     var overlay = overlayColor ?? Color.FromArgb(128, 0, 0, 0);
                     gui.DrawRect(gui.CurrentNode.Rect, overlay);
                 }
-            }
         }
 
         gui.Popup(ref isOpen, content, width, height, title,
             position ?? new Vector2(gui.ScreenRect.W * 0.5f - width * 0.5f, gui.ScreenRect.H * 0.5f - height * 0.5f),
-            modal: true, closeOnClickOutside: true, closeOnEscape: true,
+            true, true, true,
             backgroundColor, borderColor, titleBarColor, titleTextColor,
             titleBarHeight, borderRadius, borderWidth, filePath, lineNumber);
     }
@@ -160,7 +155,6 @@ public static partial class ControlsExtensions
                    .Enter())
         {
             if (gui.Pass == Pass.Pass2Render)
-            {
                 // Only render background when shown and text is not empty
                 if (show && !string.IsNullOrEmpty(text))
                 {
@@ -170,10 +164,9 @@ public static partial class ControlsExtensions
                     gui.DrawBackgroundRect(bgColor, borderRadius);
                     gui.DrawRectBorder(gui.CurrentNode.Rect, borderColorFinal, 1f, borderRadius);
                 }
-            }
 
             // Always draw text for consistency, but make transparent when hidden
-            var textColorFinal = (show && !string.IsNullOrEmpty(text)) ? (textColor ?? Color.Black) : Color.Transparent;
+            var textColorFinal = show && !string.IsNullOrEmpty(text) ? textColor ?? Color.Black : Color.Transparent;
             gui.DrawText(tooltipText, fontSize, textColorFinal, centerInRect: false);
         }
     }
@@ -208,7 +201,6 @@ public static partial class ControlsExtensions
                    .Enter())
         {
             if (gui.Pass == Pass.Pass2Render)
-            {
                 // Only render background when open
                 if (isOpen)
                 {
@@ -218,7 +210,6 @@ public static partial class ControlsExtensions
                     gui.DrawBackgroundRect(bgColor, borderRadius);
                     gui.DrawRectBorder(gui.CurrentNode.Rect, borderColorFinal, 1f, borderRadius);
                 }
-            }
 
             RenderContextMenuItems(gui, builder.Items, ref isOpen, itemHeight, hoverColor, isOpen);
         }
@@ -228,17 +219,15 @@ public static partial class ControlsExtensions
         {
             var mousePos = gui.Input.MousePosition;
             var menuRect = new Rect(menuPos.X, menuPos.Y, menuWidth, menuHeight);
-            if (!IsMouseInRect(mousePos, menuRect))
-            {
-                isOpen = false;
-            }
+            if (!IsMouseInRect(mousePos, menuRect)) isOpen = false;
         }
     }
 
     // Core implementation helpers
     private static PopupState GetOrCreatePopupState(string id, Vector2? position,
-        bool closeOnClickOutside, bool closeOnEscape) =>
-        PopupStates.TryGetValue(id, out var state)
+        bool closeOnClickOutside, bool closeOnEscape)
+    {
+        return PopupStates.TryGetValue(id, out var state)
             ? state
             : PopupStates[id] = new PopupState
             {
@@ -246,16 +235,14 @@ public static partial class ControlsExtensions
                 CloseOnClickOutside = closeOnClickOutside,
                 CloseOnEscape = closeOnEscape
             };
+    }
 
     private static void HandlePopupInteraction(Gui gui, PopupState state)
     {
         if (gui.Pass != Pass.Pass2Render) return;
 
         // Handle escape key
-        if (state.CloseOnEscape && gui.Input.IsKeyPressed(KeyboardKey.Escape))
-        {
-            state.IsOpen = false;
-        }
+        if (state.CloseOnEscape && gui.Input.IsKeyPressed(KeyboardKey.Escape)) state.IsOpen = false;
     }
 
     private static void RenderPopup(Gui gui, PopupState state, Action content, float width, float height,
@@ -287,9 +274,7 @@ public static partial class ControlsExtensions
 
             // Always create title bar node for consistency
             if (!string.IsNullOrEmpty(title))
-            {
                 RenderPopupTitleBar(gui, title, width, titleBarHeight, titleBarColor, titleTextColor, state.IsOpen);
-            }
 
             // Always create content area node for consistency
             var contentY = string.IsNullOrEmpty(title) ? 0 : titleBarHeight;
@@ -299,23 +284,17 @@ public static partial class ControlsExtensions
                        .Enter())
             {
                 // Only invoke content when popup is open
-                if (state.IsOpen)
-                {
-                    content.Invoke();
-                }
+                if (state.IsOpen) content.Invoke();
             }
         }
 
         // Handle click outside to close - check after rendering the popup
-        if (gui.Pass == Pass.Pass2Render && state.IsOpen && state.CloseOnClickOutside &&
+        if (gui.Pass == Pass.Pass2Render && state is { IsOpen: true, CloseOnClickOutside: true } &&
             gui.Input.IsMouseButtonPressed(MouseButton.Left))
         {
             var mousePos = gui.Input.MousePosition;
             var popupRect = new Rect(state.Position.X, state.Position.Y, width, totalHeight);
-            if (!IsMouseInRect(mousePos, popupRect))
-            {
-                state.IsOpen = false;
-            }
+            if (!IsMouseInRect(mousePos, popupRect)) state.IsOpen = false;
         }
     }
 
@@ -331,22 +310,19 @@ public static partial class ControlsExtensions
             }
 
             // Always draw text for consistency, but make transparent when closed
-            var titleColorFinal = isOpen ? (titleTextColor ?? Color.Black) : Color.Transparent;
-            gui.DrawText(title, 14, titleColorFinal, centerInRect: false);
+            var titleColorFinal = isOpen ? titleTextColor ?? Color.Black : Color.Transparent;
+            gui.DrawText(title, color: titleColorFinal, centerInRect: false);
         }
     }
 
     private static void RenderContextMenuItems(Gui gui, List<ContextMenuItem> items, ref bool isOpen,
         float itemHeight, Color? hoverColor, bool menuIsOpen)
     {
-        for (var i = 0; i < items.Count; i++)
+        foreach (var item in items)
         {
-            var item = items[i];
-
             using (gui.Node().Height(itemHeight).Direction(Axis.Horizontal).Padding(8).Enter())
             {
                 if (gui.Pass == Pass.Pass2Render)
-                {
                     // Only handle interaction when menu is open
                     if (menuIsOpen)
                     {
@@ -367,16 +343,12 @@ public static partial class ControlsExtensions
                             return;
                         }
                     }
-                }
 
                 // Always render text for consistency, but make transparent when closed
                 var textColor = item.Enabled ? Color.Black : Color.Gray;
-                if (!menuIsOpen)
-                {
-                    textColor = Color.Transparent;
-                }
+                if (!menuIsOpen) textColor = Color.Transparent;
 
-                gui.DrawText(item.Text, 12, textColor, centerInRect: false);
+                gui.DrawText(item.Text, color: textColor, centerInRect: false);
             }
         }
     }
@@ -393,5 +365,8 @@ public static partial class ControlsExtensions
     /// <summary>
     /// Clears all popup states (useful for cleanup)
     /// </summary>
-    public static void ClearPopupStates(this Gui gui) => PopupStates.Clear();
+    public static void ClearPopupStates(this Gui gui)
+    {
+        PopupStates.Clear();
+    }
 }

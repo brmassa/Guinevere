@@ -11,22 +11,15 @@ public partial class LayoutNode
     public void CalculateLayout()
     {
         if (_parent == null)
-        {
             InitializeRootLayout();
-        }
         else
-        {
             InitializeChildLayout();
-        }
     }
 
     private void InitializeRootLayout()
     {
         _rect = _gui.ScreenRect;
-        if (ChildNodes.Count > 0)
-        {
-            LayoutChildren();
-        }
+        if (ChildNodes.Count > 0) LayoutChildren();
     }
 
     /// <summary>
@@ -43,16 +36,12 @@ public partial class LayoutNode
         while (currentScope != null)
         {
             var localOffset = currentScope.Get<LayoutNodeScopeLocalScrollOffset>().Value;
-            if (localOffset != Vector2.Zero)
-            {
-                scrollOffset += localOffset;
-            }
+            if (localOffset != Vector2.Zero) scrollOffset += localOffset;
 
             currentScope = currentScope.Node.Parent?.Scope;
         }
 
         if (scrollOffset != Vector2.Zero)
-        {
             // Apply the scroll offset to the node's position
             _rect = new Rect(
                 _rect.X - scrollOffset.X,
@@ -60,7 +49,6 @@ public partial class LayoutNode
                 _rect.W,
                 _rect.H
             );
-        }
     }
 
     private void InitializeChildLayout()
@@ -71,19 +59,23 @@ public partial class LayoutNode
         _rect = new Rect(0, 0, myWidth, myHeight);
     }
 
-    private float CalculateWidth(float availableWidth) =>
-        Style.ExpandWidth || Style.IsExpanded
+    private float CalculateWidth(float availableWidth)
+    {
+        return Style.ExpandWidth || Style.IsExpanded
             ? availableWidth * Style.ExpandWidthPercentage
             : Style.Width >= 0
                 ? Style.Width
                 : CalculateContentWidth(availableWidth);
+    }
 
-    private float CalculateHeight(float availableHeight) =>
-        Style.ExpandHeight || Style.IsExpanded
+    private float CalculateHeight(float availableHeight)
+    {
+        return Style.ExpandHeight || Style.IsExpanded
             ? availableHeight * Style.ExpandHeightPercentage
             : Style.Height >= 0
                 ? Style.Height
                 : CalculateContentHeight(availableHeight);
+    }
 
     private float CalculateContentWidth(float availableWidth)
     {
@@ -163,13 +155,9 @@ public partial class LayoutNode
 
         var contentRect = InnerRect;
         if (Style.Direction == Axis.Vertical)
-        {
             LayoutChildrenVertically(contentRect);
-        }
         else
-        {
             LayoutChildrenHorizontally(contentRect);
-        }
     }
 
     private void LayoutChildrenVertically(Rect contentRect)
@@ -245,9 +233,7 @@ public partial class LayoutNode
         float defaultHeight)
     {
         if (child.Style.ExpandHeight || child.Style.IsExpanded)
-        {
             return CalculateExpandingChildHeight(child, context, remainingHeight, defaultHeight);
-        }
 
         if (child.Style.Height >= 0)
             return child.Style.Height;
@@ -274,11 +260,8 @@ public partial class LayoutNode
             var height = remainingHeight * expandRatio;
 
             // Apply constraint for horizontal containers
-            if (child.Style.Direction == Axis.Horizontal && child.Style.Height < 0 &&
-                !child.Style.ExpandHeight && !child.Style.IsExpanded)
-            {
+            if (child.Style is { Direction: Axis.Horizontal, Height: < 0, ExpandHeight: false, IsExpanded: false })
                 height = Math.Min(height, 120f);
-            }
 
             return height;
         }
@@ -305,10 +288,7 @@ public partial class LayoutNode
             var childRect = CalculateVerticalChildRect(child, contentRect, currentY, childDimensions[i].Height);
             child._rect = childRect;
 
-            if (child.ChildNodes.Count > 0)
-            {
-                child.LayoutChildren();
-            }
+            if (child.ChildNodes.Count > 0) child.LayoutChildren();
 
             // Apply scroll offset after positioning
             child.ApplyScrollOffset();
@@ -409,9 +389,7 @@ public partial class LayoutNode
         float defaultWidth)
     {
         if (child.Style.ExpandWidth || child.Style.IsExpanded)
-        {
             return CalculateExpandingChildWidth(child, context, remainingWidth, defaultWidth);
-        }
 
         if (child.Style.Width >= 0)
             return child.Style.Width;
@@ -435,11 +413,8 @@ public partial class LayoutNode
             var width = remainingWidth * expandRatio;
 
             // Apply constraint for vertical containers
-            if (child.Style.Direction == Axis.Vertical && child.Style.Width < 0 &&
-                !child.Style.ExpandWidth && !child.Style.IsExpanded)
-            {
+            if (child.Style is { Direction: Axis.Vertical, Width: < 0, ExpandWidth: false, IsExpanded: false })
                 width = Math.Min(width, 240f);
-            }
 
             return width;
         }
@@ -466,10 +441,7 @@ public partial class LayoutNode
             var childRect = CalculateHorizontalChildRect(child, contentRect, currentX, childDimensions[i].Width);
             child._rect = childRect;
 
-            if (child.ChildNodes.Count > 0)
-            {
-                child.LayoutChildren();
-            }
+            if (child.ChildNodes.Count > 0) child.LayoutChildren();
 
             // Apply scroll offset after positioning
             child.ApplyScrollOffset();

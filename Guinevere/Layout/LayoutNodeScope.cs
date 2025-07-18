@@ -49,7 +49,10 @@ public class LayoutNodeScope(ILayoutNodeEnterExit? nodeManager, LayoutNode node)
     /// </summary>
     /// <param name="index">The Z-index value to assign to the layout node.</param>
     /// <returns>Returns the current <see cref="LayoutNodeScope"/> instance for method chaining.</returns>
-    public LayoutNodeScope SetZIndex(int index) => Set(new LayoutNodeScopeZIndex { Value = index });
+    public LayoutNodeScope SetZIndex(int index)
+    {
+        return Set(new LayoutNodeScopeZIndex { Value = index });
+    }
 
     private readonly Dictionary<Type, object> _records = new();
 

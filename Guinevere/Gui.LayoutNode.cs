@@ -64,15 +64,20 @@ public partial class Gui : ILayoutNodeEnterExit
     /// <param name="lineNumber">The line number in the source file where the node is being defined.</param>
     /// <param name="extra">An optional integer to append additional uniqueness to the identifier. Defaults to 0.</param>
     /// <returns>A formatted string representing the unique node identifier.</returns>
-    public static string NodeId(string filePath, int lineNumber, int extra = 0) =>
-        $"{filePath}:{lineNumber} {extra}";
+    public static string NodeId(string filePath, int lineNumber, int extra = 0)
+    {
+        return $"{filePath}:{lineNumber} {extra}";
+    }
 
     /// <summary>
     /// Enters a given layout node context, registers it in the scope stack, and returns the associated layout node scope.
     /// </summary>
     /// <param name="node">The layout node to enter and register in the context.</param>
     /// <returns>The scope associated with the entered layout node.</returns>
-    public LayoutNodeScope Enter(LayoutNode node) => RegisterLayoutNodeScope(node);
+    public LayoutNodeScope Enter(LayoutNode node)
+    {
+        return RegisterLayoutNodeScope(node);
+    }
 
     /// <summary>
     /// Exits the current layout node scope and returns the associated layout node.
@@ -80,10 +85,7 @@ public partial class Gui : ILayoutNodeEnterExit
     /// <returns>The layout node associated with the exited scope.</returns>
     public LayoutNode Exit()
     {
-        if (LayoutNodeScopeStack.Count == 1)
-        {
-            return CurrentNodeScope.Node;
-        }
+        if (LayoutNodeScopeStack.Count == 1) return CurrentNodeScope.Node;
 
         var scope = LayoutNodeScopeStack.Pop();
 
@@ -94,7 +96,11 @@ public partial class Gui : ILayoutNodeEnterExit
     /// Performs layout calculations on the root node of the GUI tree.
     /// This ensures that all nodes have their layout properties properly computed based on the hierarchy and cascading style rules.
     /// </summary>
-    public void CalculateLayout() => RootNode!.CalculateLayout();
+    public void CalculateLayout()
+    {
+        RootNode!.CalculateLayout();
+    }
+
     private LayoutNodeScope RegisterLayoutNodeScope(LayoutNode node)
     {
         LayoutNodeScopeStack.Push(node.Scope);
@@ -114,7 +120,7 @@ public partial class Gui : ILayoutNodeEnterExit
         var nodeExist = CurrentNode.Children.FirstOrDefault(child => child.Id == id);
         if (Pass == Pass.Pass1Build || nodeExist is null)
         {
-            node = new(id, this, CurrentNode, width, height);
+            node = new LayoutNode(id, this, CurrentNode, width, height);
             CurrentNode.AddChild(node);
         }
         else
@@ -123,7 +129,7 @@ public partial class Gui : ILayoutNodeEnterExit
         }
 
         // Only reset DrawList during Pass1Build phase to prevent clearing render commands
-        node.DrawList = new();
+        node.DrawList = new DrawList();
         node.Pass2NodeCount = 0;
 
         return node;

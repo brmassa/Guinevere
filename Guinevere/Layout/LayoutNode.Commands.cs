@@ -175,11 +175,13 @@ public partial class LayoutNode
     /// </summary>
     /// <param name="value">The value to be applied as padding to the top, right, bottom, and left sides of the node.</param>
     /// <returns>The current instance of <see cref="LayoutNode"/>, allowing for method chaining.</returns>
-    public LayoutNode Padding(float value) =>
-        PaddingTop(value)
+    public LayoutNode Padding(float value)
+    {
+        return PaddingTop(value)
             .PaddingRight(value)
             .PaddingBottom(value)
             .PaddingLeft(value);
+    }
 
     /// <summary>
     /// Sets the padding for the layout node using the specified horizontal and vertical values.
@@ -187,11 +189,13 @@ public partial class LayoutNode
     /// <param name="horizontal">The padding to apply to the left and right sides of the layout node.</param>
     /// <param name="vertical">The padding to apply to the top and bottom sides of the layout node.</param>
     /// <returns>The current instance of <see cref="LayoutNode"/>, enabling method chaining.</returns>
-    public LayoutNode Padding(float horizontal, float vertical) =>
-        PaddingTop(vertical)
+    public LayoutNode Padding(float horizontal, float vertical)
+    {
+        return PaddingTop(vertical)
             .PaddingRight(horizontal)
             .PaddingBottom(vertical)
             .PaddingLeft(horizontal);
+    }
 
     /// <summary>
     /// Sets the padding for the layout node using individual values for each side.
@@ -201,11 +205,13 @@ public partial class LayoutNode
     /// <param name="bottom">The padding value for the bottom side of the layout node.</param>
     /// <param name="left">The padding value for the left side of the layout node.</param>
     /// <returns>The current instance of <see cref="LayoutNode"/>, allowing for method chaining.</returns>
-    public LayoutNode Padding(float top, float right, float bottom, float left) =>
-        PaddingTop(top)
+    public LayoutNode Padding(float top, float right, float bottom, float left)
+    {
+        return PaddingTop(top)
             .PaddingRight(right)
             .PaddingBottom(bottom)
             .PaddingLeft(left);
+    }
 
     /// <summary>
     /// Sets the vertical padding for the layout node by applying the specified value
@@ -213,14 +219,20 @@ public partial class LayoutNode
     /// </summary>
     /// <param name="value">The amount of padding to apply to both the top and bottom edges of the layout node.</param>
     /// <returns>The current instance of <see cref="LayoutNode"/>, enabling method chaining.</returns>
-    public LayoutNode PaddingY(float value) => PaddingTop(value).PaddingBottom(value);
+    public LayoutNode PaddingY(float value)
+    {
+        return PaddingTop(value).PaddingBottom(value);
+    }
 
     /// <summary>
     /// Configures the horizontal padding of the layout node by applying the specified value to both the left and right sides.
     /// </summary>
     /// <param name="value">The amount of horizontal padding to apply, in logical units.</param>
     /// <returns>The current instance of <see cref="LayoutNode"/>, enabling method chaining.</returns>
-    public LayoutNode PaddingX(float value) => PaddingRight(value).PaddingLeft(value);
+    public LayoutNode PaddingX(float value)
+    {
+        return PaddingRight(value).PaddingLeft(value);
+    }
 
     /// <summary>
     /// Sets the top padding value for the layout node.

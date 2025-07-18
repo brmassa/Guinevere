@@ -46,10 +46,8 @@ public class ClipOperation : IDrawListEntry
 
             // Validate that we have proper dimensions before clipping
             if (clipRect.W <= 0 || clipRect.H <= 0)
-            {
                 // If dimensions are invalid, don't apply clipping
                 return;
-            }
 
             // For scrollable containers, ensure we're clipping to the correct viewport
             var scrollState = gui.GetScrollState(node.Id);
@@ -60,10 +58,7 @@ public class ClipOperation : IDrawListEntry
                 var viewportRect = node.InnerRect;
 
                 // Only apply clipping if the viewport has valid dimensions
-                if (viewportRect.W > 0 && viewportRect.H > 0)
-                {
-                    canvas.ClipRect(viewportRect);
-                }
+                if (viewportRect is { W: > 0, H: > 0 }) canvas.ClipRect(viewportRect);
             }
             else
             {

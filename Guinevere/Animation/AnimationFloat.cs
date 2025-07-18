@@ -66,7 +66,7 @@ public class AnimationFloat
     /// <summary>
     /// Gets a value indicating whether the animation is currently running.
     /// </summary>
-    public bool IsAnimating => _isAnimating && (_time.Elapsed - _startTime) < _duration;
+    public bool IsAnimating => _isAnimating && _time.Elapsed - _startTime < _duration;
 
     /// <summary>
     /// Starts an animation to the specified target value.

@@ -32,9 +32,7 @@ public partial class Shape
             var expandedPath = new SKPath();
             var strokePaint = new SKPaint
             {
-                Style = SKPaintStyle.Stroke,
-                StrokeWidth = Math.Abs(spread) * 2,
-                StrokeJoin = SKStrokeJoin.Round
+                Style = SKPaintStyle.Stroke, StrokeWidth = Math.Abs(spread) * 2, StrokeJoin = SKStrokeJoin.Round
             };
             strokePaint.GetFillPath(shadowPath, expandedPath);
             shadowPath = expandedPath;
@@ -50,10 +48,7 @@ public partial class Shape
         };
 
         // Apply offset to the shadow path
-        if (offset.X != 0 || offset.Y != 0)
-        {
-            shadowPath.Transform(SKMatrix.CreateTranslation(offset.X, offset.Y));
-        }
+        if (offset.X != 0 || offset.Y != 0) shadowPath.Transform(SKMatrix.CreateTranslation(offset.X, offset.Y));
 
         // For inner shadow, we need to clip the shadow to only show inside the original shape
         // This is achieved by intersecting the offset shadow with the original shape
@@ -74,8 +69,10 @@ public partial class Shape
     /// <param name="blurRadius">The radius of the blur applied to the shadow.</param>
     /// <param name="spread">The spread of the shadow, which adjusts its size.</param>
     /// <returns>The <see cref="Shape"/> instance with the applied inner shadow effect.</returns>
-    public Shape InnerShadow(Color color, float blurRadius, int spread = 0) =>
-        InnerShadow(color, Vector2.Zero, blurRadius, spread);
+    public Shape InnerShadow(Color color, float blurRadius, int spread = 0)
+    {
+        return InnerShadow(color, Vector2.Zero, blurRadius, spread);
+    }
 
     /// <summary>
     /// Applies an outer shadow effect to the shape using the specified color, offset, blur radius, and spread value.
@@ -89,10 +86,7 @@ public partial class Shape
     {
         // Create a shadow path with offset
         var shadowPath = new SKPath(Path);
-        if (offset.X != 0 || offset.Y != 0)
-        {
-            shadowPath.Transform(SKMatrix.CreateTranslation(offset.X, offset.Y));
-        }
+        if (offset.X != 0 || offset.Y != 0) shadowPath.Transform(SKMatrix.CreateTranslation(offset.X, offset.Y));
 
         // Expand shadow if spread is specified
         if (spread != 0)
@@ -100,9 +94,7 @@ public partial class Shape
             var expandedPath = new SKPath();
             var strokePaint = new SKPaint
             {
-                Style = SKPaintStyle.Stroke,
-                StrokeWidth = Math.Abs(spread) * 2,
-                StrokeJoin = SKStrokeJoin.Round
+                Style = SKPaintStyle.Stroke, StrokeWidth = Math.Abs(spread) * 2, StrokeJoin = SKStrokeJoin.Round
             };
             strokePaint.GetFillPath(shadowPath, expandedPath);
             shadowPath = expandedPath;
@@ -135,8 +127,10 @@ public partial class Shape
     /// <param name="blurRadius">The radius of the blur applied to the shadow.</param>
     /// <param name="spread">The spread of the shadow, which adjusts its size. Defaults to 0.</param>
     /// <returns>The <see cref="Shape"/> instance with the applied outer shadow effect.</returns>
-    public Shape OuterShadow(Color color, float blurRadius, float spread = 0) =>
-        OuterShadow(color, Vector2.Zero, blurRadius, spread);
+    public Shape OuterShadow(Color color, float blurRadius, float spread = 0)
+    {
+        return OuterShadow(color, Vector2.Zero, blurRadius, spread);
+    }
 
     /// <summary>
     /// Applies a radial gradient color effect to the shape using the specified colors, radii, and offsets.

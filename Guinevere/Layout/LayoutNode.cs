@@ -172,15 +172,9 @@ public partial class LayoutNode : IDisposable
             Style.Height = height.Value;
         Id = id;
         Scope = new LayoutNodeScope(gui, this);
-        if (width == 0)
-        {
-            ExpandWidth();
-        }
+        if (width == 0) ExpandWidth();
 
-        if (height == 0)
-        {
-            ExpandHeight();
-        }
+        if (height == 0) ExpandHeight();
     }
 
     /// <summary>
@@ -265,5 +259,8 @@ public partial class LayoutNode : IDisposable
     /// <returns>
     /// The <see cref="LayoutNodeScope"/> instance associated with this <see cref="LayoutNode"/>.
     /// </returns>
-    public LayoutNodeScope ToScope() => Scope;
+    public LayoutNodeScope ToScope()
+    {
+        return Scope;
+    }
 }

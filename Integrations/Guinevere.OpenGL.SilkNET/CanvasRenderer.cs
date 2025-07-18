@@ -105,17 +105,21 @@ public class CanvasRenderer : ICanvasRenderer
         _gl.BindVertexArray(_vao);
         _gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
         fixed (float* buffer = vertices)
+        {
             _gl.BufferData(BufferTargetARB.ArrayBuffer,
                 (nuint)(vertices.Length * sizeof(float)),
                 buffer,
                 BufferUsageARB.StaticDraw);
+        }
 
         _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, ebo);
         fixed (uint* buffer = indices)
+        {
             _gl.BufferData(BufferTargetARB.ElementArrayBuffer,
                 (nuint)(indices.Length * sizeof(uint)),
                 buffer,
                 BufferUsageARB.StaticDraw);
+        }
 
         _gl.EnableVertexAttribArray(0);
         _gl.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
@@ -170,7 +174,7 @@ public class CanvasRenderer : ICanvasRenderer
     /// <inheritdoc/>
     public void Resize(int width, int height)
     {
-        if (width <= 0 || height <= 0 || width == _width && height == _height)
+        if (width <= 0 || height <= 0 || (width == _width && height == _height))
             return;
 
         _width = width;
