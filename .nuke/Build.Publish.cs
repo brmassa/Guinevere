@@ -40,7 +40,7 @@ partial class Build
             Log.Information("Publishing Guinevere core library for {Runtime}", RuntimeIdentifier);
 
             var publishSettings = DotNetTasks.DotNetPublish(s => s
-                .SetProject(Solution.Guinevere)
+                // .SetProject(Solution.Guinevere)
                 .SetConfiguration(ConfigurationSet)
                 .SetOutput(PublishDir)
                 .SetRuntime(RuntimeIdentifier)

@@ -8,6 +8,7 @@
         <RootNamespace>$(MSBuildProjectName.Replace("-", "_"))</RootNamespace>
         <IsPackable>false</IsPackable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <ExcludeFromBuild>true</ExcludeFromBuild>
     </PropertyGroup>
 
     <ItemGroup>
