@@ -96,36 +96,37 @@ partial class Build
         .After(Compile)
         .Executes(() =>
         {
-            // var integrationProjects = new[]
-            // {
-            //     Solution.Guinevere.OpenGL.OpenTK,
-            //     // Solution.Guinevere_OpenGL_Raylib,
-            //     // Solution.Guinevere_OpenGL_SilkNET,
-            //     // Solution.Guinevere_Vulkan_SilkNET
-            // };
+            var integrationProjects = new[]
+            {
+                Solution.GetProject("Guinevere.OpenGL.OpenTK"),
+                Solution.GetProject("Guinevere.OpenGL.Raylib"),
+                Solution.GetProject("Guinevere.OpenGL.SilkNET"),
+                Solution.GetProject("Guinevere.Vulkan.SilkNET")
+            };
 
-            // foreach (var project in integrationProjects)
-            // {
-            //     var projectOutput = PublishDir / "integrations" / project.Name;
+            foreach (var project in integrationProjects)
+            {
+                if (project == null) continue;
+                var projectOutput = PublishDir / "integrations" / project.Name;
 
-            //     Log.Information("Publishing integration {Project} for {Runtime}", project.Name, RuntimeIdentifier);
+                Log.Information("Publishing integration {Project} for {Runtime}", project.Name, RuntimeIdentifier);
 
-            //     _ = DotNetTasks.DotNetPublish(s => s
-            //         .SetProject(project)
-            //         .SetConfiguration(ConfigurationSet)
-            //         .SetOutput(projectOutput)
-            //         .SetRuntime(RuntimeIdentifier)
-            //         .SetSelfContained(PublishSelfContained)
-            //         .SetPublishSingleFile(PublishSingleFile)
-            //         .SetPublishReadyToRun(PublishReadyToRun)
-            //         .SetPublishTrimmed(PublishTrimmed)
-            //         .SetVersion(VersionFull)
-            //         .SetAssemblyVersion(VersionFull)
-            //         .SetInformationalVersion(VersionFull)
-            //         .AddProperty("TrimMode", "partial")
-            //         .AddProperty("EnableTrimAnalyzer", PublishTrimmed)
-            //     );
-            // }
+                _ = DotNetTasks.DotNetPublish(s => s
+                    .SetProject(project)
+                    .SetConfiguration(ConfigurationSet)
+                    .SetOutput(projectOutput)
+                    .SetRuntime(RuntimeIdentifier)
+                    .SetSelfContained(PublishSelfContained)
+                    .SetPublishSingleFile(PublishSingleFile)
+                    .SetPublishReadyToRun(PublishReadyToRun)
+                    .SetPublishTrimmed(PublishTrimmed)
+                    .SetVersion(VersionFull)
+                    .SetAssemblyVersion(VersionFull)
+                    .SetInformationalVersion(VersionFull)
+                    .AddProperty("TrimMode", "partial")
+                    .AddProperty("EnableTrimAnalyzer", PublishTrimmed)
+                );
+            }
 
             Log.Information("Successfully published all integrations");
         });

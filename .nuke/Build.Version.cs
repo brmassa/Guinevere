@@ -262,14 +262,15 @@ partial class Build
             var projectsToVersion = new List<Project>
             {
                 Solution.Guinevere,
-                // Solution.Guinevere.OpenGL.OpenTK,
-                // Solution.Guinevere_OpenGL_Raylib,
-                // Solution.Guinevere_OpenGL_SilkNET,
-                // Solution.Guinevere_Vulkan_SilkNET
+                Solution.GetProject("Guinevere.OpenGL.OpenTK"),
+                Solution.GetProject("Guinevere.OpenGL.Raylib"),
+                Solution.GetProject("Guinevere.OpenGL.SilkNET"),
+                Solution.GetProject("Guinevere.Vulkan.SilkNET")
             };
 
             projectsToVersion.ForEach(project =>
             {
+                if (project == null) return;
                 Log.Information(
                     "{project}:\tfrom {version} to {VersionFull}",
                     project.Name,

@@ -31,8 +31,6 @@ A **GPU accelerated immediate mode GUI system** built on SkiaSharp, designed for
 using Guinevere;
 using Guinevere.OpenGL.SilkNET;
 
-namespace Sample_70_PanGui_HelloWorld;
-
 public abstract class Program
 {
     public static void Main()

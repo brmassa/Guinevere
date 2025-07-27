@@ -44,7 +44,7 @@ partial class Build
             Log.Debug("configuration {configuration}", Configuration);
 
             var projectsToBuild = Solution.AllProjects
-                .Where(p => !p.GetProperty("ExcludeFromBuild")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true);
+                .Where(p => p.GetProperty("ExcludeFromBuild")?.Equals("true", StringComparison.OrdinalIgnoreCase) != true);
 
             foreach (var project in projectsToBuild)
             {

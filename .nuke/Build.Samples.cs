@@ -27,7 +27,7 @@ partial class Build
     /// </summary>
     private List<Project> SampleProjects => Solution.AllProjects
         .Where(p => p.Directory.ToString().Contains("/Samples/") &&
-                   !p.GetProperty("ExcludeFromBuild")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true)
+                   p.GetProperty("ExcludeFromBuild")?.Equals("true", StringComparison.OrdinalIgnoreCase) != true)
         .ToList();
 
     /// <summary>
