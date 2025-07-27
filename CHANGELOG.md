@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+- Added: Control focus
+- Changed: release on code change
+
 ## v[1.2.0][] 2025-07-18
 
 - Added: Changelog updater
@@ -20,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First Commit
 
-[1.2.0]: https://github.com/brmassa/guinevere/compare/v1.1.0...v1.2.0
+[1.2.0]: https://github.com/MASS4ORG/Guinevere/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/MASS4ORG/Guinevere/compare/1.0.0...1.1.0
-[1.0.0]: https://github.com/MASS4ORG/Guinevere/compare/main...1.1.0
-[Unreleased]: https://github.com/MASS4ORG/Guinevere/compare/1.1.0...main
+[1.0.0]: https://github.com/MASS4ORG/Guinevere/compare/main...1.0.0
+[Unreleased]: https://github.com/MASS4ORG/Guinevere/compare/v1.2.0...main

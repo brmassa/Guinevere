@@ -65,9 +65,23 @@ public static partial class ControlsExtensions
     {
         if (gui.Pass == Pass.Pass2Render)
         {
+            // Register this checkbox as focusable
+            gui.RegisterFocusable(canReceiveFocus: true, isInteractable: true);
+
             var interactable = gui.GetInteractable();
+
+            // Handle mouse click for focus and toggle
             if (interactable.OnClick())
+            {
+                gui.RequestFocus(FocusReason.Mouse);
                 isChecked = !isChecked;
+            }
+
+            // Handle keyboard interaction for focused checkbox
+            if (gui.HasFocus() && gui.Input.IsKeyPressed(KeyboardKey.Space))
+            {
+                isChecked = !isChecked;
+            }
         }
     }
 
@@ -82,8 +96,19 @@ public static partial class ControlsExtensions
             var bgColor = GetCheckboxBackgroundColor(isChecked, backgroundColor);
             var borderColorFinal = borderColor ?? Color.Gray;
 
-            gui.DrawBackgroundRect(bgColor, 2);
-            gui.DrawRectBorder(rect, borderColorFinal, 1f, 2);
+            // Use stronger border and subtle glow if focused
+            if (gui.HasFocus())
+            {
+                var focusRect = new Rect(rect.X - 3, rect.Y - 3, rect.W + 6, rect.H + 6);
+                gui.DrawRectBorder(focusRect, Color.FromArgb(128, 100, 149, 237), 4f, 4); // subtle glow
+                gui.DrawBackgroundRect(bgColor, 2);
+                gui.DrawRectBorder(rect, Color.FromArgb(255, 100, 149, 237), 2f, 2); // strong blue border
+            }
+            else
+            {
+                gui.DrawBackgroundRect(bgColor, 2);
+                gui.DrawRectBorder(rect, borderColorFinal, 1f, 2);
+            }
 
             if (isChecked)
                 DrawCheckmark(gui, rect, size, checkColor ?? Color.White);
