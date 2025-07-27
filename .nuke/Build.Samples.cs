@@ -88,7 +88,6 @@ partial class Build
                         .SetVersion(VersionFull)
                         .SetAssemblyVersion(VersionFull)
                         .SetInformationalVersion(VersionFull)
-                        .EnableNoBuild()
                     );
                 }
             }
