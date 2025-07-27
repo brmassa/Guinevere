@@ -73,6 +73,12 @@ partial class Build
 
                 foreach (var project in SampleProjects)
                 {
+                    // Skip publishing if project is a library
+                    if (project.GetProperty("OutputType")?.Equals("Library", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Log.Information("Skipping publish for library project: {Project}", project.Name);
+                        continue;
+                    }
                     var projectOutput = runtimeOutput / project.Name;
 
                     Log.Information("Publishing {Project} for {Runtime}", project.Name, runtime);
