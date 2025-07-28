@@ -51,8 +51,7 @@ internal sealed partial class Build : NukeBuild
     private Target Release => td => td
         .DependsOn(
         // CI,
-            Clean, Restore,
-        PackNuGet
+        PublishNuGet
         // , PublishSamples, PackageSamples
         )
         .Executes(() =>

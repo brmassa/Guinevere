@@ -70,7 +70,7 @@ partial class Build
     /// Creates NuGet packages for all library projects
     /// </summary>
     private Target PackNuGet => td => td
-        .DependsOn(Compile)
+        .DependsOn(Restore)
         .After(Publish)
         .Produces(PackagesDirectory / "*.nupkg")
         .Executes(() =>
