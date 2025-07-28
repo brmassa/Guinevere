@@ -50,7 +50,8 @@ internal sealed partial class Build : NukeBuild
     /// </summary>
     private Target Release => td => td
         .DependsOn(
-            // CI,
+        // CI,
+            Clean, Restore,
         PackNuGet
         // , PublishSamples, PackageSamples
         )
