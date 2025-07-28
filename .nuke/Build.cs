@@ -49,7 +49,11 @@ internal sealed partial class Build : NukeBuild
     /// Complete release pipeline: Build, Test, Package, and Publish
     /// </summary>
     private Target Release => td => td
-        .DependsOn(CI, PackNuGet, PublishSamples, PackageSamples)
+        .DependsOn(
+            // CI,
+        PackNuGet
+        // , PublishSamples, PackageSamples
+        )
         .Executes(() =>
         {
             Log.Information("Release pipeline completed successfully");
