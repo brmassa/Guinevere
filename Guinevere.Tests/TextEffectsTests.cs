@@ -34,10 +34,10 @@ public class TextEffectsTests
         return pixmap.GetPixelSpan().ToArray();
     }
 
-    private static (byte R, byte G, byte B, byte A) At(byte[] px, int x, int y)
+    private static (byte R, byte B, byte A) At(byte[] px, int x, int y)
     {
         var i = ((y * W) + x) * 4;
-        return (px[i], px[i + 1], px[i + 2], px[i + 3]);
+        return (px[i], px[i + 2], px[i + 3]);
     }
 
     private static int OpaqueCount(byte[] px)
@@ -89,7 +89,7 @@ public class TextEffectsTests
             effects: new TextEffects
             {
                 DropShadow = new TextEffects.TextShadow(
-                    Color.FromArgb(220, 0, 0, 0), new System.Numerics.Vector2(10, 10), 2f),
+                    Color.FromArgb(220, 0, 0, 0), new Vector2(10, 10), 2f),
             }));
 
         Assert.True(OpaqueCount(shadowed) > OpaqueCount(plain) + 50, "shadow should add coverage");
@@ -110,7 +110,7 @@ public class TextEffectsTests
             effects: new TextEffects
             {
                 Gradient = new TextEffects.TextGradient(
-                    Color.FromArgb(255, 255, 0, 0), Color.FromArgb(255, 0, 0, 255), 0f),
+                    Color.FromArgb(255, 255, 0, 0), Color.FromArgb(255, 0, 0, 255)),
             }));
 
         (long r, long b, int count) Sample(int x0, int x1)
@@ -120,7 +120,7 @@ public class TextEffectsTests
             for (var y = 0; y < H; y++)
             for (var x = x0; x < x1; x++)
             {
-                var (pr, _, pb, pa) = At(px, x, y);
+                var (pr, pb, pa) = At(px, x, y);
                 if (pa <= 60) continue;
                 r += pr;
                 b += pb;
@@ -150,7 +150,7 @@ public class TextEffectsTests
         RenderFrame(gui => fxNode = gui.DrawText("Hello", size: Size, color: Color.White, effects: new TextEffects
         {
             Outline = new TextEffects.TextOutline(Color.White, 3f),
-            DropShadow = new TextEffects.TextShadow(Color.Black, new System.Numerics.Vector2(6, 6), 4f),
+            DropShadow = new TextEffects.TextShadow(Color.Black, new Vector2(6, 6), 4f),
         }));
 
         Assert.NotNull(plainNode);

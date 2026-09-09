@@ -1,6 +1,7 @@
-using System.Numerics;
-
 namespace Guinevere.Tests.Controls;
+
+// ReSharper disable AccessToDisposedClosure - RunFrame executes its callback synchronously, so the
+// test-local SKImage "using" resources are alive for the entire call and the closure cannot outlive them.
 
 /// <summary>Tests for the multi-state <c>ImageButton</c> control.</summary>
 public class ImageButtonTests
