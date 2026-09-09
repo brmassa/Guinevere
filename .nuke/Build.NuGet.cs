@@ -112,12 +112,16 @@ partial class Build
         });
 
     /// <summary>
-    /// Publishes NuGet packages to the configured source
+    /// Publishes NuGet packages to the configured source.
+    /// Runs whenever an API key is present. The tag/release flow supplies a short-lived
+    /// Trusted Publishing key through the NuGet/login action, so no long-lived secret is
+    /// needed. This is deliberately NOT gated on <see cref="HasNewCommits"/>: publishing for
+    /// an existing tag must republish that exact version. Pushes use --skip-duplicate, so a
+    /// version already on the feed is a no-op instead of an error.
     /// </summary>
     private Target PublishNuGet => td => td
         .DependsOn(PackNuGet)
         .OnlyWhenStatic(() => !string.IsNullOrEmpty(NuGetApiKey))
-        .OnlyWhenStatic(() => HasNewCommits)
         .Executes(() =>
         {
             var packages = PackagesDirectory.GlobFiles("*.nupkg")
