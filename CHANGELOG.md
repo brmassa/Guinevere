@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+- Added: docking system (`Guinevere/Docking/`, sample `Sample-60-Docking`) — `DockLayout` with tab
+  groups, nested splits and floating windows, rendered by `gui.DockSpace(...)`, with drag-to-dock,
+  tab reorder, tear-off and close
+- Added: draggable borders — `gui.Splitter(ref fraction, axis)` resizes the two flow siblings it
+  separates
+- Added: out-of-flow positioning (`LayoutNode.Absolute` / `AbsoluteScreen`) and `BlockInput()` for
+  overlays
+- Added: input simulator
+
 ## v[1.6.2][] 2026-09-09
 
 ## v[1.6.1][] 2026-09-09

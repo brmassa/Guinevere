@@ -11,30 +11,33 @@ public readonly struct InteractableElement
     private readonly SKPath _shape;
     private readonly Gui _gui;
     private readonly string _id;
+    private readonly LayoutNode? _node;
 
     /// <summary>
     /// Represents an interactive UI element in the graphical user interface,
     /// defining a specific shape or region for user interaction and associating it
     /// with a GUI context for handling input events such as clicks, hovers, and holds.
     /// </summary>
-    public InteractableElement(Rect rect, Gui gui, string? id)
+    public InteractableElement(Rect rect, Gui gui, string? id, LayoutNode? node = null)
     {
         var builder = new SKPathBuilder();
         builder.AddRect(rect);
         _shape = builder.Detach();
         _gui = gui;
         _id = id ?? $"rect_{rect.X}_{rect.Y}_{rect.W}_{rect.H}";
+        _node = node;
     }
 
     /// <summary>
     /// Represents an interactive element within the graphical user interface (GUI),
     /// enabling interaction such as clicks, hovers, and holds on specific visual regions defined by shapes.
     /// </summary>
-    public InteractableElement(Shape path, Gui gui, string? id)
+    public InteractableElement(Shape path, Gui gui, string? id, LayoutNode? node = null)
     {
         _shape = path.Path;
         _gui = gui;
         _id = id ?? $"shape_{path.Path.GetHashCode()}";
+        _node = node;
     }
 
     /// <summary>
@@ -69,6 +72,8 @@ public readonly struct InteractableElement
     /// </returns>
     public bool OnHover()
     {
+        if (_gui.IsHoverBlocked(_node)) return false;
+
         return _shape.Contains(_gui.Input.MousePosition.X, _gui.Input.MousePosition.Y);
     }
 
@@ -102,27 +107,53 @@ public readonly struct InteractableElement
         return true;
     }
 
+    /// <summary>
+    /// Determines whether the element is being dragged, reporting the press origin alongside the
+    /// current position so callers can apply a movement threshold before treating it as a drag.
+    /// </summary>
+    /// <param name="args">When the method returns true, describes the drag in progress.</param>
+    /// <param name="button">The mouse button to track. Defaults to <see cref="MouseButton.Left"/>.</param>
+    /// <returns>True while the element is held; otherwise, false.</returns>
+    public bool OnDrag(out DragArgs args, MouseButton button = MouseButton.Left)
+    {
+        args = default;
+        if (!IsHeld(button)) return false;
+
+        args = new DragArgs
+        {
+            Origin = _gui.GetPressAnchor(_id),
+            CurrentPosition = _gui.Input.MousePosition,
+            FrameDelta = _gui.PointerFrameDelta
+        };
+        return true;
+    }
+
     private bool IsHeld(MouseButton button = MouseButton.Left)
     {
-        var isHovering = OnHover();
         var mouseDown = _gui.Input.IsMouseButtonDown(button);
-
         var isDragging = _gui.GetDragState(_id);
 
-        // Stage 1: Start dragging only if hovering AND mouse is pressed this frame
-        if (isHovering && mouseDown)
+        // Stage 1: keep going while this element still holds the pointer.
+        if (isDragging && mouseDown && _gui.HoldsPointer(_id, button)) return true;
+
+        // Stage 2: release, and hand the pointer back.
+        if (isDragging && !mouseDown)
         {
-            _gui.SetDragState(_id, true);
-            return true;
+            _gui.SetDragState(_id, false);
+            _gui.ReleasePointer(_id);
+            return false;
         }
 
-        // Stage 2: Continue dragging if we were already dragging AND mouse is still down
-        if (isDragging && mouseDown) return true;
+        // Stage 3: begin only on the press itself, and only if nothing else already owns the pointer.
+        // Testing the button's level here instead of its edge is what used to let any element the
+        // cursor happened to cross mid-drag start a drag of its own.
+        if (!_gui.Input.IsMouseButtonPressed(button)) return false;
+        if (!OnHover()) return false;
+        if (!_gui.TryCapturePointer(_id, button)) return false;
 
-        // Stop dragging when mouse is released
-        if (isDragging && !mouseDown) _gui.SetDragState(_id, false);
-
-        return false;
+        if (!isDragging) _gui.SetPressAnchor(_id, _gui.Input.MousePosition);
+        _gui.SetDragState(_id, true);
+        return true;
     }
 
     /// <summary>

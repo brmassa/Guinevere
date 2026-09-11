@@ -29,6 +29,11 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Guinevere\Guinevere.csproj" />
+        <ProjectReference Include="..\Guinevere.Scripting\Guinevere.Scripting.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="Scripts/*.json" CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
 
 </Project>
