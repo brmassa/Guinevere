@@ -45,6 +45,9 @@ public partial class Gui
         return Focus.HasFocusWithin(CurrentNode.Id);
     }
 
+    /// <summary>Why the focused control currently has focus.</summary>
+    public FocusReason FocusReason => Focus.CurrentFocusReason;
+
     /// <summary>
     /// Requests focus for the current layout node.
     /// </summary>

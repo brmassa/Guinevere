@@ -23,6 +23,7 @@ public partial class Gui
     private Vector2 _pointerLastFrame;
     private bool _hasPointerLastFrame;
     private (string Id, MouseButton Button)? _pointerCapture;
+    private readonly Dictionary<string, (float Time, int Count)> _clickRuns = new();
     private LayoutNode? _inputBlocker;
 
     /// <summary>
@@ -96,6 +97,25 @@ public partial class Gui
         if (_pointerCapture?.Id == id) _pointerCapture = null;
     }
 
+    /// <summary>
+    /// How long after a click a second one still counts as a double click, in seconds.
+    /// </summary>
+    public float DoubleClickInterval { get; set; } = 0.4f;
+
+    /// <summary>
+    /// Records a click and reports how many landed in a row on this element. Two means a double click.
+    /// </summary>
+    internal int RegisterClick(string id)
+    {
+        var now = Time.Elapsed;
+        var run = _clickRuns.TryGetValue(id, out var previous) && now - previous.Time <= DoubleClickInterval
+            ? previous.Count + 1
+            : 1;
+
+        _clickRuns[id] = (now, run);
+        return run;
+    }
+
     internal bool GetDragState(string id)
     {
         return _dragStates.TryGetValue(id, out var state) && state;
@@ -167,6 +187,9 @@ public partial class Gui
     /// Whether a blocking overlay is swallowing the pointer for this node. The blocker's own subtree
     /// stays interactive, so the check is an ancestor walk rather than a rect test.
     /// </summary>
+    /// <summary>Whether the pointer is inside some element that blocks input.</summary>
+    public bool IsPointerOverBlocker => _inputBlocker is not null;
+
     internal bool IsHoverBlocked(LayoutNode? node)
     {
         if (_inputBlocker is null) return false;

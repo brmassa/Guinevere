@@ -23,6 +23,11 @@ public partial class Gui
     public Time Time { get; init; } = new();
 
     /// <summary>
+    /// Fallback colours for the built-in controls. Assign once to theme every control at a stroke.
+    /// </summary>
+    public ControlPalette Controls { get; set; } = ControlPalette.Light;
+
+    /// <summary>
     /// A property that provides an interface for handling window-specific operations.
     /// </summary>
     /// <remarks>
@@ -154,7 +159,9 @@ public partial class Gui
             if (!ancestor.Scope.HasLocal<LayoutNodeScopeIsClipped>()) continue;
             if (!ancestor.Scope.Get<LayoutNodeScopeIsClipped>().Value) continue;
 
-            var r = ancestor.InnerRect;
+            // The node's own rect, not its content box: clipping means "nothing outside this node",
+            // and a scroll container draws its bar in the padding it reserved.
+            var r = ancestor.Rect;
             if (r is { W: > 0, H: > 0 })
                 canvas.ClipRect(r);
         }

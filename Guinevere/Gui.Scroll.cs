@@ -62,7 +62,7 @@ public partial class Gui
         if (scrollState != null && (scrollState.IsScrollingX || scrollState.IsScrollingY))
         {
             // Ensure the node's layout is finalized before clipping
-            var clipRect = CurrentNode.InnerRect;
+            var clipRect = CurrentNode.Rect;
 
             // Only apply clipping if the rectangle has valid dimensions
             if (clipRect is { W: > 0, H: > 0 })
@@ -74,7 +74,7 @@ public partial class Gui
         else
         {
             // Non-scrollable content still needs basic clipping
-            var clipRect = CurrentNode.InnerRect;
+            var clipRect = CurrentNode.Rect;
             if (clipRect is { W: > 0, H: > 0 })
             {
                 SetClipped(true, CurrentNode.Scope);
@@ -104,21 +104,27 @@ public partial class Gui
         // Mark this node as a scroll container
         SetIsScrollContainer(true);
 
+        // Reserve the bar's width so content stops before it rather than running underneath. The
+        // decision uses the previous frame's state, which is what both passes of this frame see.
+        if (Pass == Pass.Pass1Build)
+        {
+            if (scrollY && scrollState.ShowScrollbarY)
+                node.PaddingRight(node.Style.PaddingRight + scrollState.ScrollbarThickness);
+            if (scrollX && scrollState.ShowScrollbarX)
+                node.PaddingBottom(node.Style.PaddingBottom + scrollState.ScrollbarThickness);
+        }
+
         // Update local scroll offset in node scope
         SetLocalScrollOffset(scrollState.ScrollOffset, node.Scope);
 
         if (Pass == Pass.Pass2Render)
         {
-            // Handle input and draw scrollbars
             HandleScrollInput(node, scrollState);
 
-            if (scrollX && scrollState.ShowScrollbarX)
-                DrawScrollbar(node, scrollState, Axis.Horizontal, foregroundColor, backgroundColor);
-            if (scrollY && scrollState.ShowScrollbarY)
-                DrawScrollbar(node, scrollState, Axis.Vertical, foregroundColor, backgroundColor);
-
-            // Apply clipping after all input handling and layout is complete
+            // Clip first: the scrollbars live in their own raised node and must not be clipped away
+            // with the content.
             ClipContent();
+            DrawScrollbars(node, scrollState, scrollX, scrollY, foregroundColor, backgroundColor);
         }
         else if (Pass == Pass.Pass1Build)
         {
@@ -208,18 +214,19 @@ public partial class Gui
     {
         var maxX = 0f;
         var maxY = 0f;
-        var minX = float.MaxValue;
-        var minY = float.MaxValue;
 
         if (node.Children.Count > 0)
         {
             foreach (var child in node.Children)
             {
-                // Calculate absolute bounds of all children
-                minX = Math.Min(minX, child.Rect.X);
-                minY = Math.Min(minY, child.Rect.Y);
-                maxX = Math.Max(maxX, child.Rect.X + child.Rect.W);
-                maxY = Math.Max(maxY, child.Rect.Y + child.Rect.H);
+                // The children's rects carry the current scroll offset (ApplyScrollOffset subtracts
+                // it), so measuring them directly makes ContentSize -- and with it the drag ratio and
+                // clamp target -- drift frame to frame. Holding the thumb near the bottom then
+                // oscillated instead of holding still. Undo the offset to measure the unscrolled extent.
+                var x = child.Rect.X + scrollState.ScrollOffset.X;
+                var y = child.Rect.Y + scrollState.ScrollOffset.Y;
+                maxX = Math.Max(maxX, x + child.Rect.W);
+                maxY = Math.Max(maxY, y + child.Rect.H);
             }
 
             // Calculate content size relative to the container
@@ -240,7 +247,9 @@ public partial class Gui
 
     private void HandleScrollbarDragging(LayoutNode node, ScrollState scrollState, Vector2 mousePos)
     {
-        var nodeRect = node.InnerRect;
+        // The node's own rect, matching where the bar is drawn. The content box is inset by the width
+        // the bar reserved, so hit-testing against it would sit the hot area beside the bar.
+        var nodeRect = node.Rect;
 
         // Update hover states
         scrollState.IsVerticalScrollbarHovered = scrollState.ShowScrollbarY &&
@@ -299,27 +308,52 @@ public partial class Gui
         }
     }
 
+    /// <summary>
+    /// Draws the scrollbars into a raised, out-of-flow node. Drawing them into the container itself
+    /// put them under its own content, which paints later in the flat z-ordered pass.
+    /// </summary>
+    private void DrawScrollbars(LayoutNode node, ScrollState scrollState, bool scrollX, bool scrollY,
+        Color? foregroundColor, Color? backgroundColor)
+    {
+        if (!(scrollX && scrollState.ShowScrollbarX) && !(scrollY && scrollState.ShowScrollbarY)) return;
+
+        using (Node(-1, -1, $"{node.Id}/scrollbars").AbsoluteScreen(0, 0).Enter())
+        {
+            SetZIndex(ScrollbarZIndex);
+
+            if (scrollX && scrollState.ShowScrollbarX)
+                DrawScrollbar(node, scrollState, Axis.Horizontal, foregroundColor, backgroundColor);
+            if (scrollY && scrollState.ShowScrollbarY)
+                DrawScrollbar(node, scrollState, Axis.Vertical, foregroundColor, backgroundColor);
+        }
+    }
+
+    /// <summary>Where scrollbars draw: above their container's content, below popups and drag ghosts.</summary>
+    private const int ScrollbarZIndex = 2_000;
+
     private void DrawScrollbar(LayoutNode node, ScrollState scrollState, Axis axis, Color? foregroundColor,
         Color? backgroundColor)
     {
         var shouldShow = axis == Axis.Vertical ? scrollState.ShowScrollbarY : scrollState.ShowScrollbarX;
         if (!shouldShow) return;
 
-        var nodeRect = node.InnerRect;
+        // The container's own rect, not its content box: a scrollbar belongs on the border, and the
+        // padding then applies to what is left.
+        var nodeRect = node.Rect;
         var (track, thumb) = axis == Axis.Vertical
             ? scrollState.CalculateVerticalScrollbar(nodeRect)
             : scrollState.CalculateHorizontalScrollbar(nodeRect);
 
-        var bgColor = backgroundColor ?? Color.FromArgb(180, 60, 60, 60);
+        var bgColor = backgroundColor ?? Controls.ScrollbarTrack;
         var isDragging = axis == Axis.Vertical ? scrollState.IsDraggingScrollbarY : scrollState.IsDraggingScrollbarX;
         var isHovered = axis == Axis.Vertical
             ? scrollState.IsVerticalScrollbarHovered
             : scrollState.IsHorizontalScrollbarHovered;
 
         // Use different colors based on interaction state
-        var fgColor = foregroundColor ?? (isDragging ? Color.FromArgb(255, 160, 160, 160) :
-            isHovered ? Color.FromArgb(240, 140, 140, 140) :
-            Color.FromArgb(220, 120, 120, 120));
+        var fgColor = foregroundColor ?? (isDragging ? Controls.ScrollbarThumbActive :
+            isHovered ? Controls.ScrollbarThumbHover :
+            Controls.ScrollbarThumb);
 
         // Draw scrollbar background
         DrawRectFilled(track, bgColor);
