@@ -89,7 +89,6 @@ partial class Build
                     .SetAssemblyVersion(VersionFull)
                     .SetFileVersion(VersionFull)
                     .SetInformationalVersion(VersionFull)
-                    .SetPackageId($"org.Mass4.{project.Name}")
                     .SetTitle(GetPackageTitle(project))
                     .SetAuthors("Bruno Massa")
                     .SetCopyright($"Copyright © Bruno Massa {DateTime.UtcNow.Year}")
@@ -99,10 +98,6 @@ partial class Build
                     .SetPackageRequireLicenseAcceptance(false)
                     .SetPackageTags("gui imgui graphics opengl vulkan skia gamedev opentk raylib silk.net")
                     .SetPackageIconUrl("icon.png")
-                    // .SetDescription(GetPackageDescription(project))
-                    // .SetPackageReadmeFile("README.md")
-                    // .EnableIncludeSymbols(!SkipSymbols)
-                    // .EnableIncludeSource(!SkipSymbols)
                     .EnableNoBuild()
                 );
             }

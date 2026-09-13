@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/mass4org/guinevere/actions/workflows/ci.yml/badge.svg)](https://github.com/brmassa/guinevere/actions/workflows/ci.yml)
 [![Release](https://github.com/mass4org/guinevere/actions/workflows/release.yml/badge.svg)](https://github.com/brmassa/guinevere/actions/workflows/release.yml)
-[![NuGet](https://img.shields.io/nuget/v/org.mass4.Guinevere.svg)](https://www.nuget.org/packages/org.mass4.Guinevere/)
+[![NuGet](https://img.shields.io/nuget/v/MASS4.Guinevere.svg)](https://www.nuget.org/packages/MASS4.Guinevere/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A **GPU accelerated immediate mode GUI system** built on SkiaSharp, designed for high-performance applications with modern graphics APIs support. You can use it to create rich and beautiful apps.
@@ -61,8 +61,8 @@ A **GPU accelerated immediate mode GUI system** built on SkiaSharp, designed for
 2. **Install Guinevere and an integration package:**
 
    ```powershell
-   dotnet add package org.mass4.Guinevere
-   dotnet add package org.mass4.Guinevere.OpenGL.SilkNET
+   dotnet add package MASS4.Guinevere
+   dotnet add package MASS4.Guinevere.OpenGL.SilkNET
    ```
 
 3. **Basic Usage:**

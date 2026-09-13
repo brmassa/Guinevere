@@ -40,7 +40,6 @@ partial class Build
             Log.Information("Publishing Guinevere core library for {Runtime}", RuntimeIdentifier);
 
             DotNetTasks.DotNetPublish(s => s
-                // .SetProject(Solution.Guinevere)
                 .SetConfiguration(ConfigurationSet)
                 .SetOutput(PublishDir)
                 .SetRuntime(RuntimeIdentifier)
@@ -129,15 +128,5 @@ partial class Build
             }
 
             Log.Information("Successfully published all integrations");
-        });
-
-    /// <summary>
-    /// Publishes all binaries (library + integrations)
-    /// </summary>
-    private Target PublishBinaries => td => td
-        .DependsOn(PublishLibrary, PublishIntegrations)
-        .Executes(() =>
-        {
-            Log.Information("All binary publish operations completed successfully");
         });
 }

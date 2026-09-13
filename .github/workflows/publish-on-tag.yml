@@ -4,7 +4,7 @@
 # Trusted Publishing policy for this repo + this workflow file:
 #   Repository Owner: MASS4ORG   Repository: Guinevere   Workflow File: publish-on-tag.yml
 # and the repo needs a `NUGET_USER` secret set to the nuget.org account/profile name
-# that owns the `org.mass4.*` packages.
+# that owns the `MASS4.*` packages.
 #
 # Triggered by `release.yml` via `gh workflow run` after it cuts a tag (a tag push made
 # with GITHUB_TOKEN does not fire `on: push`), or manually via the Actions tab.

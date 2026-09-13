@@ -7,21 +7,24 @@
         <Nullable>enable</Nullable>
         <RootNamespace>Guinevere</RootNamespace>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <Version>1.7.0</Version>
 
         <!-- NuGet Package Properties -->
-        <PackageId>org.mass4.Guinevere.Scripting</PackageId>
         <Title>Guinevere - Scripting</Title>
+        <PackageId>MASS4.Guinevere.Scripting</PackageId>
         <Description>
             Drives a Guinevere UI from code or from a JSON script: injected pointer and keyboard input
             replayed against a real frame loop, for tests, debugging and headless automation.
         </Description>
+        <Company>MASS4</Company>
+        <Product>Guinevere</Product>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Version>1.7.0</Version>
     </PropertyGroup>
 
     <ItemGroup>

@@ -47,4 +47,5 @@ AGENTS.md
 .cursor/
 .windsurf/
 
+coverage/
 script.sh
