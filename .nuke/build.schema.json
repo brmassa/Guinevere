@@ -27,7 +27,7 @@
         "BuildAll",
         "BuildSamples",
         "CheckNewCommits",
-        "CI",
+        "Ci",
         "Clean",
         "CleanSamples",
         "Compile",
