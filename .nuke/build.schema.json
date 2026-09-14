@@ -41,7 +41,6 @@
         "PackNuGet",
         "Publish",
         "PublishAll",
-        "PublishBinaries",
         "PublishIntegrations",
         "PublishLibrary",
         "PublishNuGet",
