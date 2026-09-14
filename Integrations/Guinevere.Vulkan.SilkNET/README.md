@@ -19,7 +19,7 @@ public abstract class Program
 
         win.RunGui(() =>
         {
-            gui.DrawRect(gui.ScreenRect, Blue;
+            gui.DrawRect(gui.ScreenRect, Color.Blue);
             gui.DrawText("Hello, world!");
         });
     }

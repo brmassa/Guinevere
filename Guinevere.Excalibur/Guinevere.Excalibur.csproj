@@ -25,6 +25,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="JetBrains.Annotations" Version="2026.2.0"/>
         <PackageReference Include="SkiaSharp" Version="4.152.0"/>
     </ItemGroup>
