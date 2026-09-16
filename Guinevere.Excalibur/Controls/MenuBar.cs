@@ -5,16 +5,40 @@ namespace Guinevere;
 public static partial class ControlsExtensions
 {
     private const int MenuBarZIndex = 5000;
+    internal const int CascadeMenuZIndex = 9000;
 
+    /// <summary>
+    /// The bar's state, in two halves. Input arrives during the render pass and writes the live half;
+    /// what a frame actually draws is the <c>Frame</c> half, sampled once at the start of the build
+    /// pass. Without that split, opening a menu in the render pass creates a dropdown the layout pass
+    /// never saw, and every one of its labels draws at the window's origin for a frame.
+    /// </summary>
     private class MenuBarState
     {
         public int OpenIndex { get; set; } = -1;
         public bool KeyboardActive { get; set; }
         public int KeyboardIndex { get; set; } = -1;
         public bool KeyboardSubmenu { get; set; }
+
+        public int FrameOpenIndex { get; set; } = -1;
+        public bool FrameKeyboardActive { get; set; }
+        public int FrameKeyboardIndex { get; set; } = -1;
+        public bool FrameKeyboardSubmenu { get; set; }
+
         public List<Rect> TitleRects { get; set; } = new();
+        public List<Rect> FrameTitleRects { get; set; } = new();
         public List<Rect> SubmenuRects { get; set; } = new();
         public List<Rect> PrevSubmenuRects { get; set; } = new();
+
+        /// <summary>Samples the live state into the half this frame draws from.</summary>
+        public void BeginFrame()
+        {
+            FrameOpenIndex = OpenIndex;
+            FrameKeyboardActive = KeyboardActive;
+            FrameKeyboardIndex = KeyboardIndex;
+            FrameKeyboardSubmenu = KeyboardSubmenu;
+            FrameTitleRects = [.. TitleRects];
+        }
     }
 
     /// <summary>
@@ -49,6 +73,7 @@ public static partial class ControlsExtensions
         {
             state.PrevSubmenuRects = state.SubmenuRects;
             state.SubmenuRects = new List<Rect>();
+            state.BeginFrame();
         }
 
         using (gui.Node().Height(height).Direction(Axis.Horizontal).Enter())
@@ -71,15 +96,15 @@ public static partial class ControlsExtensions
                     padding);
         }
 
-        if (state.OpenIndex >= 0 && gui.Pass == Pass.Pass2Render)
-            HandleMenuKeyboard(gui, state, builder.Menus[state.OpenIndex].Items);
+        if (state.FrameOpenIndex >= 0 && gui.Pass == Pass.Pass2Render)
+            HandleMenuKeyboard(gui, state, builder.Menus[state.FrameOpenIndex].Items);
 
-        if (state.OpenIndex >= 0)
-            RenderMenuBarDropdown(gui, state, builder.Menus[state.OpenIndex], height,
+        if (state.FrameOpenIndex >= 0)
+            RenderMenuBarDropdown(gui, state, builder.Menus[state.FrameOpenIndex], height,
                 backgroundColor, textColor, hoverColor, fontSize, padding);
 
         // Clicking anywhere that is neither a title nor the open menu cascade dismisses the menu.
-        if (gui.Pass == Pass.Pass2Render && state.OpenIndex >= 0 &&
+        if (gui.Pass == Pass.Pass2Render && state.FrameOpenIndex >= 0 &&
             gui.Input.IsMouseButtonPressed(MouseButton.Left))
         {
             var mousePos = gui.Input.MousePosition;
@@ -105,7 +130,7 @@ public static partial class ControlsExtensions
                 var isHovered = interactable.OnHover();
                 var isClicked = interactable.OnClick();
 
-                var isOpen = state.OpenIndex == index;
+                var isOpen = state.FrameOpenIndex == index;
 
                 if (isClicked ||
                     (gui.HasFocus() &&
@@ -123,7 +148,7 @@ public static partial class ControlsExtensions
                         state.KeyboardSubmenu = false;
                     }
                 }
-                else if (state.OpenIndex >= 0 && !isOpen && isHovered)
+                else if (state.FrameOpenIndex >= 0 && !isOpen && isHovered)
                 {
                     state.OpenIndex = index;
                     state.KeyboardActive = false;
@@ -131,7 +156,7 @@ public static partial class ControlsExtensions
                     state.KeyboardSubmenu = false;
                 }
 
-                if (state.OpenIndex == index || isHovered)
+                if (isOpen || isHovered)
                     gui.DrawBackgroundRect(hoverColor ?? gui.Controls.SurfaceHover, 2);
             }
 
@@ -143,7 +168,9 @@ public static partial class ControlsExtensions
     private static void RenderMenuBarDropdown(Gui gui, MenuBarState state, MenuBarMenu menu, float height,
         Color? backgroundColor, Color? textColor, Color? hoverColor, float fontSize, float padding)
     {
-        var anchor = state.TitleRects[state.OpenIndex];
+        if (state.FrameOpenIndex >= state.FrameTitleRects.Count) return;
+
+        var anchor = state.FrameTitleRects[state.FrameOpenIndex];
         if (anchor.W <= 0 || anchor.H <= 0) return;
 
         RenderMenuGroup(gui, state, menu.Title, menu.Items,
@@ -154,6 +181,12 @@ public static partial class ControlsExtensions
     private static void RenderMenuGroup(Gui gui, MenuBarState state, string baseId, List<FlyoutItem> items,
         Vector2 position, int depth,
         Color? backgroundColor, Color? textColor, Color? hoverColor, float fontSize, float padding)
+        => RenderMenuGroup(gui, state, baseId, items, position, depth, backgroundColor, textColor,
+            hoverColor, fontSize, padding, MenuBarZIndex);
+
+    private static void RenderMenuGroup(Gui gui, MenuBarState state, string baseId, List<FlyoutItem> items,
+        Vector2 position, int depth,
+        Color? backgroundColor, Color? textColor, Color? hoverColor, float fontSize, float padding, int zIndex)
     {
         const float itemHeight = 26f;
         const float separatorHeight = 9f;
@@ -172,15 +205,17 @@ public static partial class ControlsExtensions
 
         // A row keeps its submenu open while the pointer is either on it, on the keyboard-selected
         // row, or anywhere inside a submenu that was open last frame (cascade stability).
-        var cascadeOpen = state.PrevSubmenuRects.Any(r => IsMouseInRect(mousePos, r));
         var openSubmenuIndex = -1;
         for (var i = 0; i < items.Count; i++)
         {
             var item = items[i];
             if (!item.HasSubmenu || !item.Enabled) continue;
+            var rowY = groupRect.Y + RowOffset(items, i, itemHeight, separatorHeight);
             var shouldOpen = hoverIndex == i ||
-                             (state.KeyboardActive && state.KeyboardIndex == i && state.KeyboardSubmenu) ||
-                             cascadeOpen;
+                             (state.FrameKeyboardActive && state.FrameKeyboardIndex == i
+                                                        && state.FrameKeyboardSubmenu) ||
+                             state.PrevSubmenuRects.Any(r => IsMouseInRect(mousePos, r)
+                                 && IsSubmenuForRow(r, groupRect, rowY, itemHeight));
             if (shouldOpen)
             {
                 openSubmenuIndex = i;
@@ -194,7 +229,8 @@ public static partial class ControlsExtensions
                    .BlockInput()
                    .Enter())
         {
-            gui.SetZIndex(MenuBarZIndex);
+            gui.SetZIndex(zIndex);
+            gui.SetEscapesAncestorClips();
 
             if (gui.Pass == Pass.Pass2Render)
             {
@@ -212,8 +248,16 @@ public static partial class ControlsExtensions
             var rowOffset = RowOffset(items, openSubmenuIndex, itemHeight, separatorHeight);
             RenderMenuGroup(gui, state, $"{baseId}/{items[openSubmenuIndex].Text}", submenu,
                 new Vector2(groupRect.X + groupRect.W, groupRect.Y + rowOffset), depth + 1,
-                backgroundColor, textColor, hoverColor, fontSize, padding);
+                backgroundColor, textColor, hoverColor, fontSize, padding, zIndex);
         }
+    }
+
+    private static bool IsSubmenuForRow(Rect submenu, Rect parent, float rowY, float rowHeight)
+    {
+        var rowCenter = rowY + rowHeight * 0.5f;
+        var attachedToParent = submenu.X >= parent.X + parent.W - 1
+            || submenu.X + submenu.W <= parent.X + 1;
+        return attachedToParent && submenu.Y <= rowCenter && submenu.Y + submenu.H >= rowCenter;
     }
 
     private static void RenderMenuBarRow(Gui gui, MenuBarState state, List<FlyoutItem> items, int index,
@@ -249,11 +293,12 @@ public static partial class ControlsExtensions
                 gui.RegisterFocusable(canReceiveFocus: true, isInteractable: true);
                 var interactable = gui.GetInteractable();
                 var isHovered = interactable.OnHover();
+                if (isHovered && item.Enabled) item.OnHover?.Invoke();
                 if (interactable.OnClick() && item.Enabled)
                     ActivateRow(state, item);
 
                 var isSelectedRow = isHovered ||
-                                    (state.KeyboardActive && state.KeyboardIndex == index);
+                                    (state.FrameKeyboardActive && state.FrameKeyboardIndex == index);
 
                 if (isSelectedRow && item.Enabled)
                     gui.DrawBackgroundRect(hoverColor ?? gui.Controls.SurfaceHover, 2);

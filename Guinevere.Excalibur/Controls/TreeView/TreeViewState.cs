@@ -17,7 +17,7 @@ public sealed class TreeViewState
     /// deeper ones start closed; one means only the roots are open. Rows the user has folded or
     /// unfolded keep their own state regardless.
     /// </summary>
-    public int DefaultExpandedDepth { get; set; } = 1;
+    public int DefaultExpandedDepth { get; set; }
 
     /// <summary>Whether a row is collapsed, taking <see cref="DefaultExpandedDepth"/> into account.</summary>
     /// <param name="id">The row id.</param>
@@ -55,6 +55,34 @@ public sealed class TreeViewState
         else _collapsed.Add(id);
     }
 
+    /// <summary>The row being renamed in place, or null when nothing is being edited.</summary>
+    public string? EditingId { get; private set; }
+
+    /// <summary>The text in the rename box, kept here so the tree can rebuild its rows freely.</summary>
+    public string EditingText { get; set; } = "";
+
+    /// <summary>Starts an inline rename.</summary>
+    /// <param name="id">The row to edit.</param>
+    /// <param name="initialText">The value the box opens with, normally the row's label.</param>
+    public void BeginRename(string id, string initialText)
+    {
+        EditingId = id;
+        EditingText = initialText;
+    }
+
+    /// <summary>Ends an inline rename without committing it.</summary>
+    public void CancelRename()
+    {
+        EditingId = null;
+        EditingText = "";
+    }
+
+    /// <summary>
+    /// Asks the next frame to scroll <see cref="SelectedId"/> into view. The caller is responsible for
+    /// expanding the row's ancestors first; a row hidden under a collapsed parent cannot be scrolled to.
+    /// </summary>
+    public void Reveal() => WantsReveal = true;
+
     /// <summary>Expands every row, whatever its depth.</summary>
     public void ExpandAll()
     {
@@ -71,6 +99,9 @@ public sealed class TreeViewState
 
     /// <summary>Set when a row was clicked, so the tree claims focus in its own scope.</summary>
     internal bool WantsFocus { get; set; }
+
+    /// <summary>Set by <see cref="Reveal"/>, cleared once the tree has scrolled the selection into view.</summary>
+    internal bool WantsReveal { get; set; }
 
     /// <summary>The viewport height the virtualisation used this frame.</summary>
     internal float FrameViewportHeight { get; set; } = 600f;

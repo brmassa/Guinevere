@@ -4,12 +4,21 @@ namespace Guinevere;
 
 public static partial class ControlsExtensions
 {
+    private const int PopupZIndex = 9_000;
+    private const int TooltipZIndex = 11_000;
+
     private class PopupState
     {
         public bool IsOpen { get; set; }
         public Vector2 Position { get; set; }
         public bool CloseOnClickOutside { get; set; } = true;
         public bool CloseOnEscape { get; set; } = true;
+
+        /// <summary>
+        /// Set on the frame the popup opens. The press that opens a popup is outside it by definition —
+        /// it is on the button — so without this the click-outside rule closes it again immediately.
+        /// </summary>
+        public bool JustOpened { get; set; }
     }
 
     private class TooltipState
@@ -50,7 +59,12 @@ public static partial class ControlsExtensions
         if (isOpen != state.IsOpen)
         {
             state.IsOpen = isOpen;
+            state.JustOpened = isOpen;
             if (isOpen && position.HasValue) state.Position = position.Value;
+        }
+        else if (isOpen && position.HasValue)
+        {
+            state.Position = position.Value;
         }
 
         // Always create popup structure for consistency
@@ -162,19 +176,24 @@ public static partial class ControlsExtensions
                    .AbsoluteScreen(tooltipPos.X, tooltipPos.Y)
                    .Enter())
         {
+            gui.SetZIndex(TooltipZIndex);
+            gui.SetEscapesAncestorClips();
+
             if (gui.Pass == Pass.Pass2Render)
                 // Only render background when shown and text is not empty
                 if (show && !string.IsNullOrEmpty(text))
                 {
-                    var bgColor = backgroundColor ?? Color.FromArgb(240, 255, 255, 255);
-                    var borderColorFinal = borderColor ?? Color.FromArgb(255, 180, 180, 180);
+                    var bgColor = backgroundColor ?? gui.Controls.Surface;
+                    var borderColorFinal = borderColor ?? gui.Controls.Border;
 
                     gui.DrawBackgroundRect(bgColor, borderRadius);
                     gui.DrawRectBorder(gui.CurrentNode.Rect, borderColorFinal, 1f, borderRadius);
                 }
 
             // Always draw text for consistency, but make transparent when hidden
-            var textColorFinal = show && !string.IsNullOrEmpty(text) ? textColor ?? Color.Black : Color.Transparent;
+            var textColorFinal = show && !string.IsNullOrEmpty(text)
+                ? textColor ?? gui.Controls.Text
+                : Color.Transparent;
             gui.DrawText(tooltipText, fontSize, textColorFinal, centerInRect: false);
         }
     }
@@ -242,8 +261,12 @@ public static partial class ControlsExtensions
         // ReSharper disable once ExplicitCallerInfoArgument - keep the caller's original location for a stable NodeId
         using (gui.Node(menuWidth, menuHeight, filePath: filePath, lineNumber: lineNumber)
                    .AbsoluteScreen(menuPos.X, menuPos.Y)
+                   .BlockInput()
                    .Enter())
         {
+            gui.SetZIndex(PopupZIndex);
+            gui.SetEscapesAncestorClips();
+
             if (gui.Pass == Pass.Pass2Render)
                 // Only render background when open
                 if (isOpen)
@@ -293,8 +316,12 @@ public static partial class ControlsExtensions
 
         using (gui.Node(width, totalHeight)
                    .AbsoluteScreen(state.Position.X, state.Position.Y)
+                   .BlockInput()
                    .Enter())
         {
+            gui.SetZIndex(PopupZIndex);
+            gui.SetEscapesAncestorClips();
+
             if (gui.Pass == Pass.Pass2Render)
             {
                 // Only render visually when popup is open
@@ -328,13 +355,18 @@ public static partial class ControlsExtensions
         }
 
         // Handle click outside to close - check after rendering the popup
-        if (gui.Pass == Pass.Pass2Render && state is { IsOpen: true, CloseOnClickOutside: true } &&
-            gui.Input.IsMouseButtonPressed(MouseButton.Left))
+        if (gui.Pass != Pass.Pass2Render || state is not { IsOpen: true, CloseOnClickOutside: true }) return;
+
+        if (state.JustOpened)
         {
-            var mousePos = gui.Input.MousePosition;
-            var popupRect = new Rect(state.Position.X, state.Position.Y, width, totalHeight);
-            if (!IsMouseInRect(mousePos, popupRect)) state.IsOpen = false;
+            state.JustOpened = false;
+            return;
         }
+
+        if (!gui.Input.IsMouseButtonPressed(MouseButton.Left)) return;
+
+        var popupRect = new Rect(state.Position.X, state.Position.Y, width, totalHeight);
+        if (!IsMouseInRect(gui.Input.MousePosition, popupRect)) state.IsOpen = false;
     }
 
     private static void RenderPopupTitleBar(Gui gui, string title, float width, float height,
@@ -395,8 +427,13 @@ public static partial class ControlsExtensions
     private static Vector2 ConstrainToScreen(Gui gui, Vector2 position, float width, float height)
     {
         var screen = gui.ScreenRect;
-        var constrainedX = Math.Max(0, Math.Min(position.X, screen.W - width));
-        var constrainedY = Math.Max(0, Math.Min(position.Y, screen.H - height));
+        const float windowBorder = 2f;
+        var left = screen.X + windowBorder;
+        var top = screen.Y + windowBorder;
+        var right = Math.Max(left, screen.X + screen.W - windowBorder - width);
+        var bottom = Math.Max(top, screen.Y + screen.H - windowBorder - height);
+        var constrainedX = Math.Clamp(position.X, left, right);
+        var constrainedY = Math.Clamp(position.Y, top, bottom);
         return new Vector2(constrainedX, constrainedY);
     }
 
