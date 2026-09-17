@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+## v[2.1.0][] 2026-09-17
+
 - Added: Cascaded Menu
 - Fix: z-Index for context menus/flyouts/tooltips
 - Fix: Treeviewer starting collapsed
@@ -77,6 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First Commit
 
+[2.1.0]: https://github.com/brmassa/guinevere/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/brmassa/guinevere/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/brmassa/guinevere/compare/v1.8.0...v2.0.0
 [1.8.0]: https://github.com/brmassa/guinevere/compare/v1.7.0...v1.8.0
