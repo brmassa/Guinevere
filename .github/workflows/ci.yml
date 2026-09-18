@@ -42,7 +42,7 @@ jobs:
             - name: "Run: TestReport, Compile, Restore, Publish"
               run: ./build.cmd TestReport Compile Restore Publish
             - name: "Publish: coverage.xml"
-              uses: actions/upload-artifact@7
+              uses: actions/upload-artifact@v7
               with:
                   name: coverage.xml
                   path: coverage/coverage.xml
