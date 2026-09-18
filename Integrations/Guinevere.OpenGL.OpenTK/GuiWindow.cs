@@ -5,7 +5,7 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace Guinevere.OpenGL.OpenTK;
+namespace Guinevere;
 
 /// <summary>
 /// Represents a GUI window implementation using OpenTK for OpenGL rendering.
@@ -13,14 +13,14 @@ namespace Guinevere.OpenGL.OpenTK;
 /// </summary>
 public class GuiWindow : GameWindow, IInputHandler, IWindowHandler, IDisposable
 {
-    private readonly Gui _gui;
-    private readonly ICanvasRenderer _canvasRenderer;
-    private Action _guiCallback = null!;
-    private int _width;
-    private int _height;
-    private readonly Font _fontText;
-    private readonly Font _fontIcon;
-    private readonly StringBuilder _typedCharacters = new();
+    readonly Gui _gui;
+    readonly ICanvasRenderer _canvasRenderer;
+    Action _guiCallback = null!;
+    int _width;
+    int _height;
+    readonly Font _fontText;
+    readonly Font _fontIcon;
+    readonly StringBuilder _typedCharacters = new();
 
     /// <summary>
     /// Initializes a new instance of the GuiWindow class with the specified parameters.
@@ -37,9 +37,9 @@ public class GuiWindow : GameWindow, IInputHandler, IWindowHandler, IDisposable
         _gui = gui;
         _gui.Input = this;
         _gui.WindowHandler = this;
-        var fontStream = GetStreamResource("Fonts.font.ttf");
+        var fontStream = GetStreamResource("Guinevere.font.ttf");
         _fontText = Font.FromStream(fontStream);
-        fontStream = GetStreamResource("Fonts.icons.ttf");
+        fontStream = GetStreamResource("Guinevere.icons.ttf");
         _fontIcon = Font.FromStream(fontStream);
         _canvasRenderer = new CanvasRenderer();
         _canvasRenderer.Initialize(_width, _height);
@@ -155,12 +155,11 @@ public class GuiWindow : GameWindow, IInputHandler, IWindowHandler, IDisposable
     /// </summary>
     /// <param name="resource">The name of the resource to retrieve.</param>
     /// <returns>A stream containing the resource data.</returns>
-    private static Stream GetStreamResource(string resource)
+    static Stream GetStreamResource(string resource)
     {
-        resource = "Guinevere.OpenGL.OpenTK." + resource;
         var assembly = Assembly.GetExecutingAssembly();
-        var stream = assembly.GetManifestResourceStream(resource);
-        if (stream == null) throw new Exception($"Could not load resource: `{resource}`");
+        var stream = assembly.GetManifestResourceStream(resource)
+            ?? throw new Exception($"Could not load resource: `{resource}`");
         return stream;
     }
 

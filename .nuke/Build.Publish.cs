@@ -3,7 +3,7 @@ using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using Serilog;
 
-namespace Guinevere.Nuke;
+namespace Build;
 
 /// <summary>
 /// This is the main build file for the project.
@@ -19,7 +19,7 @@ partial class Build
     private AbsolutePath PublishDir => PublishDirectory ?? RootDirectory / "publish" / RuntimeIdentifier;
 
     [Parameter("publish-self-contained (default: true)")]
-    public readonly bool PublishSelfContained = true;
+    public readonly bool PublishSelfContained = false;
 
     [Parameter("publish-single-file (default: false - only for executables)")]
     public readonly bool PublishSingleFile;

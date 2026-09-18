@@ -7,18 +7,16 @@ namespace Guinevere;
 /// </summary>
 public sealed class ScriptedInputHandler : IInputHandler
 {
-    private readonly HashSet<MouseButton> _buttonsDown = [];
-    private readonly HashSet<MouseButton> _buttonsPressed = [];
-    private readonly HashSet<MouseButton> _buttonsReleased = [];
-    private readonly HashSet<KeyboardKey> _keysDown = [];
-    private readonly HashSet<KeyboardKey> _keysPressed = [];
-    private readonly HashSet<KeyboardKey> _keysReleased = [];
+    readonly HashSet<MouseButton> _buttonsDown = [];
+    readonly HashSet<MouseButton> _buttonsPressed = [];
+    readonly HashSet<KeyboardKey> _keysDown = [];
+    readonly HashSet<KeyboardKey> _keysPressed = [];
 
-    private string _typed = string.Empty;
-    private string _clipboard = string.Empty;
-    private Vector2 _position;
-    private Vector2 _previous;
-    private float _wheel;
+    string _typed = string.Empty;
+    string _clipboard = string.Empty;
+    Vector2 _position;
+    Vector2 _previous;
+    float _wheel;
 
     /// <inheritdoc />
     public Vector2 MousePosition => _position;
@@ -50,7 +48,7 @@ public sealed class ScriptedInputHandler : IInputHandler
     /// <summary>Releases a held mouse button.</summary>
     public void ReleaseButton(MouseButton button = MouseButton.Left)
     {
-        if (_buttonsDown.Remove(button)) _buttonsReleased.Add(button);
+        _buttonsDown.Remove(button);
     }
 
     /// <summary>Presses a key and holds it until <see cref="ReleaseKey"/>.</summary>
@@ -62,7 +60,7 @@ public sealed class ScriptedInputHandler : IInputHandler
     /// <summary>Releases a held key.</summary>
     public void ReleaseKey(KeyboardKey key)
     {
-        if (_keysDown.Remove(key)) _keysReleased.Add(key);
+        _keysDown.Remove(key);
     }
 
     /// <summary>Queues text for this frame's <see cref="GetTypedCharacters"/>.</summary>
@@ -88,9 +86,7 @@ public sealed class ScriptedInputHandler : IInputHandler
     {
         _previous = _position;
         _buttonsPressed.Clear();
-        _buttonsReleased.Clear();
         _keysPressed.Clear();
-        _keysReleased.Clear();
         _typed = string.Empty;
         _wheel = 0f;
     }

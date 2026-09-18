@@ -2,12 +2,13 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
 using System.Text;
-using Silk.NET.Input;
+using Serilog;
 using Silk.NET.GLFW;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 
-namespace Guinevere.Vulkan.SilkNET;
+namespace Guinevere;
 
 /// <summary>
 /// Represents a GUI window implementation using SilkNET for Vulkan rendering.
@@ -15,26 +16,27 @@ namespace Guinevere.Vulkan.SilkNET;
 /// </summary>
 public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisposable
 {
-    private readonly Gui _gui;
-    private readonly IWindow _window;
-    private readonly CanvasRenderer _renderer;
-    private IInputContext _inputContext = null!;
-    private IMouse _mouse = null!;
-    private IKeyboard _keyboard = null!;
-    private Action _draw = null!;
-    private bool _isInitialized;
-    private Vector2 _mousePosition;
-    private Vector2 _prevMousePosition;
-    private Vector2 _mouseDelta;
-    private float _mouseWheelDelta;
-    private readonly HashSet<Silk.NET.Input.MouseButton> _pressedButtons = new();
-    private readonly HashSet<Silk.NET.Input.MouseButton> _heldButtons = new();
-    private readonly HashSet<Key> _pressedKeys = new();
-    private readonly HashSet<Key> _heldKeys = new();
-    private readonly StringBuilder _typedCharacters = new();
-    private readonly Font _fontText;
-    private readonly Font _fontIcon;
-    private readonly Glfw _glfw = Glfw.GetApi();
+    readonly ILogger _logger;
+    readonly Gui _gui;
+    readonly IWindow _window;
+    readonly CanvasRenderer _renderer;
+    IInputContext _inputContext = null!;
+    IMouse _mouse = null!;
+    IKeyboard _keyboard = null!;
+    Action _draw = null!;
+    bool _isInitialized;
+    Vector2 _mousePosition;
+    Vector2 _prevMousePosition;
+    Vector2 _mouseDelta;
+    float _mouseWheelDelta;
+    readonly HashSet<Silk.NET.Input.MouseButton> _pressedButtons = [];
+    readonly HashSet<Silk.NET.Input.MouseButton> _heldButtons = [];
+    readonly HashSet<Key> _pressedKeys = [];
+    readonly HashSet<Key> _heldKeys = [];
+    readonly StringBuilder _typedCharacters = new();
+    readonly Font _fontText;
+    readonly Font _fontIcon;
+    readonly Glfw _glfw = Glfw.GetApi();
 
     /// <summary>
     /// Initializes a new instance of the GuiWindow class with the specified parameters.
@@ -43,16 +45,18 @@ public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisposable
     /// <param name="width">The initial width of the window. Default is 800.</param>
     /// <param name="height">The initial height of the window. Default is 600.</param>
     /// <param name="title">The title of the window. Default is empty string.</param>
-    public GuiWindow(Gui gui, int width = 800, int height = 600, string title = "")
+    /// <param name="logger">The logger that receives window and renderer diagnostics.</param>
+    public GuiWindow(Gui gui, int width = 800, int height = 600, string title = "", ILogger? logger = null)
     {
+        _logger = logger ?? Log.Logger;
         _gui = gui;
         _gui.Input = this;
         _gui.WindowHandler = this;
-        var fontStream = GetStreamResource("Fonts.font.ttf");
+        var fontStream = GetStreamResource("Guinevere.font.ttf");
         _fontText = Font.FromStream(fontStream);
-        fontStream = GetStreamResource("Fonts.icons.ttf");
+        fontStream = GetStreamResource("Guinevere.icons.ttf");
         _fontIcon = Font.FromStream(fontStream);
-        _renderer = new CanvasRenderer();
+        _renderer = new CanvasRenderer(logger);
 
         // Create window options with Vulkan API
         var options = WindowOptions.Default;
@@ -98,12 +102,11 @@ public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisposable
     /// </summary>
     /// <param name="resource">The name of the resource to retrieve.</param>
     /// <returns>A stream containing the resource data.</returns>
-    private static Stream GetStreamResource(string resource)
+    static Stream GetStreamResource(string resource)
     {
-        resource = "Guinevere.Vulkan.SilkNET." + resource;
         var assembly = Assembly.GetExecutingAssembly();
-        var stream = assembly.GetManifestResourceStream(resource);
-        if (stream == null) throw new Exception($"Could not load resource: `{resource}`");
+        var stream = assembly.GetManifestResourceStream(resource)
+            ?? throw new Exception($"Could not load resource: `{resource}`");
         return stream;
     }
 
@@ -111,7 +114,7 @@ public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisposable
     /// Handles frame update events by updating the GUI time.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last update.</param>
-    private void OnUpdate(double deltaTime)
+    void OnUpdate(double deltaTime)
     {
         _gui.Time.Update(deltaTime);
     }
@@ -119,9 +122,9 @@ public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisposable
     /// <summary>
     /// Handles window load events by initializing the Vulkan renderer and input systems.
     /// </summary>
-    private void OnLoad()
+    void OnLoad()
     {
-        Console.WriteLine("OnLoad called");
+        _logger.Debug("OnLoad called");
         // Initialize the Vulkan renderer with our window context
         _renderer.Initialize(_window.Size.X, _window.Size.Y, _window);
 
@@ -142,14 +145,14 @@ public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisposable
         _keyboard.KeyChar += OnKeyChar;
 
         _isInitialized = true;
-        Console.WriteLine("OnLoad completed");
+        _logger.Debug("OnLoad completed");
     }
 
     /// <summary>
     /// Handles frame rendering by executing the GUI draw callback and rendering the result.
     /// </summary>
     /// <param name="deltaTime">The time elapsed since the last render.</param>
-    private void OnRender(double deltaTime)
+    void OnRender(double deltaTime)
     {
         // Make sure we're initialized before rendering
         if (!_isInitialized)
@@ -198,7 +201,7 @@ public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisposable
     /// Handles window resize events by updating renderer dimensions.
     /// </summary>
     /// <param name="newSize">The new window size.</param>
-    private void OnResize(Vector2D<int> newSize)
+    void OnResize(Vector2D<int> newSize)
     {
         if (!_isInitialized)
             return;
@@ -210,46 +213,46 @@ public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisposable
     /// <summary>
     /// Handles window closing events by cleaning up resources.
     /// </summary>
-    private void OnClosing()
+    void OnClosing()
     {
         _isInitialized = false;
     }
 
-    private void OnMouseMove(IMouse mouse, Vector2 position)
+    void OnMouseMove(IMouse mouse, Vector2 position)
     {
         _prevMousePosition = _mousePosition;
         _mousePosition = position;
         _mouseDelta = _mousePosition - _prevMousePosition;
     }
 
-    private void OnMouseScroll(IMouse mouse, ScrollWheel scrollWheel)
+    void OnMouseScroll(IMouse mouse, ScrollWheel scrollWheel)
     {
         _mouseWheelDelta = scrollWheel.Y;
     }
 
-    private void OnMouseDown(IMouse mouse, Silk.NET.Input.MouseButton button)
+    void OnMouseDown(IMouse mouse, Silk.NET.Input.MouseButton button)
     {
         _pressedButtons.Add(button);
         _heldButtons.Add(button);
     }
 
-    private void OnMouseUp(IMouse mouse, Silk.NET.Input.MouseButton button)
+    void OnMouseUp(IMouse mouse, Silk.NET.Input.MouseButton button)
     {
         _heldButtons.Remove(button);
     }
 
-    private void OnKeyDown(IKeyboard keyboard, Key key, int scanCode)
+    void OnKeyDown(IKeyboard keyboard, Key key, int scanCode)
     {
         _pressedKeys.Add(key);
         _heldKeys.Add(key);
     }
 
-    private void OnKeyUp(IKeyboard keyboard, Key key, int scanCode)
+    void OnKeyUp(IKeyboard keyboard, Key key, int scanCode)
     {
         _heldKeys.Remove(key);
     }
 
-    private void OnKeyChar(IKeyboard keyboard, char c)
+    void OnKeyChar(IKeyboard keyboard, char c)
     {
         _typedCharacters.Append(c);
     }

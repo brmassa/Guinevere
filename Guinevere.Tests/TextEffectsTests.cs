@@ -2,17 +2,17 @@ namespace Guinevere.Tests;
 
 /// <summary>
 /// Pixel-level tests for <see cref="TextEffects"/> on <see cref="Gui.DrawText(string, float, Color?, Font?, float, bool, bool, TextEffects?)"/>.
-/// The <c>ui --sample text</c> CLI verb renders the same effects for eyeballing.
+/// The <c>ui --example text</c> CLI verb renders the same effects for eyeballing.
 /// </summary>
 public class TextEffectsTests
 {
-    private const int W = 400;
-    private const int H = 140;
-    private const float Size = 56f;
+    const int W = 400;
+    const int H = 140;
+    const float Size = 56f;
 
-    private static readonly Font Face = Font.FromFamilyName("sans-serif", Size);
+    static readonly Font Face = Font.FromFamilyName("sans-serif", Size);
 
-    private static byte[] RenderFrame(Action<Gui> draw)
+    static byte[] RenderFrame(Action<Gui> draw)
     {
         using var surface = SKSurface.Create(new SKImageInfo(W, H, SKColorType.Rgba8888, SKAlphaType.Unpremul));
         var canvas = surface.Canvas;
@@ -31,16 +31,16 @@ public class TextEffectsTests
 
         using var snapshot = surface.Snapshot();
         using var pixmap = snapshot.PeekPixels();
-        return pixmap.GetPixelSpan().ToArray();
+        return [.. pixmap.GetPixelSpan()];
     }
 
-    private static (byte R, byte B, byte A) At(byte[] px, int x, int y)
+    static (byte R, byte B, byte A) At(byte[] px, int x, int y)
     {
         var i = ((y * W) + x) * 4;
         return (px[i], px[i + 2], px[i + 3]);
     }
 
-    private static int OpaqueCount(byte[] px)
+    static int OpaqueCount(byte[] px)
     {
         var n = 0;
         for (var i = 3; i < px.Length; i += 4)
@@ -113,28 +113,28 @@ public class TextEffectsTests
                     Color.FromArgb(255, 255, 0, 0), Color.FromArgb(255, 0, 0, 255)),
             }));
 
-        (long r, long b, int count) Sample(int x0, int x1)
+        (long r, long b, int count) Example(int x0, int x1)
         {
             long r = 0, b = 0;
             var c = 0;
             for (var y = 0; y < H; y++)
-            for (var x = x0; x < x1; x++)
-            {
-                var (pr, pb, pa) = At(px, x, y);
-                if (pa <= 60) continue;
-                r += pr;
-                b += pb;
-                c++;
-            }
+                for (var x = x0; x < x1; x++)
+                {
+                    var (pr, pb, pa) = At(px, x, y);
+                    if (pa <= 60) continue;
+                    r += pr;
+                    b += pb;
+                    c++;
+                }
 
             return (r, b, c);
         }
 
-        var left = Sample(6, 46);
-        var right = Sample(200, 240);
+        var left = Example(6, 46);
+        var right = Example(200, 240);
 
         Assert.True(left.count > 20 && right.count > 20,
-            $"text should cover both sample windows (left {left.count}, right {right.count})");
+            $"text should cover both example windows (left {left.count}, right {right.count})");
         Assert.True((double)left.r / left.count > (double)left.b / left.count, "left of the text should be red-dominant");
         Assert.True((double)right.b / right.count > (double)right.r / right.count, "right of the text should be blue-dominant");
     }

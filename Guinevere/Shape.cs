@@ -44,8 +44,8 @@ public partial class Shape : IDrawable
         // Render all layers in Z-order
         // Scroll offsets are now handled during layout calculation
         foreach (var (_, layerList) in Layers)
-        foreach (var (path, paint) in layerList)
-            canvas.DrawPath(path, paint);
+            foreach (var (path, paint) in layerList)
+                canvas.DrawPath(path, paint);
     }
 
     /// <summary>
@@ -76,7 +76,7 @@ public partial class Shape : IDrawable
     /// <param name="paint">The paint to use for the path.</param>
     internal void AddToLayer(int zIndex, SKPath path, SKPaint paint)
     {
-        if (!Layers.ContainsKey(zIndex)) Layers[zIndex] = new List<(SKPath, SKPaint)>();
+        if (!Layers.ContainsKey(zIndex)) Layers[zIndex] = [];
 
         Layers[zIndex].Add((path, paint));
     }

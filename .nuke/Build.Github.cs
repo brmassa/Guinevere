@@ -13,7 +13,7 @@ using Nuke.Common.Tools.Git;
 
 using Serilog;
 
-namespace Guinevere.Nuke;
+namespace Build;
 
 /// <summary>
 /// This is the main build file for the project.
@@ -159,11 +159,8 @@ partial class Build
     /// Complete release process: commit, tag, and create GitHub release
     /// </summary>
     private Target PublishAll => td => td
-        .DependsOn(Test, Compile, PackNuGet, PackageSamples, CreateTag, GitHubCreateRelease, PublishNuGet)
-        .Executes(() =>
-        {
-            Log.Information("Completed full release process for version {Version}", VersionFull);
-        });
+        .DependsOn(Test, Compile, PackNuGet, PackageExamples, CreateTag, GitHubCreateRelease, PublishNuGet)
+        .Executes(() => Log.Information("Completed full release process for version {Version}", VersionFull));
 
     /// <summary>
     /// Creates a GitHub release using the GitHub API
@@ -233,15 +230,15 @@ partial class Build
     }
 
     /// <summary>
-    /// Uploads sample packages as release assets
+    /// Uploads example packages as release assets
     /// </summary>
-    private async Task UploadSamplePackagesAsync(long releaseId)
+    private async Task UploadExamplePackagesAsync(long releaseId)
     {
-        var samplePackages = SamplesOutput.GlobFiles("*.zip").ToList();
+        var examplePackages = ExamplesOutput.GlobFiles("*.zip").ToList();
 
-        Log.Information("Uploading {Count} sample packages to GitHub release", samplePackages.Count);
+        Log.Information("Uploading {Count} example packages to GitHub release", examplePackages.Count);
 
-        foreach (var package in samplePackages)
+        foreach (var package in examplePackages)
         {
             await UploadReleaseAssetAsync(releaseId, package, "application/zip");
         }

@@ -6,7 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <RootNamespace>$(MSBuildProjectName.Replace("-", "_"))</RootNamespace>
+        <RootNamespace>Guinevere</RootNamespace>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
         <!-- NuGet Package Properties -->
@@ -37,17 +37,19 @@
         <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.23.0" />
         <PackageReference Include="Silk.NET.Windowing.Common" Version="2.23.0" />
         <PackageReference Include="Silk.NET.Windowing.Glfw" Version="2.23.0" />
-        <PackageReference Include="SkiaSharp" Version="4.152.0" />
-        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.152.0" />
-        <PackageReference Include="SkiaSharp.Views.Desktop.Common" Version="4.152.0" />
+        <PackageReference Include="SkiaSharp" Version="4.152.1" />
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.152.1" />
+        <PackageReference Include="SkiaSharp.Views.Desktop.Common" Version="4.152.1" />
+        <PackageReference Include="Serilog" Version="4.4.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Guinevere\Guinevere.csproj"/>
+        <ProjectReference Include="../../Guinevere/Guinevere.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="Fonts\*"/>
-        <EmbeddedResource Include="Shaders\*"/>
+        <EmbeddedResource Include="../Resources/Fonts/font.ttf" />
+        <EmbeddedResource Include="../Resources/Fonts/icons.ttf" />
+        <EmbeddedResource Include="../Resources/Shaders/Vulkan/*.spv"/>
     </ItemGroup>
 </Project>

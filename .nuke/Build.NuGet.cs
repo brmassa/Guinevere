@@ -7,7 +7,7 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 using Serilog;
 
-namespace Guinevere.Nuke;
+namespace Build;
 
 /// <summary>
 /// This is the main build file for the project.
@@ -27,9 +27,7 @@ partial class Build
     /// <summary>
     /// Gets the list of projects that should be packaged as NuGet packages
     /// </summary>
-    private List<Project> PackageableProjects => Solution.AllProjects
-        .Where(ShouldCreateNuGetPackage)
-        .ToList();
+    private List<Project> PackageableProjects => [.. Solution.AllProjects.Where(ShouldCreateNuGetPackage)];
 
     /// <summary>
     /// Determines if a project should be packaged as a NuGet package
@@ -54,7 +52,7 @@ partial class Build
             var isLibrary = content.Contains("<OutputType>Library</OutputType>", StringComparison.OrdinalIgnoreCase) ||
                             (!content.Contains("<OutputType>", StringComparison.OrdinalIgnoreCase) &&
                              !project.Name.Contains("Test", StringComparison.OrdinalIgnoreCase) &&
-                             !project.Name.Contains("Sample", StringComparison.OrdinalIgnoreCase) &&
+                             !project.Name.Contains("Example", StringComparison.OrdinalIgnoreCase) &&
                              !project.Name.Contains("Example", StringComparison.OrdinalIgnoreCase));
 
             return isLibrary;

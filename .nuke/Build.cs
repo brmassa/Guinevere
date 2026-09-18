@@ -3,7 +3,7 @@ using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
 using Serilog;
 
-namespace Guinevere.Nuke;
+namespace Build;
 
 /// <summary>
 /// This is the main build file for the Guinevere project.
@@ -40,10 +40,7 @@ internal sealed partial class Build : NukeBuild
     /// </summary>
     private Target Ci => td => td
         .DependsOn(Clean, Restore, Compile, Test)
-        .Executes(() =>
-        {
-            Log.Information("CI pipeline completed successfully");
-        });
+        .Executes(() => Log.Information("CI pipeline completed successfully"));
 
     /// <summary>
     /// Complete release pipeline: Build, Test, Package, and Publish
@@ -52,20 +49,14 @@ internal sealed partial class Build : NukeBuild
         .DependsOn(
         // CI,
         PublishNuGet
-        // , PublishSamples, PackageSamples
+        // , PublishExamples, PackageExamples
         )
-        .Executes(() =>
-        {
-            Log.Information("Release pipeline completed successfully");
-        });
+        .Executes(() => Log.Information("Release pipeline completed successfully"));
 
     /// <summary>
     /// Build all deliverables without publishing
     /// </summary>
     private Target BuildAll => td => td
-        .DependsOn(Compile, BuildSamples, PackNuGet, PackageSamples)
-        .Executes(() =>
-        {
-            Log.Information("All deliverables built successfully");
-        });
+        .DependsOn(Compile, BuildExamples, PackNuGet, PackageExamples)
+        .Executes(() => Log.Information("All deliverables built successfully"));
 }

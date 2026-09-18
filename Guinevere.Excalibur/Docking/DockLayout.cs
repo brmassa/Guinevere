@@ -166,7 +166,7 @@ public sealed class DockLayout
     /// panel placements before any user has arranged one.
     /// </summary>
     /// <param name="panelId">The panel to dock.</param>
-    /// <param name="zone">The edge to dock against. <see cref="DockZone.Center"/> joins the centre group.</param>
+    /// <param name="zone">The edge to dock against. <see cref="DockZone.Center"/> joins the center group.</param>
     /// <param name="fraction">The share of the layout the panel takes.</param>
     public void DockAtEdge(string panelId, DockZone zone, float fraction = 0.25f)
     {
@@ -237,12 +237,12 @@ public sealed class DockLayout
             Remove(panelId);
     }
 
-    private DockLeaf? EdgeLeaf(DockZone zone)
+    DockLeaf? EdgeLeaf(DockZone zone)
     {
         return Root?.Leaves().FirstOrDefault(leaf => leaf.Zone == zone);
     }
 
-    private void EnsureRoot(DockNode node)
+    void EnsureRoot(DockNode node)
     {
         if (Root is null) Root = node;
         else Root = new DockSplit(Axis.Horizontal, Root, node);
@@ -253,12 +253,12 @@ public sealed class DockLayout
     /// lazy walk would find the replacement still holding <paramref name="target"/> and splice a split
     /// in as its own child — unbounded recursion on every later traversal.
     /// </summary>
-    private bool Replace(DockNode target, DockNode replacement)
+    void Replace(DockNode target, DockNode replacement)
     {
         if (ReferenceEquals(Root, target))
         {
             Root = replacement;
-            return true;
+            return;
         }
 
         foreach (var window in Floating)
@@ -266,16 +266,18 @@ public sealed class DockLayout
             if (ReferenceEquals(window.Root, target))
             {
                 window.Root = replacement;
-                return true;
+                return;
             }
 
-            if (ReplaceChild(window.Root, target, replacement)) return true;
+            if (ReplaceChild(window.Root, target, replacement))
+                return;
         }
 
-        return Root is not null && ReplaceChild(Root, target, replacement);
+        if (Root is not null)
+            ReplaceChild(Root, target, replacement);
     }
 
-    private static bool ReplaceChild(DockNode node, DockNode target, DockNode replacement)
+    static bool ReplaceChild(DockNode node, DockNode target, DockNode replacement)
     {
         if (node is not DockSplit split) return false;
 
@@ -295,7 +297,7 @@ public sealed class DockLayout
                || ReplaceChild(split.Second, target, replacement);
     }
 
-    private void Prune()
+    void Prune()
     {
         Root = Prune(Root);
 
@@ -307,7 +309,7 @@ public sealed class DockLayout
         }
     }
 
-    private static DockNode? Prune(DockNode? node)
+    static DockNode? Prune(DockNode? node)
     {
         switch (node)
         {

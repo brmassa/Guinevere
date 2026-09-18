@@ -89,7 +89,7 @@ public partial class Gui
 
     /// <summary>
     /// Draws an image as a nine-patch into <paramref name="destination"/>: corners 1:1, edges and
-    /// centre stretched. Only takes effect during the render pass.
+    /// center stretched. Only takes effect during the render pass.
     /// </summary>
     /// <param name="image">The image to draw.</param>
     /// <param name="destination">Destination rectangle in screen space.</param>
@@ -113,7 +113,7 @@ public partial class Gui
         AddDraw(new NineSliceDrawable(image, destination, border, BuildImagePaint(tint, opacity)), node: node);
     }
 
-    private static SKPaint? BuildImagePaint(Color? tint, float opacity)
+    static SKPaint? BuildImagePaint(Color? tint, float opacity)
     {
         var alpha = (byte)(Math.Clamp(opacity, 0f, 1f) * 255f + 0.5f);
         if (tint is null && alpha == 255) return null;
