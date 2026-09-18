@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Nuke.Common;
 using Nuke.Common.Git;
@@ -33,10 +34,11 @@ partial class Build
                 var gitVersionValue = GitVersion.MajorMinorPatch;
                 var calculatedVersion = CalculateNextVersion();
 
-                // Use fallback if GitVersion gives unreasonable result (0.x.x when we have tagged releases > 1.0)
-                if (gitVersionValue.StartsWith("0.") && !calculatedVersion.StartsWith("0."))
+                // GitVersion uses the nearest version source. A stray or incorrectly-created older tag can
+                // therefore make it regress below the version calculated from the released tag history.
+                if (IsVersionEarlierThan(gitVersionValue, calculatedVersion))
                 {
-                    Log.Warning("GitVersion returned {GitVersion} but fallback calculated {Fallback}. Using fallback.",
+                    Log.Warning("GitVersion returned {GitVersion}, but released tags require at least {Fallback}. Using fallback.",
                         gitVersionValue, calculatedVersion);
                     return calculatedVersion;
                 }
@@ -77,19 +79,50 @@ partial class Build
 
             try
             {
-                CurrentVersion = GitTasks.Git("describe --tags --abbrev=0")
-                    .FirstOrDefault().Text;
+                // `describe` selects the closest tag, which is unsafe if a stale tag was accidentally
+                // created after a newer release. Select the highest semantic-version tag reachable from HEAD.
+                var gitTag = GitTasks.Git("tag --merged HEAD --sort=-version:refname")
+                    .Select(output => output.Text)
+                    .FirstOrDefault(IsReleaseTag);
+                CurrentVersion = SelectLatestReleaseTag(gitTag, GetLatestChangelogTag());
             }
             catch
             {
-                CurrentVersion = "v1.0.0";
+                // Handled below so an empty repository still has a deterministic initial version.
             }
+
+            CurrentVersion ??= "v1.0.0";
 
             return CurrentVersion;
         }
     }
 
     private string CurrentFullVersion => CurrentTag.TrimStart('v');
+
+    private static bool IsReleaseTag(string tag) =>
+        tag.StartsWith('v') && Version.TryParse(tag[1..], out var version) && version.Build >= 0;
+
+    private static bool IsVersionEarlierThan(string candidate, string baseline) =>
+        Version.TryParse(candidate, out var candidateVersion) &&
+        Version.TryParse(baseline, out var baselineVersion) &&
+        candidateVersion < baselineVersion;
+
+    private string GetLatestChangelogTag()
+    {
+        if (!File.Exists(ChangelogFile))
+            return null;
+
+        return VersionRegex().Matches(File.ReadAllText(ChangelogFile))
+            .Select(match => $"v{match.Groups[1].Value}")
+            .Where(IsReleaseTag)
+            .OrderByDescending(tag => Version.Parse(tag[1..]))
+            .FirstOrDefault();
+    }
+
+    private static string SelectLatestReleaseTag(params string[] tags) =>
+        tags.Where(tag => !string.IsNullOrWhiteSpace(tag))
+            .OrderByDescending(tag => Version.Parse(tag[1..]))
+            .FirstOrDefault();
 
     /// <summary>
     /// Calculates the next version by incrementing from the last tag
