@@ -10,11 +10,9 @@ namespace Controls_01;
 /// </summary>
 public abstract partial class Program
 {
-    static readonly Color SectionColor = Color.DarkGray;
-
     public static void Main()
     {
-        var gui = new Gui();
+        var gui = new Gui { Controls = ControlPalette.Dark };
         gui.StyleSheets.Add(StyleSheet.Parse(Style));
 
         using var win = new GuiWindow(gui, 1150, 860, "Controls");
@@ -33,6 +31,7 @@ public abstract partial class Program
                 tabs.Tab("Selection", () => SelectionContent(gui));
                 tabs.Tab("Text Inputs", () => TextInputsContent(gui));
                 tabs.Tab("Navigation", () => NavigationContent(gui));
+                tabs.Tab("Focus", () => FocusNavigationContent(gui));
                 tabs.Tab("Feedback", () => FeedbackContent(gui));
                 tabs.Tab("Scrolling", () => ScrollingContent(gui));
                 tabs.Tab("Styling", () => StylingContent(gui));
@@ -53,8 +52,8 @@ public abstract partial class Program
     {
         using (gui.Node().ExpandWidth().Margin(5).Padding(5).Enter())
         {
-            gui.DrawText(title, size: 18, color: Color.FromArgb(255, 51, 51, 51)).MarginBottom(5);
-            gui.DrawBackgroundRect(SectionColor, 5);
+            gui.DrawText(title, size: 18, color: gui.Controls.Text).MarginBottom(5);
+            gui.DrawBackgroundRect(gui.Controls.SurfaceHover, 5);
             body();
         }
     }
