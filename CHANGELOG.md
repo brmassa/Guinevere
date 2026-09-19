@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+## v[3.1.0][] 2026-09-19
+
 - Added: Dialogs
 - Fixed: HandleScrollInput allowing scrolling behind
 - Fixed: ApplyAncestorClips' content overflow
@@ -89,6 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First Commit
 
+[3.1.0]: https://github.com/brmassa/guinevere/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/brmassa/guinevere/compare/v2.1.0...v3.0.0
 [2.1.0]: https://github.com/brmassa/guinevere/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/brmassa/guinevere/compare/v2.0.0...v2.0.1
