@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+## v[4.0.0][] 2026-09-20
+
 ### Added
 
 - **Composable layouts:** Mix and interpolate pixels, percentages, ratios, expand, fit-content, and the new `FitLargest` sizing via `UnitValue`.
@@ -115,6 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First Commit
 
+[4.0.0]: https://github.com/brmassa/guinevere/compare/v3.1.0...v4.0.0
 [3.1.0]: https://github.com/brmassa/guinevere/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/brmassa/guinevere/compare/v2.1.0...v3.0.0
 [2.1.0]: https://github.com/brmassa/guinevere/compare/v2.0.1...v2.1.0
