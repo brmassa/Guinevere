@@ -2,6 +2,26 @@ namespace Guinevere;
 
 public partial class LayoutNode
 {
+    internal void ApplyWidth(UnitValue value)
+    {
+        InvalidateLayout();
+        Style.WidthExpression = value;
+        Style.Width = value.PixelsContribution;
+        Style.WidthPercent = value.PercentageContribution != 0f ? value.PercentageContribution : -1f;
+        Style.ExpandWidth = value.ExpandContribution != 0f;
+        Style.ExpandWidthPercentage = value.ExpandContribution;
+    }
+
+    internal void ApplyHeight(UnitValue value)
+    {
+        InvalidateLayout();
+        Style.HeightExpression = value;
+        Style.Height = value.PixelsContribution;
+        Style.HeightPercent = value.PercentageContribution != 0f ? value.PercentageContribution : -1f;
+        Style.ExpandHeight = value.ExpandContribution != 0f;
+        Style.ExpandHeightPercentage = value.ExpandContribution;
+    }
+
     /// <summary>
     /// Configures the layout node to expand its dimensions proportionally based on the specified width and height percentages.
     /// </summary>
@@ -12,6 +32,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.IsExpanded = true;
         Style.ExpandWidthPercentage = widthPercentage;
         Style.ExpandHeightPercentage = heightPercentage;
@@ -27,6 +48,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.ExpandWidth = true;
         Style.ExpandWidthPercentage = percentage;
         return this;
@@ -41,6 +63,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.ExpandHeight = true;
         Style.ExpandHeightPercentage = percentage;
         return this;
@@ -55,6 +78,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.Gap = gap;
         return this;
     }
@@ -123,6 +147,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.MarginTop = value;
         Style.HasSpecificMargins = true;
         return this;
@@ -137,6 +162,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.MarginRight = value;
         Style.HasSpecificMargins = true;
         return this;
@@ -151,6 +177,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.MarginBottom = value;
         Style.HasSpecificMargins = true;
         return this;
@@ -165,6 +192,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.MarginLeft = value;
         Style.HasSpecificMargins = true;
         return this;
@@ -243,6 +271,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.PaddingTop = value;
         return this;
     }
@@ -256,6 +285,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.PaddingRight = value;
         return this;
     }
@@ -269,6 +299,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.PaddingBottom = value;
         return this;
     }
@@ -282,6 +313,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.PaddingLeft = value;
         return this;
     }
@@ -295,6 +327,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.AlignContentHorizontal = alignment;
         Style.AlignContentVertical = alignment;
         return this;
@@ -310,6 +343,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.AlignContentHorizontal = horizontal;
         Style.AlignContentVertical = vertical;
         return this;
@@ -324,6 +358,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.AlignContentHorizontal = horizontal;
         return this;
     }
@@ -337,6 +372,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.AlignContentVertical = vertical;
         return this;
     }
@@ -350,6 +386,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.AlignSelf = alignment;
         return this;
     }
@@ -363,6 +400,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.Direction = direction;
         return this;
     }
@@ -376,6 +414,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.Wrap = true;
         return this;
     }
@@ -389,7 +428,17 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.Width = width;
+        Style.WidthExpression = null;
+        return this;
+    }
+
+    /// <summary>Sets a composable width expression.</summary>
+    public LayoutNode Width(UnitValue width)
+    {
+        if (_gui.Pass != Pass.Pass1Build) return this;
+        ApplyWidth(width);
         return this;
     }
 
@@ -402,7 +451,17 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.Height = height;
+        Style.HeightExpression = null;
+        return this;
+    }
+
+    /// <summary>Sets a composable height expression.</summary>
+    public LayoutNode Height(UnitValue height)
+    {
+        if (_gui.Pass != Pass.Pass1Build) return this;
+        ApplyHeight(height);
         return this;
     }
 
@@ -413,7 +472,9 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.WidthPercent = Math.Clamp(fraction, 0f, 1f);
+        Style.WidthExpression = null;
         return this;
     }
 
@@ -424,7 +485,9 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.HeightPercent = Math.Clamp(fraction, 0f, 1f);
+        Style.HeightExpression = null;
         return this;
     }
 
@@ -436,6 +499,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.MinWidth = min;
         Style.MaxWidth = max;
         return this;
@@ -449,6 +513,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.MinHeight = min;
         Style.MaxHeight = max;
         return this;
@@ -461,6 +526,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.MinWidth = value;
         return this;
     }
@@ -472,6 +538,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.MaxWidth = value;
         return this;
     }
@@ -483,6 +550,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.MinHeight = value;
         return this;
     }
@@ -494,6 +562,7 @@ public partial class LayoutNode
     {
         if (_gui.Pass != Pass.Pass1Build) return this;
 
+        InvalidateLayout();
         Style.MaxHeight = value;
         return this;
     }
