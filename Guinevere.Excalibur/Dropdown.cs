@@ -10,13 +10,13 @@ public static partial class ControlsExtensions
         public int SelectedIndex { get; set; } = -1;
 
         /// <summary>The button's rect as last measured, which is where the list anchors.</summary>
-        public Rect ButtonRect { get; set; } = new();
+        public Rect ButtonRect { get; set; }
 
         /// <summary>
         /// The anchor both passes of the current frame use. A node's rect only resolves in the render
         /// pass, so reading it directly would place the list differently in each pass.
         /// </summary>
-        public Rect Anchor { get; set; } = new();
+        public Rect Anchor { get; set; }
     }
 
     /// <summary>
@@ -71,10 +71,10 @@ public static partial class ControlsExtensions
         if (gui.Pass == Pass.Pass1Build) state.Anchor = state.ButtonRect;
 
         DrawButton(gui, id, options, selectedIndex, width, height, placeholder,
-            enabled ? backgroundColor ?? palette.Surface : DisabledFill,
-            enabled ? borderColor ?? palette.Border : DisabledBorder,
-            enabled ? textColor ?? palette.Text : DisabledText,
-            enabled ? placeholderColor ?? palette.TextDim : DisabledText,
+            enabled ? backgroundColor ?? palette.Surface : gui.Controls.Surface,
+            enabled ? borderColor ?? palette.Border : gui.Controls.Border,
+            enabled ? textColor ?? palette.Text : gui.Controls.TextDisabled,
+            enabled ? placeholderColor ?? palette.TextDim : gui.Controls.TextDisabled,
             fontSize, padding, borderRadius, state, enabled);
 
         if (state.IsOpen && !enabled) state.IsOpen = false;

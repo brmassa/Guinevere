@@ -68,7 +68,7 @@ public partial class Gui
             if (clipRect is { W: > 0, H: > 0 })
             {
                 SetClipped(true, CurrentNode.Scope);
-                AddDraw(new ClipOperation(clipRect));
+                CurrentNode.DrawList.AddClip(clipRect);
             }
         }
         else
@@ -78,7 +78,7 @@ public partial class Gui
             if (clipRect is { W: > 0, H: > 0 })
             {
                 SetClipped(true, CurrentNode.Scope);
-                AddDraw(new ClipOperation(clipRect));
+                CurrentNode.DrawList.AddClip(clipRect);
             }
         }
     }
@@ -345,16 +345,16 @@ public partial class Gui
             ? scrollState.CalculateVerticalScrollbar(nodeRect)
             : scrollState.CalculateHorizontalScrollbar(nodeRect);
 
-        var bgColor = backgroundColor ?? Controls.ScrollbarTrack;
+        var bgColor = backgroundColor ?? Controls.BaseBackground;
         var isDragging = axis == Axis.Vertical ? scrollState.IsDraggingScrollbarY : scrollState.IsDraggingScrollbarX;
         var isHovered = axis == Axis.Vertical
             ? scrollState.IsVerticalScrollbarHovered
             : scrollState.IsHorizontalScrollbarHovered;
 
         // Use different colors based on interaction state
-        var fgColor = foregroundColor ?? (isDragging ? Controls.ScrollbarThumbActive :
-            isHovered ? Controls.ScrollbarThumbHover :
-            Controls.ScrollbarThumb);
+        var fgColor = foregroundColor ?? (isDragging ? Controls.TextDim :
+            isHovered ? Controls.BorderActive :
+            Controls.Border);
 
         // Draw scrollbar background
         DrawRectFilled(track, bgColor);
