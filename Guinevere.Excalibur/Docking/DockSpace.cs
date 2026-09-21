@@ -31,7 +31,7 @@ public static partial class ControlsExtensions
         Action<DockTabStrip, Gui>? renderTabStripActions = null,
         [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
     {
-        var context = new DockContext(gui, layout, panelInfo, renderPanel, theme ?? DockTheme.Dark,
+        var context = new DockContext(gui, layout, panelInfo, renderPanel, theme ?? DockTheme.FromPalette(gui.Controls),
             renderTabStripActions);
 
         using (gui.Node(filePath: filePath, lineNumber: lineNumber).Expand().Enter())
@@ -149,7 +149,7 @@ public static partial class ControlsExtensions
     {
         var gui = context.Gui;
 
-        var dragging = gui.DragSource<DockTabPayload>(id, new DockTabPayload(item.Id, leaf), ghost: g =>
+        var dragging = gui.DragSource(id, new DockTabPayload(item.Id, leaf), ghost: g =>
         {
             using (g.Node(120, context.Theme.TabHeight).Enter())
             {

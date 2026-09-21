@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+- Added: Headless press, toggle, selection, drag, and repeat behaviors with optional control semantics
+- Fixed: Tab and dropdown state changes now happen between frames, preventing new trees from blinking before layout
 - Added: File browser widget
 - Changed: Major rework on some internal type representations, specially Color
-- Changed: enhanced the Drag-and-drop API
+- Changed: Enhanced the Drag-and-drop API
+- Added: Better styling foundations and showcase
+- Changed: Standardized Excalibur control palettes and sizes
 
 ## v[4.0.0][] 2026-09-20
 

@@ -43,6 +43,7 @@ A **GPU accelerated immediate mode GUI system** built on SkiaSharp, designed for
   - [Animation](#animation)
   - [Shapes & Effects](#shapes--effects)
   - [Scrolling & Clipping](#scrolling--clipping)
+  - [Headless Controls](#headless-controls)
   - [Excalibur Controls](#excalibur-controls)
   - [Layering & Transforms](#layering--transforms)
   - [Performance](#performance)
@@ -147,6 +148,8 @@ A **GPU accelerated immediate mode GUI system** built on SkiaSharp, designed for
 - Rich text rendering with Unicode and emoji
 - Wrapping, sizes, and color control
 - Theming via transient color changes
+- Runtime stylesheets with nested selectors, `>` child selectors, custom modifiers, variables,
+  `@const`, `#inherit(...)`, and non-destructive provider/file reloads
 
   ```csharp
   gui.DrawText("Title", 24, Color.White);
@@ -155,6 +158,27 @@ A **GPU accelerated immediate mode GUI system** built on SkiaSharp, designed for
   gui.DrawText("Red text");
   gui.SetTextColor(Color.White);
   ```
+
+  Styles accept both the existing CSS-like form and PanGui's scalar syntax:
+
+  ```csharp
+  var styles = StyleSheetSource.FromFile("theme.pss");
+  gui.AddStyleSheet(styles);
+
+  using (gui.StyledNode("checkbox", isChecked ? ["checked"] : []).Enter()) { }
+  ```
+
+  ```css
+  @const spacing = 12;
+  checkbox {
+      padding = @spacing;
+      :checked(0.2 ease-out) { background-color = #4a90e2; }
+  }
+  ```
+
+  Transition annotations are parsed for source compatibility; animated interpolation, expressions,
+  shape/effect declarations, advanced macro families, and `#inherit-properties`/`#inherit-selector`
+  remain planned styling features.
 
 ### Animation
 
@@ -228,6 +252,16 @@ A **GPU accelerated immediate mode GUI system** built on SkiaSharp, designed for
   // Custom clip area
   gui.SetClipArea(gui.CurrentNode, Shape.Circle(100));
   ```
+
+### Headless Controls
+
+Core provides visual-free `Pressable`, `Toggleable`, `Selectable`, `Draggable`, and `Repeatable`
+behaviors. Apply one inside any layout node and render from its stable `ControlVisualState`; activation
+is delivered in the next layout pass so application state cannot produce different trees in a frame's
+layout and render passes. See [Example 08](Examples/Example-08-HeadlessControls/Program.cs) for custom
+button and switch skins with no Excalibur reference. Platforms can optionally provide
+`IControlActivationSource` for controller or command activation and `IControlSemanticsSink` for
+accessibility metadata.
 
 ### Excalibur Controls
 

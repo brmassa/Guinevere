@@ -9,6 +9,12 @@ public static partial class ControlsExtensions
         public bool IsOpen { get; set; }
         public int SelectedIndex { get; set; } = -1;
 
+        /// <summary>Open/close input detected during render and committed before the next layout pass.</summary>
+        public bool? RequestedOpen { get; set; }
+
+        /// <summary>Option input detected during render and committed before the next layout pass.</summary>
+        public int? RequestedSelection { get; set; }
+
         /// <summary>The button's rect as last measured, which is where the list anchors.</summary>
         public Rect ButtonRect { get; set; }
 
@@ -43,8 +49,8 @@ public static partial class ControlsExtensions
     /// <param name="filePath">Call site, supplied by the compiler. Pass an id to separate two dropdowns sharing one.</param>
     /// <param name="lineNumber">Call site, supplied by the compiler.</param>
     public static void Dropdown(this Gui gui, string[] options, ref int selectedIndex,
-        float width = 200,
-        float height = 32,
+        float width = ControlMetrics.FieldWidth,
+        float height = ControlMetrics.FieldHeight,
         string placeholder = "Select an option...",
         Color? backgroundColor = null,
         Color? borderColor = null,
@@ -53,9 +59,9 @@ public static partial class ControlsExtensions
         Color? dropdownColor = null,
         Color? hoverColor = null,
         Color? selectedColor = null,
-        float fontSize = 14,
-        float padding = 8,
-        float borderRadius = 4,
+        float fontSize = ControlMetrics.FontSize,
+        float padding = ControlMetrics.Spacing,
+        float borderRadius = ControlMetrics.CornerRadius,
         int maxVisibleItems = 6,
         bool enabled = true,
         [CallerFilePath] string filePath = "",
@@ -68,7 +74,24 @@ public static partial class ControlsExtensions
         var state = DropdownStateFor(gui, id);
         var palette = gui.Controls;
 
-        if (gui.Pass == Pass.Pass1Build) state.Anchor = state.ButtonRect;
+        if (gui.Pass == Pass.Pass1Build)
+        {
+            state.Anchor = state.ButtonRect;
+            if (state.RequestedOpen is { } requestedOpen)
+            {
+                state.IsOpen = requestedOpen;
+                state.RequestedOpen = null;
+            }
+
+            if (state.RequestedSelection is { } requestedSelection)
+            {
+                selectedIndex = requestedSelection;
+                state.SelectedIndex = requestedSelection;
+                state.RequestedSelection = null;
+            }
+
+            if (!enabled) state.IsOpen = false;
+        }
 
         DrawButton(gui, id, options, selectedIndex, width, height, placeholder,
             enabled ? backgroundColor ?? palette.Surface : gui.Controls.Surface,
@@ -77,7 +100,6 @@ public static partial class ControlsExtensions
             enabled ? placeholderColor ?? palette.TextDim : gui.Controls.TextDisabled,
             fontSize, padding, borderRadius, state, enabled);
 
-        if (state.IsOpen && !enabled) state.IsOpen = false;
         if (!enabled || !state.IsOpen || state.Anchor.W <= 0) return;
 
         DrawList(gui, id, options, ref selectedIndex, state.Anchor, height,
@@ -111,8 +133,8 @@ public static partial class ControlsExtensions
     /// <param name="lineNumber">Call site, supplied by the compiler.</param>
     /// <returns>The chosen index after this frame.</returns>
     public static int Dropdown(this Gui gui, string[] options, int selectedIndex = -1,
-        float width = 200,
-        float height = 32,
+        float width = ControlMetrics.FieldWidth,
+        float height = ControlMetrics.FieldHeight,
         string placeholder = "Select an option...",
         Color? backgroundColor = null,
         Color? borderColor = null,
@@ -121,9 +143,9 @@ public static partial class ControlsExtensions
         Color? dropdownColor = null,
         Color? hoverColor = null,
         Color? selectedColor = null,
-        float fontSize = 14,
-        float padding = 8,
-        float borderRadius = 4,
+        float fontSize = ControlMetrics.FontSize,
+        float padding = ControlMetrics.Spacing,
+        float borderRadius = ControlMetrics.CornerRadius,
         int maxVisibleItems = 6,
         bool enabled = true,
         [CallerFilePath] string filePath = "",
@@ -171,7 +193,7 @@ public static partial class ControlsExtensions
                 if (enabled && interactable.OnClick())
                 {
                     gui.RequestFocus(FocusReason.Mouse);
-                    state.IsOpen = !state.IsOpen;
+                    state.RequestedOpen = !state.IsOpen;
                 }
 
                 DrawArrow(gui, rect, padding, text);
@@ -256,20 +278,19 @@ public static partial class ControlsExtensions
 
         if (chosen >= 0)
         {
-            selectedIndex = chosen;
-            state.SelectedIndex = chosen;
-            state.IsOpen = false;
+            state.RequestedSelection = chosen;
+            state.RequestedOpen = false;
             return;
         }
 
-        if (gui.Input.IsKeyPressed(KeyboardKey.Escape)) state.IsOpen = false;
+        if (gui.Input.IsKeyPressed(KeyboardKey.Escape)) state.RequestedOpen = false;
 
         // A press that reached neither the button nor the list dismisses it. The list blocks input, so
         // a press inside it never gets here.
         if (gui.Input.IsMouseButtonPressed(MouseButton.Left)
             && !buttonRect.Contains(gui.Input.MousePosition)
             && !gui.IsPointerOverBlocker)
-            state.IsOpen = false;
+            state.RequestedOpen = false;
     }
 
     /// <summary>Where an open option list draws, above ordinary content but below a drag ghost.</summary>
