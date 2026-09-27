@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+## v[5.1.0][] 2026-09-27
+
 - Fixed: Text fields keep the caret after edits; double-click selects words around punctuation and triple-click selects all.
 - Changed: Simplified stylesheet application and intrinsic sizing; reduced hot-path allocations with benchmark coverage.
 - Tests: rendering paths and reducing the top "CRAP" score.
@@ -148,6 +150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First Commit
 
+[5.1.0]: https://github.com/brmassa/guinevere/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/brmassa/guinevere/compare/v4.2.0...v5.0.0
 [4.2.0]: https://github.com/brmassa/guinevere/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/brmassa/guinevere/compare/v4.0.0...v4.1.0
