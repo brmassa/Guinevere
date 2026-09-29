@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+## v[5.3.0][] 2026-09-29
+
 - Fixed: A drag source declared with an `object` payload carries it under its own type, so typed `DropTarget<T>` accept it. Tree rows could previously only be dropped on `DropTarget<object>`.
 - Fixed: A left click on a tree row settles when the button comes up, so a press that goes on to be a drag no longer selects the row. Added `InteractableElement.OnClickCompleted`; `TreeViewTheme.DragThreshold` tunes the distance that separates the two.
 - Changed: Standardized release workflow and target names with Turian.
@@ -159,6 +161,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First Commit
 
+[5.3.0]: https://github.com/brmassa/guinevere/compare/v5.2.0...v5.3.0
 [5.2.0]: https://github.com/brmassa/guinevere/compare/v5.1.0...v5.2.0
 [5.1.0]: https://github.com/brmassa/guinevere/compare/v5.0.0...v5.1.0
 [5.0.0]: https://github.com/brmassa/guinevere/compare/v4.2.0...v5.0.0
