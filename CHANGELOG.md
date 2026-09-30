@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+## v[5.4.0][] 2026-09-30
+
 - Fixed: Closing a window from a `CloseRequested` handler no longer wipes its own approval and freezes the host; `Close()` is reentrancy-safe, and OpenGL SilkNET, OpenTK and Raylib hosts gained `CloseRequested`.
 
 ## v[5.3.0][] 2026-09-29
@@ -163,6 +165,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First Commit
 
+[5.4.0]: https://github.com/brmassa/guinevere/compare/v5.3.0...v5.4.0
 [5.3.0]: https://github.com/brmassa/guinevere/compare/v5.2.0...v5.3.0
 [5.2.0]: https://github.com/brmassa/guinevere/compare/v5.1.0...v5.2.0
 [5.1.0]: https://github.com/brmassa/guinevere/compare/v5.0.0...v5.1.0

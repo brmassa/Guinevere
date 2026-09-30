@@ -9,6 +9,7 @@
         <IsPackable>false</IsPackable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ExcludeFromBuild>true</ExcludeFromBuild>
+        <Version>5.4.0</Version>
     </PropertyGroup>
 
     <ItemGroup>

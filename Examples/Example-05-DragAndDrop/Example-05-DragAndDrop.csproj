@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <Version>5.4.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Guinevere.Excalibur\Guinevere.Excalibur.csproj" />

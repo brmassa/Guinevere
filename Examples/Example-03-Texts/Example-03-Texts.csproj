@@ -7,6 +7,7 @@
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <RootNamespace>Example-04-Texts</RootNamespace>
+        <Version>5.4.0</Version>
     </PropertyGroup>
 
     <ItemGroup>

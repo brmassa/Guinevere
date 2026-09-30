@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>$(MSBuildProjectName.Replace("-", "_"))</RootNamespace>
     <IsPackable>false</IsPackable>
+    <Version>5.4.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Integrations\Guinevere.OpenGL.SilkNET\Guinevere.OpenGL.SilkNET.csproj" />

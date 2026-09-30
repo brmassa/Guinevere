@@ -9,6 +9,7 @@
         <NukeTelemetryVersion>1</NukeTelemetryVersion>
         <IsPackable>false</IsPackable>
         <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+        <Version>5.4.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
