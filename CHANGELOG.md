@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+## v[5.6.1][] 2026-10-02
+
 - Fixed: The forms packages are published as `MASS4.Autoformers` and `MASS4.Autoformers.Excalibur`.
 - Fixed: Release versions follow Conventional Commits again: `fix:` releases a patch, `feat:` a minor and `!:` a major version.
 
@@ -177,6 +179,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First Commit
 
+[5.6.1]: https://github.com/brmassa/guinevere/compare/v5.6.0...v5.6.1
 [5.6.0]: https://github.com/brmassa/guinevere/compare/v5.5.0...v5.6.0
 [5.5.0]: https://github.com/brmassa/guinevere/compare/v5.4.0...v5.5.0
 [5.4.0]: https://github.com/brmassa/guinevere/compare/v5.3.0...v5.4.0
@@ -207,4 +210,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.2.0]: https://github.com/MASS4ORG/Guinevere/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/MASS4ORG/Guinevere/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/MASS4ORG/Guinevere/compare/main...1.0.0
-[Unreleased]: https://github.com/brmassa/guinevere/compare/v5.6.0...HEAD
+[Unreleased]: https://github.com/brmassa/guinevere/compare/v5.6.1...HEAD
