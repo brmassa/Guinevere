@@ -28,15 +28,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="README.md" Pack="true" PackagePath="/" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="SkiaSharp" Version="4.152.1" />
+        <PackageReference Include="SkiaSharp" Version="4.153.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Guinevere\Guinevere.csproj" />
+        <ProjectReference Include="../Guinevere/Guinevere.csproj" />
     </ItemGroup>
 
 </Project>
