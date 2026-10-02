@@ -20,19 +20,19 @@
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        <Version>5.4.0</Version>
+        <Version>5.5.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="/"/>
+        <None Include="README.md" Pack="true" PackagePath="/" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Attributes/Attributes.csproj"/>
+        <ProjectReference Include="../Attributes/Attributes.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Guinevere.Tests"/>
+        <InternalsVisibleTo Include="Guinevere.Tests" />
     </ItemGroup>
 
 </Project>
