@@ -21,7 +21,6 @@ partial class Build
 
     private Target UpdateChangelog => td => td
         .DependsOn(CheckNewCommits)
-        .ProceedAfterFailure()
         .Executes(() =>
         {
             if (!File.Exists(ChangelogFile))

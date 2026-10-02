@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+## v[5.5.0][] 2026-10-02
+
 - Added: Attribute-driven forms in three packages: `MASS4.Attributes` (metadata), `Autoformers` (GUI-free form model) and `Autoformers.Excalibur` (`gui.Form` on Excalibur controls). See [Example 76](Examples/Example-76-Odin-Attributes/README.md).
 - Changed: Every package now shares one version line, so the project folders drop the `MASS4.` prefix (`Attributes`, `Autoformers`, `Autoformers.Excalibur`) and the forms packages are published as `Autoformers` and `Autoformers.Excalibur`.
 
@@ -168,6 +170,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First Commit
 
+[5.5.0]: https://github.com/brmassa/guinevere/compare/v5.4.0...v5.5.0
+[5.4.0]: https://github.com/brmassa/guinevere/compare/v5.3.0...v5.4.0
 [5.3.0]: https://github.com/brmassa/guinevere/compare/v5.2.0...v5.3.0
 [5.2.0]: https://github.com/brmassa/guinevere/compare/v5.1.0...v5.2.0
 [5.1.0]: https://github.com/brmassa/guinevere/compare/v5.0.0...v5.1.0
@@ -195,4 +199,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.2.0]: https://github.com/MASS4ORG/Guinevere/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/MASS4ORG/Guinevere/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/MASS4ORG/Guinevere/compare/main...1.0.0
-[Unreleased]: https://github.com/MASS4ORG/Guinevere/compare/v3.1.0...main
+[Unreleased]: https://github.com/brmassa/guinevere/compare/v5.5.0...HEAD
