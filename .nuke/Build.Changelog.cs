@@ -46,9 +46,9 @@ partial class Build
             var unreleasedLink = $@"[Unreleased]: {GetVersionLink($"v{VersionFull}", "HEAD")}";
 
             fileContents = InsertTextAtIndex(fileContents, newVersionSection, UnreleasedSection, UnreleasedSection.Length + 1);
-            fileContents = InsertTextAtIndex(fileContents, linkReference, $"[{previousVersion}]:", 0);
+            fileContents = InsertTextAtIndex(fileContents, linkReference, FirstVersionLink(fileContents), 0);
 
-            fileContents = UpdateUnreleasedLink(fileContents, unreleasedLink, previousVersion);
+            fileContents = UpdateUnreleasedLink(fileContents, unreleasedLink);
 
             File.WriteAllText(ChangelogFile, fileContents);
 
@@ -69,11 +69,21 @@ partial class Build
         return fileContents.Insert(linkInsertIndex + charDelta, newText);
     }
 
-    private string UpdateUnreleasedLink(string fileContents, string unreleasedLink, string previousVersion)
-    {
-        var oldUnreleasedLink = $@"[Unreleased]: {GetVersionLink($"v{previousVersion}", "HEAD")}";
-        return fileContents.Replace(oldUnreleasedLink, unreleasedLink, StringComparison.InvariantCulture);
-    }
+    /// <summary>
+    /// The newest version link definition, which the new version's link goes above. Falls back to the
+    /// Unreleased link so a missing or hand-edited version link cannot block a release.
+    /// </summary>
+    private static string FirstVersionLink(string fileContents) =>
+        VersionLinkRegex().Match(fileContents) is { Success: true } match ? match.Value : "[Unreleased]:";
+
+    private static string UpdateUnreleasedLink(string fileContents, string unreleasedLink) =>
+        UnreleasedLinkRegex().Replace(fileContents, unreleasedLink, 1);
+
+    [GeneratedRegex(@"^\[\d+\.\d+\.\d+\]:", RegexOptions.Multiline)]
+    private static partial Regex VersionLinkRegex();
+
+    [GeneratedRegex(@"^\[Unreleased\]:.*$", RegexOptions.Multiline)]
+    private static partial Regex UnreleasedLinkRegex();
 
     private string GetPreviousVersion()
     {

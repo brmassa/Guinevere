@@ -163,6 +163,10 @@
           "type": "string",
           "description": "NuGet API Key for publishing packages"
         },
+        "NuGetPackagePrefix": {
+          "type": "string",
+          "description": "Package ID prefix every published package must carry (default: MASS4.)"
+        },
         "NuGetSource": {
           "type": "string",
           "description": "NuGet source URL (default: nuget.org)"

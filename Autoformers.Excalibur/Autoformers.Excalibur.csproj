@@ -10,7 +10,7 @@
 
         <!-- NuGet Package Properties -->
         <Title>Autoformers for Excalibur</Title>
-        <PackageId>Autoformers.Excalibur</PackageId>
+        <PackageId>MASS4.Autoformers.Excalibur</PackageId>
         <Description>Draws Autoformers models with Excalibur controls: labelled rows, collections, nested objects and scoped, disposable drawer registries. Styled through inherited Guinevere control tokens.</Description>
         <Company>MASS4</Company>
         <Product>Guinevere</Product>
