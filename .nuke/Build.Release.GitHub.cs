@@ -58,37 +58,24 @@ partial class Build
         });
 
     /// <summary>
-    /// Creates a tag in the GitHub repository following SumTree pattern
+    /// Tags the release commit and pushes both in one atomic push, so the branch never receives a release
+    /// commit without its tag.
     /// </summary>
     [PublicAPI]
     Target GitHubCreateTag => td => td
         .DependsOn(CheckNewCommits, CreateReleaseCommit)
         .OnlyWhenStatic(() => HasNewCommits)
         .Requires(() => GitHubToken)
-        .Executes(async () =>
+        .Executes(() =>
         {
-            try
+            if (GitTasks.Git($"ls-remote --tags origin refs/tags/{TagName}").Any())
             {
-                GitTasks.Git("push origin HEAD");
-                using var httpClient = HttpClientGitHubToken();
-                var message = $"Automatic tag creation: '{TagName}' in {Date}";
-                var response = await httpClient.PostAsJsonAsync(
-                    GitHubApiUrl($"repos/{GitHubRepository}/git/refs"),
-                    new
-                    {
-                        @ref = $"refs/tags/{TagName}",
-                        sha = GitTasks.Git("rev-parse HEAD").FirstOrDefault().Text
-                    }).ConfigureAwait(false);
+                throw new InvalidOperationException($"Tag {TagName} already exists on origin.");
+            }
 
-                _ = response.EnsureSuccessStatusCode();
-                Log.Information("Tag {Tag} created with the message '{Message}'", TagName, message);
-            }
-            catch (HttpRequestException ex)
-            {
-                Log.Error(ex, "{StatusCode}: {Message}", ex.StatusCode,
-                    ex.Message);
-                throw;
-            }
+            GitTasks.Git($"tag {TagName}");
+            GitTasks.Git($"push --atomic origin HEAD refs/tags/{TagName}");
+            Log.Information("Pushed the release commit and tag {Tag}", TagName);
         });
 
     /// <summary>

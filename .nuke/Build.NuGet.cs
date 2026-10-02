@@ -118,6 +118,8 @@ partial class Build
                 return;
             }
 
+            EnsurePublishable(packages);
+
             foreach (var package in packages)
             {
                 Log.Information("Publishing package {Package} to {Source}", package.Name, NuGetSource);
@@ -132,6 +134,33 @@ partial class Build
 
             Log.Information("Successfully published {Count} packages to {Source}", packages.Count, NuGetSource);
         });
+
+    [Parameter("Package ID prefix every published package must carry (default: MASS4.)")]
+    public readonly string NuGetPackagePrefix = "MASS4.";
+
+    /// <summary>
+    /// Fails before the first push when any package could not be published, since nuget.org versions
+    /// cannot be deleted: every ID must carry the prefix the Trusted Publishing policy covers, and CI
+    /// must build a release tag so the package version is the tagged one.
+    /// </summary>
+    private void EnsurePublishable(IEnumerable<AbsolutePath> packages)
+    {
+        var unprefixed = packages
+            .Select(package => package.Name)
+            .Where(name => !name.StartsWith(NuGetPackagePrefix, StringComparison.Ordinal))
+            .ToList();
+        if (unprefixed.Count > 0)
+        {
+            throw new InvalidOperationException(
+                $"Packages without the '{NuGetPackagePrefix}' prefix: {string.Join(", ", unprefixed)}");
+        }
+
+        var gitHubRef = GitHubActions.Instance?.Ref;
+        if (gitHubRef != null && !gitHubRef.StartsWith("refs/tags/", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"Publishing must run on a release tag, not '{gitHubRef}'.");
+        }
+    }
 
     /// <summary>
     /// Gets the NuGet package title for a project

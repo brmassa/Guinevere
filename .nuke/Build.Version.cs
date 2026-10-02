@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Build;
 
 /// <summary>
@@ -12,36 +14,34 @@ partial class Build
     [GitVersion]
     private readonly GitVersion GitVersion;
 
+    private string CachedVersionFull;
+
     /// <summary>
-    /// The current version, using GitVersion with fallback.
+    /// The release version. GitVersion decides it; the Conventional Commits fallback only takes over when
+    /// GitVersion is missing or does not land above the latest release (shallow clone, stray older tag).
     /// </summary>
-    private string VersionFull
+    private string VersionFull => CachedVersionFull ??= ResolveVersion();
+
+    private string ResolveVersion()
     {
-        get
+        var latestRelease = CurrentFullVersion;
+        if (GetCommitsSinceLastTag() == 0)
         {
-            if (GitVersion?.MajorMinorPatch != null)
-            {
-                var gitVersionValue = GitVersion.MajorMinorPatch;
-                var calculatedVersion = CalculateNextVersion();
-
-                // GitVersion uses the nearest version source. A stray or incorrectly-created older tag can
-                // therefore make it regress below the version calculated from the released tag history.
-                if (IsVersionEarlierThan(gitVersionValue, calculatedVersion))
-                {
-                    Log.Warning(
-                        "GitVersion returned {GitVersion}, but released tags require at least {Fallback}. Using fallback",
-                        gitVersionValue, calculatedVersion);
-                    return calculatedVersion;
-                }
-
-                Log.Debug("Using GitVersion: {Version}", gitVersionValue);
-                return gitVersionValue;
-            }
-
-            var fallbackVersion = CalculateNextVersion();
-            Log.Debug("Using fallback version calculation: {Version}", fallbackVersion);
-            return fallbackVersion;
+            Log.Debug("HEAD is the {Tag} release", CurrentTag);
+            return latestRelease;
         }
+
+        var gitVersionValue = GitVersion?.MajorMinorPatch;
+        if (gitVersionValue != null && IsVersionEarlierThan(latestRelease, gitVersionValue))
+        {
+            Log.Debug("Using GitVersion: {Version}", gitVersionValue);
+            return gitVersionValue;
+        }
+
+        var fallbackVersion = CalculateNextVersion();
+        Log.Warning("GitVersion returned {GitVersion}, which is not above release {Release}. Using {Fallback}",
+            gitVersionValue ?? "nothing", latestRelease, fallbackVersion);
+        return fallbackVersion;
     }
 
     /// <summary>
@@ -57,6 +57,10 @@ partial class Build
 
     private string CurrentVersion;
 
+    /// <summary>
+    /// The latest release: the highest release tag reachable from HEAD or the highest changelog version,
+    /// whichever is newer. The changelog covers a release whose tag was never created.
+    /// </summary>
     private string CurrentTag
     {
         get
@@ -64,23 +68,37 @@ partial class Build
             if (CurrentVersion != null)
                 return CurrentVersion;
 
+            CurrentVersion = SelectLatestReleaseTag(LatestReachableTag, GetLatestChangelogTag()) ?? "v1.0.0";
+            return CurrentVersion;
+        }
+    }
+
+    private string CachedReachableTag;
+
+    /// <summary>
+    /// The highest release tag reachable from HEAD, or null before the first release. `describe` is not used
+    /// because it selects the closest tag, which is wrong when a stray tag was created after a newer release.
+    /// </summary>
+    private string LatestReachableTag
+    {
+        get
+        {
+            if (CachedReachableTag != null)
+                return CachedReachableTag.Length == 0 ? null : CachedReachableTag;
+
             try
             {
-                // `describe` selects the closest tag, which is unsafe if a stale tag was accidentally
-                // created after a newer release. Select the highest semantic-version tag reachable from HEAD.
-                var gitTag = GitTasks.Git("tag --merged HEAD --sort=-version:refname")
+                CachedReachableTag = GitTasks.Git("tag --merged HEAD --sort=-version:refname", logOutput: false)
                     .Select(output => output.Text)
-                    .FirstOrDefault(IsReleaseTag);
-                CurrentVersion = SelectLatestReleaseTag(gitTag, GetLatestChangelogTag());
+                    .FirstOrDefault(IsReleaseTag) ?? "";
             }
             catch
             {
-                // Handled below so an empty repository still has a deterministic initial version.
+                // An empty repository has no tags; the release range then covers the whole history.
+                CachedReachableTag = "";
             }
 
-            CurrentVersion ??= "v1.0.0";
-
-            return CurrentVersion;
+            return CachedReachableTag.Length == 0 ? null : CachedReachableTag;
         }
     }
 
@@ -112,48 +130,59 @@ partial class Build
             .FirstOrDefault();
 
     /// <summary>
-    /// Calculates the next version by incrementing from the last tag
+    /// Bumps the latest release by the largest Conventional Commits change since the last reachable tag,
+    /// using the same rules as GitVersion.yml.
     /// </summary>
     private string CalculateNextVersion()
     {
-        var commitsSinceTag = GetCommitsSinceLastTag();
-        Log.Debug("Commits since last tag: {Count}", commitsSinceTag);
-
-        if (commitsSinceTag == 0)
-        {
-            Log.Debug("No commits since tag, returning current version: {Version}", CurrentFullVersion);
-            return CurrentFullVersion;
-        }
-
-        var currentVersion = CurrentFullVersion;
-        Log.Debug("Current tag version: {Version}", currentVersion);
-        var parts = currentVersion.Split('.');
-
-        if (parts.Length >= 2)
-        {
-            if (int.TryParse(parts[0], out var major) && int.TryParse(parts[1], out var minor))
-            {
-                // Increment minor version for new commits
-                var nextVersion = $"{major}.{minor + 1}.0";
-                Log.Debug("Calculated next version: {Version}", nextVersion);
-                return nextVersion;
-            }
-        }
-
-        // Fallback to current version if parsing fails
-        Log.Warning("Could not parse version {Version}, returning as-is", currentVersion);
-        return currentVersion;
+        var range = LatestReachableTag is { } tag ? $"{tag}..HEAD" : "HEAD";
+        var messageLines = GitTasks.Git($"log --format=%B {range}", logOutput: false).Select(output => output.Text);
+        return BumpVersion(CurrentFullVersion, messageLines);
     }
 
     /// <summary>
-    /// Gets the number of commits since the last tag
+    /// Returns <paramref name="version"/> bumped by the largest change in the commit message lines:
+    /// major for `type!:` or `BREAKING CHANGE:`, minor for `feat:`, patch otherwise.
+    /// </summary>
+    internal static string BumpVersion(string version, IEnumerable<string> messageLines)
+    {
+        var current = Version.Parse(version);
+        var bump = messageLines.Select(GetReleaseBump).DefaultIfEmpty(ReleaseBump.Patch).Max();
+        return bump switch
+        {
+            ReleaseBump.Major => $"{current.Major + 1}.0.0",
+            ReleaseBump.Minor => $"{current.Major}.{current.Minor + 1}.0",
+            _ => $"{current.Major}.{current.Minor}.{current.Build + 1}",
+        };
+    }
+
+    private static ReleaseBump GetReleaseBump(string line) =>
+        BreakingChangeRegex().IsMatch(line) ? ReleaseBump.Major
+        : FeatureRegex().IsMatch(line) ? ReleaseBump.Minor
+        : ReleaseBump.Patch;
+
+    private enum ReleaseBump
+    {
+        Patch,
+        Minor,
+        Major,
+    }
+
+    [GeneratedRegex(@"^\w+(\([^)]*\))?!:|^BREAKING[ -]CHANGE:")]
+    private static partial Regex BreakingChangeRegex();
+
+    [GeneratedRegex(@"^feat(\([^)]*\))?:")]
+    private static partial Regex FeatureRegex();
+
+    /// <summary>
+    /// Gets the number of commits since the last reachable release tag.
     /// </summary>
     private int GetCommitsSinceLastTag()
     {
         try
         {
-            // Count commits between tag and HEAD
-            var commitCountText = GitTasks.Git($"rev-list --count {CurrentTag}..HEAD")
+            var range = LatestReachableTag is { } tag ? $"{tag}..HEAD" : "HEAD";
+            var commitCountText = GitTasks.Git($"rev-list --count {range}", logOutput: false)
                 .FirstOrDefault().Text;
 
             if (int.TryParse(commitCountText, out var directCount))

@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+- Fixed: The forms packages are published as `MASS4.Autoformers` and `MASS4.Autoformers.Excalibur`.
+- Fixed: Release versions follow Conventional Commits again: `fix:` releases a patch, `feat:` a minor and `!:` a major version.
+
 ## v[5.6.0][] 2026-10-02
+
+- Fixed: The release pipeline stops before tagging when the changelog update fails. This version was only partially published to NuGet; use 5.6.1.
 
 ## v[5.5.0][] 2026-10-02
 

@@ -7,7 +7,8 @@
 # that owns the `MASS4.*` packages.
 #
 # Triggered by `check-new-release.yml` via `gh workflow run` after it cuts a tag (a tag push made
-# with GITHUB_TOKEN does not fire `on: push`), or manually via the Actions tab.
+# with GITHUB_TOKEN does not fire `on: push`), or manually via the Actions tab. Always run it on a
+# release tag: on a branch the version is computed from the commits after the tag.
 
 name: Publish on tag
 

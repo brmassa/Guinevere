@@ -10,7 +10,7 @@
 
         <!-- NuGet Package Properties -->
         <Title>Autoformers</Title>
-        <PackageId>Autoformers</PackageId>
+        <PackageId>MASS4.Autoformers</PackageId>
         <Description>A GUI-free form model: reflects plain C# objects into sections of editable fields, collections and actions, driven by MASS4.Attributes. Persistence, null rules and failure reporting are supplied by the consumer.</Description>
         <Company>MASS4</Company>
         <Product>Guinevere</Product>
