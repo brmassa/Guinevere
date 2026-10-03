@@ -49,7 +49,7 @@ public partial class App
 | Text and values | `TextInput`, `PasswordInput`, `TextArea`, `NumberField`, `Slider`, `ObjectField` | Text editing, scrub editing, numeric ranges, and compact object fields. |
 | Display | `Image`, `ProgressBar`, `WrappedText`, `Toast`, `Toasts`, `ClearToasts` | Images, progress, wrapping, and transient notifications. |
 | Navigation | `Tabs`, `TabBar`, `TabStrip`, `PillTabs`, `VerticalTabs`, `Breadcrumb`, `TreeView`, `FileBrowser` | Tabs, trails, virtualised trees, and an embeddable filesystem picker. Tabs are closable only with `closable: true`. |
-| Menus and overlays | `MenuBar`, `Flyout`, `CascadeMenu`, `ContextMenu`, `Popup`, `ModalPopup`, `Dialog`, `Tooltip` | Command menus, popovers, modal windows, and delayed help. |
+| Menus and overlays | `AppBar`, `MenuBar`, `Flyout`, `CascadeMenu`, `ContextMenu`, `Popup`, `ModalPopup`, `Dialog`, `Tooltip` | Application chrome, command menus, popovers, modal windows, and delayed help. |
 | Layout tools | `Splitter`, `DockSpace`, `DockLayout` | Resizable panes and persistent split/tab/float docking. |
 
 ## Buttons and selection
@@ -116,6 +116,10 @@ drives.
 
 ## Menu Bar
 
+Call `menus.Collapsible()` in the builder to show a compact menu toggle. Opening it reveals the titles;
+choosing an action, clicking outside, or pressing Escape collapses it again. Menu bars, flyouts, cascade menus,
+and context menus share a 300 ms submenu grace period and support nested arrow-key navigation.
+
 ```csharp
 gui.MenuBar(menus =>
 {
@@ -133,6 +137,68 @@ gui.MenuBar(menus =>
     menus.Menu("Help", help => help.Item("About", () => ShowAbout()));
 });
 ```
+
+## Application Bar
+
+```csharp
+using (gui.AppBar(nativeTitlebar: useNativeTitlebar, resizable: true,
+    minimumWindowSize: new System.Numerics.Vector2(480, 320)))
+{
+    gui.MenuBar(menus => menus.Collapsible()
+        .Menu("File", file => file.Item("Open", OpenProject)));
+    gui.Image(badge, width: 15, height: 15);
+    gui.DrawText("Studio");
+    gui.Node().ExpandWidth();
+    if (gui.Button("◐", 36, 36)) ToggleTheme();
+}
+```
+
+The scope lays out arbitrary widgets in a horizontal row, with normal gaps, padding and flexible nodes.
+Repeated calls append content in order. It creates no content delegates, action lists or application title
+model. The operating system's title is supplied separately when creating `GuiWindow`.
+
+Desktop integrations register `IWindowChromeCapability` automatically. Where movement is supported, the bar
+replaces native decorations. With `windowControls: true`, it appends minimize, maximize/restore and close
+buttons after the content, independently of native decorations or movement support.
+Close requests go through `GuiWindow.CloseRequested`, preserving the application's unsaved-work guard.
+Passive content such as images and labels, and empty space, drag the window and double-click to maximize.
+Buttons, editors, custom interactions and event handlers retain their own gestures.
+
+Set `resizable: true` to enable four border and four corner handles while native decorations are hidden.
+The desktop integrations register `IWindowResizeCapability` automatically. Handles show resize cursors,
+retain pointer capture outside the window and keep the opposite edges fixed. `minimumWindowSize` defaults
+to 160 by 100 logical desktop units; custom handles are disabled with native decorations or maximization.
+Native sizing requests made during a GUI frame are applied after rendering finishes using the canvas.
+
+Set `nativeTitlebar: true` to show the operating system's decorations at runtime; set it back to `false`
+to use application chrome. The application buttons remain available while native decorations are showing. Keep the
+scope at the same call site in both passes, and apply mode changes on the next frame. `windowControls: false`
+embeds the bar and releases any decoration management it previously owned.
+
+The current GLFW integrations cannot move native Wayland windows. The bar keeps native decorations when
+`CanMove` is false so the window stays movable. Native Wayland custom-titlebar dragging requires a backend
+with compositor move requests. Native snap gestures require support from the window integration.
+Call `DrawWindowTitlebar(true)` when completely unmounting an application bar that replaced native chrome.
+
+Let `AppBar` manage decorations while it is mounted; calling `DrawWindowTitlebar` independently every frame
+competes with its remembered mode. Switching OpenGL/Vulkan wrappers does not add native Wayland dragging:
+the GLFW integrations need compositor move support or an X11/XWayland startup choice.
+
+### Extending a host application
+
+Hosts can draw their own shell and registered plugin widgets inside the scope. `AppBarScope` is a value type;
+extend the composed content through host methods or extension methods. Keep plugin factories and contribution
+registries in the host, cache widget instances, and call their render methods in both GUI passes.
+
+Main-menu actions can continue to use a command registry feeding `MenuBar`; arbitrary widgets such as play
+controls or recent projects belong in the AppBar row. Apply contribution additions/removals between frames
+so the same widgets appear in both passes, and remove cached instances when their plugin unloads.
+
+### Migrating builder callers
+
+Replace `gui.AppBar(bar => ...)` with a `using (gui.AppBar())` scope. Move `Leading` and `Content` widgets
+directly into its body, render visible titles with `gui.DrawText`, and replace `Action` entries with ordinary
+buttons. Use normal layout nodes and menus to arrange content and handle overflow.
 
 ## Tree View
 

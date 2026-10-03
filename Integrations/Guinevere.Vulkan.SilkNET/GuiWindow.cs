@@ -13,8 +13,8 @@ namespace Guinevere;
 /// Represents a GUI window implementation using SilkNET for Vulkan rendering.
 /// Provides input handling, window management, and rendering capabilities for the Guinevere GUI framework.
 /// </summary>
-public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisplayCapability, ICursorCapability,
-    IPointerCapability, IDisposable
+public unsafe partial class GuiWindow : IInputHandler, IWindowChromeCapability, IDisplayCapability, ICursorCapability,
+    IPointerCapability, IWindowResizeCapability, IDisposable
 {
     readonly ILogger _logger;
     readonly Gui _gui;
@@ -54,6 +54,8 @@ public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisplayCapabilit
         _gui = gui;
         _gui.Input = this;
         _gui.WindowHandler = this;
+        _gui.Platform.Register<IWindowChromeCapability>(this);
+        _gui.Platform.Register<IWindowResizeCapability>(this);
         _gui.Platform.Register<IDisplayCapability>(this);
         _gui.Platform.Register<ICursorCapability>(this);
         _gui.Platform.Register<IPointerCapability>(this);
@@ -81,6 +83,7 @@ public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisplayCapabilit
         options.IsVisible = true;
         options.WindowBorder = WindowBorder.Resizable;
 
+        ConfigureWindowPlatform();
         _window = Window.Create(options);
 
         // Hook up all necessary events
@@ -226,6 +229,8 @@ public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisplayCapabilit
             throw;
         }
 
+        ApplyPendingResize();
+
         // Reset mouse wheel delta and pressed buttons/keys after frame
         _mouseWheelDelta = 0f;
         _pressedButtons.Clear();
@@ -328,8 +333,13 @@ public unsafe class GuiWindow : IInputHandler, IWindowHandler, IDisplayCapabilit
     /// <param name="show">True to show the title bar; false to hide it.</param>
     public void DrawWindowTitlebar(bool show)
     {
-        // Silk.NET doesn't easily support changing window border after creation
-        // This would require recreating the window, so we'll leave it as no-op for now
+        if (_window.IsInitialized)
+        {
+            _glfw.SetWindowAttrib((WindowHandle*)_window.Handle, WindowAttributeSetter.Decorated, show);
+            // Native maximization requires a resizable window even when decorations are hidden.
+            _glfw.SetWindowAttrib((WindowHandle*)_window.Handle, WindowAttributeSetter.Resizable, true);
+        }
+        else _window.WindowBorder = show ? WindowBorder.Resizable : WindowBorder.Hidden;
     }
 
     #region Cursor and pointer
