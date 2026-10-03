@@ -22,8 +22,15 @@ public static partial class ControlsExtensions
     /// Opens a horizontal application bar for ordinary widgets and layout nodes.
     /// Passive content moves the window; optional resize handles replace native borders on supported backends.
     /// </summary>
+    /// <param name="gui">The GUI that owns the application bar.</param>
+    /// <param name="height">The bar height in logical desktop units; must be at least 24.</param>
+    /// <param name="windowControls">Displays window controls and enables window chrome integration.</param>
+    /// <param name="nativeTitlebar">Keeps the native window title bar and decorations visible.</param>
+    /// <param name="backgroundColor">The bar background color; defaults to the control surface color.</param>
     /// <param name="resizable">Enables border and corner resizing while native decorations are hidden.</param>
     /// <param name="minimumWindowSize">The minimum client size in logical desktop units; defaults to 160 by 100.</param>
+    /// <param name="filePath">The caller file path used to identify the application bar.</param>
+    /// <param name="lineNumber">The caller line number used to identify the application bar.</param>
     public static AppBarScope AppBar(this Gui gui, float height = 36, bool windowControls = true,
         bool nativeTitlebar = false, Color? backgroundColor = null, bool resizable = false,
         Vector2? minimumWindowSize = null,
