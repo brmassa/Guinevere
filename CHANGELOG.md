@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+## v[5.9.0][] 2026-10-06
+
 - Improved: dock tab reordering shows its destination and close-button hover stays inside the tab border; compact menu titles share menu styling; Silk.NET and OpenTK windows fit the current monitor's work area at startup; X11 desktop windows can move beyond OS work-area boundaries; all desktop hosts expose native titles and icons; numeric fields clip overflowing text and preserve external value changes when tabbing away; ordinary labels support selection and copying with `DrawText(..., selectable: true)`.
 - Added: Searchable, virtualized `MultiDropdown` with filtered bulk actions, chips and keyboard navigation; flag-aware `EnumDropdown`, `[EnumButtons]` and `[EnumPaging]`, with mixed enum edits preserving each owner's unrelated flag bits. [#61](https://github.com/MASS4ORG/Guinevere/issues/61).
 
@@ -186,6 +188,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First Commit
 
+[5.9.0]: https://github.com/brmassa/guinevere/compare/v5.8.0...v5.9.0
 [5.8.0]: https://github.com/brmassa/guinevere/compare/v5.7.0...v5.8.0
 [5.7.0]: https://github.com/brmassa/guinevere/compare/v5.6.1...v5.7.0
 [5.6.1]: https://github.com/brmassa/guinevere/compare/v5.6.0...v5.6.1
@@ -219,4 +222,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.2.0]: https://github.com/MASS4ORG/Guinevere/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/MASS4ORG/Guinevere/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/MASS4ORG/Guinevere/compare/main...1.0.0
-[Unreleased]: https://github.com/brmassa/guinevere/compare/v5.8.0...HEAD
+[Unreleased]: https://github.com/brmassa/guinevere/compare/v5.9.0...HEAD
