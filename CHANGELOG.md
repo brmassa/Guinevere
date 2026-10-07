@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed: dock tab reordering; compact menu; windows fit the current monitor's work area at startup
 - Fixed: numeric fields clip overflowing text and preserve external value changes when tabbing away
 - Added: Searchable, virtualized `MultiDropdown` with filtered bulk action
-- Changed (breaking): Stylesheets move to the new `MASS4.Guinevere.Styling` package, and are `.pss` theme files in PanGui syntax. Hosts can read `@const` values from `StyleSheet.Constants`. `$tokens` layer across sheets, and `gui.StyleSheets.SetToken` overrides them all. `@font-face` and `url()` resolve against the sheet, `@import` goes through a host resolver, and parse errors report `file:line:col`. Shapes, effects, mixins and macros parse but are not applied yet. Resolved styles are cached, and cache hits allocate nothing. `gui.StyledNode` matches `:focus` and takes `disabled:` for `:disabled`, and `StyleModifiers` names the standard `:checked`, `:selected`, `:open` and `:dragging` modifiers. Migration: reference `MASS4.Guinevere.Styling`; `gui.StyleSheets`, `gui.StyledNode`, `gui.ResolveStyle` and `ControlPalette.FromStyle` keep their call syntax as extension members. `gui.StyleSheets` is now a `StyleSheetCollection` (`Add`, indexer and `Remove` are unchanged). Rewrite `prop: value;`, `--x` and `var(--x)` as `prop = value;` and `$x`, or parse with `StyleSheetOptions.AllowCssSyntax = true`. [#157](https://github.com/MASS4ORG/Guinevere/issues/157), [#158](https://github.com/MASS4ORG/Guinevere/issues/158).
+- Changed (breaking): Stylesheets move to the new `MASS4.Guinevere.Styling` package, and are `.pss` theme
 
 ## v[5.8.0][] 2026-10-05
 
