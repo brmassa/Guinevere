@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+- Added: Desktop file-drop capability and bubbling events across the four window integrations; fixed nested dropdown stacking, popup/tooltip hit testing and font-independent filter selection marks.
+
 - Changed: dock tab reordering; compact menu; windows fit the current monitor's work area at startup
 - Fixed: numeric fields clip overflowing text and preserve external value changes when tabbing away
 - Added: Searchable, virtualized `MultiDropdown` with filtered bulk action

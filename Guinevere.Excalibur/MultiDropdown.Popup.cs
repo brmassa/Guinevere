@@ -16,7 +16,8 @@ public static partial class ControlsExtensions
                    .BlockInput().Direction(Axis.Vertical).Enter())
         {
             gui.SetEscapesAncestorClips();
-            gui.SetZIndex(ListZIndex);
+            gui.SetZIndex(Math.Max(ListZIndex,
+                gui.CurrentNode.Parent!.Scope.Get<LayoutNodeScopeZIndex>().Value + 1));
             using var scope = gui.EnterFocusNavigationScope($"{id}/focus", $"{id}/button");
             scope.SetActive($"{id}/button");
             if (gui.Pass == Pass.Pass2Render)
@@ -93,10 +94,10 @@ public static partial class ControlsExtensions
     {
         var index = state.Filtered[position];
         using (gui.Node(-1, height, $"{id}/option/{index}").ExpandWidth().Padding(8, 0)
-                   .ContentAlignY(0.5f).Enter())
+                   .Direction(Axis.Horizontal).ContentAlignY(0.5f).Gap(6).Enter())
         {
-            var indicator = ChoiceIndicator(multiple, state.Mixed[index], state.Checked[index]);
-            gui.DrawText(indicator + state.Labels[index], fontSize, gui.ControlStyle.Text, centerInRect: false);
+            if (multiple) ChoiceMark(gui, state.Mixed[index], state.Checked[index], fontSize);
+            gui.DrawText(state.Labels[index], fontSize, gui.ControlStyle.Text, centerInRect: false);
             if (gui.Pass != Pass.Pass2Render) return;
             var interaction = gui.GetInteractable();
             if (state.Checked[index]) gui.DrawBackgroundRect(gui.ControlStyle.Selected, 2);
@@ -123,11 +124,19 @@ public static partial class ControlsExtensions
         state.Reveal = false;
     }
 
-    static string ChoiceIndicator(bool multiple, bool mixed, bool selected)
+    static void ChoiceMark(Gui gui, bool mixed, bool selected, float fontSize)
     {
-        if (!multiple) return "";
-        if (mixed) return "— ";
-        return selected ? "☑ " : "☐ ";
+        var size = Math.Max(10, fontSize);
+        using (gui.Node(size, size).Enter())
+        {
+            if (gui.Pass != Pass.Pass2Render) return;
+            var rect = gui.CurrentNode.Rect;
+            gui.DrawRectBorder(rect, gui.ControlStyle.Border, 1, 2);
+            if (mixed)
+                gui.DrawRect(new Rect(rect.X + size * 0.2f, rect.Y + size * 0.45f, size * 0.6f, size * 0.1f),
+                    gui.ControlStyle.Text);
+            else if (selected) DrawCheckmark(gui, rect, size, gui.ControlStyle.Text);
+        }
     }
 
     static void NavigateChoices<T>(Gui gui, string id, ChoiceState<T> state, IReadOnlyList<T> options,

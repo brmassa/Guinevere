@@ -177,7 +177,7 @@ public static partial class ControlsExtensions
 
         // ReSharper disable once ExplicitCallerInfoArgument - keep the caller's original location for a stable NodeId
         using (gui.Node(tooltipWidth, tooltipHeight, filePath: filePath, lineNumber: lineNumber)
-                   .AbsoluteScreen(tooltipPos.X, tooltipPos.Y)
+                   .AbsoluteScreen(tooltipPos.X, tooltipPos.Y).HitTestVisible(false)
                    .Enter())
         {
             gui.SetZIndex(TooltipZIndex);
@@ -187,18 +187,14 @@ public static partial class ControlsExtensions
                 // Only render background when shown and text is not empty
                 if (show && !string.IsNullOrEmpty(text))
                 {
-                    var bgColor = backgroundColor ?? gui.ControlStyle.Surface;
-                    var borderColorFinal = borderColor ?? gui.ControlStyle.Border;
-
-                    gui.DrawBackgroundRect(bgColor, borderRadius);
-                    gui.DrawRectBorder(gui.CurrentNode.Rect, borderColorFinal, 1f, borderRadius);
+                    DrawTooltipBackground(gui, backgroundColor, borderColor, borderRadius, 1f);
                 }
 
             // Always draw text for consistency, but make transparent when hidden
             var textColorFinal = show && !string.IsNullOrEmpty(text)
                 ? textColor ?? gui.ControlStyle.Text
                 : Color.Transparent;
-            gui.DrawText(tooltipText, fontSize, textColorFinal, centerInRect: false);
+            gui.DrawText(tooltipText, fontSize, textColorFinal, centerInRect: false).HitTestVisible(false);
         }
     }
 
@@ -267,7 +263,7 @@ public static partial class ControlsExtensions
         var totalHeight = string.IsNullOrEmpty(title) ? height : height + titleBarHeight;
 
         var popupNode = gui.Node(width, totalHeight)
-            .AbsoluteScreen(state.Position.X, state.Position.Y);
+            .AbsoluteScreen(state.Position.X, state.Position.Y).HitTestVisible(state.IsOpen);
         if (state.IsOpen) popupNode.BlockInput();
 
         using (popupNode.Enter())
@@ -280,11 +276,7 @@ public static partial class ControlsExtensions
                 // Only render visually when popup is open
                 if (state.IsOpen)
                 {
-                    var bgColor = backgroundColor ?? gui.ControlStyle.Popup;
-                    var borderColorFinal = borderColor ?? gui.ControlStyle.Border;
-
-                    gui.DrawBackgroundRect(bgColor, borderRadius);
-                    gui.DrawRectBorder(gui.CurrentNode.Rect, borderColorFinal, borderWidth, borderRadius);
+                    DrawPopupBackground(gui, backgroundColor, borderColor, borderRadius, borderWidth);
                 }
 
                 // Handle escape key
@@ -297,7 +289,7 @@ public static partial class ControlsExtensions
 
             // Always create content area node for consistency
             var contentY = string.IsNullOrEmpty(title) ? 0 : titleBarHeight;
-            using (gui.Node(width, height)
+            using (gui.Node(width, height).HitTestVisible(state.IsOpen)
                        .Top(contentY)
                        .Padding(8)
                        .Enter())
@@ -312,7 +304,11 @@ public static partial class ControlsExtensions
             }
         }
 
-        // Handle click outside to close - check after rendering the popup
+        DismissPopupOutside(gui, state, popupNode, width, totalHeight);
+    }
+
+    static void DismissPopupOutside(Gui gui, PopupState state, LayoutNode popupNode, float width, float height)
+    {
         if (gui.Pass != Pass.Pass2Render || state is not { IsOpen: true, CloseOnClickOutside: true }) return;
 
         if (state.JustOpened)
@@ -323,14 +319,38 @@ public static partial class ControlsExtensions
 
         if (!gui.Input.IsMouseButtonPressed(MouseButton.Left)) return;
 
-        var popupRect = new Rect(state.Position.X, state.Position.Y, width, totalHeight);
-        if (!IsMouseInRect(gui.Input.MousePosition, popupRect)) state.IsOpen = false;
+        var pointer = gui.Input.MousePosition;
+        var popupRect = new Rect(state.Position.X, state.Position.Y, width, height);
+        if (PointerOutsidePopup(popupNode, popupRect, pointer)) state.IsOpen = false;
+    }
+
+    static bool PointerOutsidePopup(LayoutNode popupNode, Rect popupRect, Vector2 pointer) =>
+        !popupRect.Contains(pointer) && !PointerInChildOverlay(popupNode, pointer);
+
+    static void DrawPopupBackground(Gui gui, Color? background, Color? border, float radius, float width)
+    {
+        gui.DrawBackgroundRect(background ?? gui.ControlStyle.Popup, radius);
+        gui.DrawRectBorder(gui.CurrentNode.Rect, border ?? gui.ControlStyle.Border, width, radius);
+    }
+
+    static void DrawTooltipBackground(Gui gui, Color? background, Color? border, float radius, float width)
+    {
+        gui.DrawBackgroundRect(background ?? gui.ControlStyle.Surface, radius);
+        gui.DrawRectBorder(gui.CurrentNode.Rect, border ?? gui.ControlStyle.Border, width, radius);
+    }
+
+    static bool PointerInChildOverlay(LayoutNode node, Vector2 pointer)
+    {
+        foreach (var child in node.Children)
+            if (child.Style.BlocksInput && child.Rect.Contains(pointer) || PointerInChildOverlay(child, pointer))
+                return true;
+        return false;
     }
 
     static void RenderPopupTitleBar(Gui gui, string title, float width, float height,
         Color? titleBarColor, Color? titleTextColor, bool isOpen)
     {
-        using (gui.Node(width, height).Enter())
+        using (gui.Node(width, height).HitTestVisible(isOpen).Enter())
         {
             if (gui.Pass == Pass.Pass2Render && isOpen)
             {
@@ -340,7 +360,7 @@ public static partial class ControlsExtensions
 
             // Always draw text for consistency, but make transparent when closed
             var titleColorFinal = isOpen ? titleTextColor ?? gui.ControlStyle.Text : Color.Transparent;
-            gui.DrawText(title, color: titleColorFinal, centerInRect: false);
+            gui.DrawText(title, color: titleColorFinal, centerInRect: false).HitTestVisible(isOpen);
         }
     }
 

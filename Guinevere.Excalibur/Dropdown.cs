@@ -253,7 +253,8 @@ public static partial class ControlsExtensions
         {
             using var focusScope = gui.EnterFocusNavigationScope($"{id}/focus");
             focusScope.SetActive();
-            gui.SetZIndex(ListZIndex);
+            gui.SetZIndex(Math.Max(ListZIndex,
+                gui.CurrentNode.Parent!.Scope.Get<LayoutNodeScopeZIndex>().Value + 1));
             gui.ScrollY();
 
             if (gui.Pass == Pass.Pass2Render)
@@ -267,26 +268,30 @@ public static partial class ControlsExtensions
                 using (gui.Node(-1, rowHeight, $"{id}/list/{i}").ExpandWidth()
                            .Padding(padding, 0).ContentAlignY(0.5f).Enter())
                 {
-                    if (gui.Pass == Pass.Pass2Render)
-                    {
-                        gui.RegisterFocusable(parentId: $"{id}/button");
-                        var interactable = gui.GetInteractable();
-
-                        if (i == selectedIndex) gui.DrawBackgroundRect(selected, borderRadius);
-                        else if (interactable.OnHover()) gui.DrawBackgroundRect(hover, borderRadius);
-
-                        if (interactable.OnClick())
-                        {
-                            gui.RequestFocus(FocusReason.Mouse);
-                            chosen = i;
-                        }
-                    }
+                    if (DropdownOptionInput(gui, id, i == selectedIndex, selected, hover, borderRadius)) chosen = i;
 
                     gui.DrawText(options[i], fontSize, text, centerInRect: false);
                 }
             }
         }
 
+        CompleteDropdownSelection(gui, state, chosen, buttonRect);
+    }
+
+    static bool DropdownOptionInput(Gui gui, string id, bool selected, Color selection, Color hover, float radius)
+    {
+        if (gui.Pass != Pass.Pass2Render) return false;
+        gui.RegisterFocusable(parentId: $"{id}/button");
+        var interactable = gui.GetInteractable();
+        if (selected) gui.DrawBackgroundRect(selection, radius);
+        else if (interactable.OnHover()) gui.DrawBackgroundRect(hover, radius);
+        if (!interactable.OnClick()) return false;
+        gui.RequestFocus(FocusReason.Mouse);
+        return true;
+    }
+
+    static void CompleteDropdownSelection(Gui gui, DropdownState state, int chosen, Rect buttonRect)
+    {
         if (gui.Pass != Pass.Pass2Render) return;
 
         if (chosen >= 0)

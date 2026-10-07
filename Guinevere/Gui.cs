@@ -113,6 +113,7 @@ public partial class Gui
         if (Platform.TryGet<IAccessibilityCapability>(out var accessibility)) accessibility?.BeginFrame();
 
         // Events run against the previous frame's tree, before it is cleared, so listeners see what the user saw.
+        DispatchFileDrops();
         DispatchInputEvents();
         _listenerCount = 0;
         _cursorNodeCount = 0;
@@ -137,13 +138,22 @@ public partial class Gui
         _controls.Apply(CurrentNodeScope);
         ControlMetrics.Apply(CurrentNodeScope);
 
-        if ((font ?? _defaultTextFont) is { } textFont)
-            SetTextFont(textFont);
-        if ((fontIcon ?? _defaultEmojiFont ?? font ?? _defaultTextFont) is { } emojiFont)
-            SetEmojiFont(emojiFont);
-        SetWidgetIconFont(fontWidgetIcon ?? _defaultWidgetIconFont ?? fontIcon ?? _defaultEmojiFont
-            ?? font ?? _defaultTextFont ?? CurrentNodeScope.Get<LayoutNodeScopeIconFont>().Value);
+        var textFont = ApplyFrameTextFonts(font, fontIcon);
+        ApplyFrameWidgetFont(textFont, fontIcon, fontWidgetIcon);
     }
+
+    Font? ApplyFrameTextFonts(Font? font, Font? fontIcon)
+    {
+        var textFont = font ?? _defaultTextFont;
+        if (textFont is not null) SetTextFont(textFont);
+        var emojiFont = fontIcon ?? _defaultEmojiFont ?? textFont;
+        if (emojiFont is not null) SetEmojiFont(emojiFont);
+        return textFont;
+    }
+
+    void ApplyFrameWidgetFont(Font? textFont, Font? fontIcon, Font? fontWidgetIcon) =>
+        SetWidgetIconFont(fontWidgetIcon ?? _defaultWidgetIconFont ?? fontIcon ?? _defaultEmojiFont
+            ?? textFont ?? CurrentNodeScope.Get<LayoutNodeScopeIconFont>().Value);
 
     /// <summary>
     /// Concludes the current GUI frame rendering process by releasing resources and performing cleanup tasks.
