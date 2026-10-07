@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
-- Improved: dock tab reordering shows its destination and close-button hover stays inside the tab border; compact menu titles share menu styling; Silk.NET and OpenTK windows fit the current monitor's work area at startup; X11 desktop windows can move beyond OS work-area boundaries; all desktop hosts expose native titles and icons; numeric fields clip overflowing text and preserve external value changes when tabbing away; ordinary labels support selection and copying with `DrawText(..., selectable: true)`.
-- Added: Searchable, virtualized `MultiDropdown` with filtered bulk actions, chips and keyboard navigation; flag-aware `EnumDropdown`, `[EnumButtons]` and `[EnumPaging]`, with mixed enum edits preserving each owner's unrelated flag bits. [#61](https://github.com/MASS4ORG/Guinevere/issues/61).
+- Changed: dock tab reordering; compact menu; windows fit the current monitor's work area at startup
+- Fixed: numeric fields clip overflowing text and preserve external value changes when tabbing away
+- Added: Searchable, virtualized `MultiDropdown` with filtered bulk action
+- Changed (breaking): Stylesheets are `.pss` theme files in PanGui syntax. Hosts can read `@const` values from `StyleSheet.Constants`. `$tokens` layer across sheets, and `gui.StyleSheets.SetToken` overrides them all. `@font-face` and `url()` resolve against the sheet, `@import` goes through a host resolver, and parse errors report `file:line:col`. Shapes, effects, mixins and macros parse but are not applied yet. Resolved styles are cached, and cache hits allocate nothing. Migration: `Gui.StyleSheets` is now a `StyleSheetCollection` (`Add`, indexer and `Remove` are unchanged). Rewrite `prop: value;`, `--x` and `var(--x)` as `prop = value;` and `$x`, or parse with `StyleSheetOptions.AllowCssSyntax = true`. [#157](https://github.com/MASS4ORG/Guinevere/issues/157), [#158](https://github.com/MASS4ORG/Guinevere/issues/158).
 
 ## v[5.8.0][] 2026-10-05
 
