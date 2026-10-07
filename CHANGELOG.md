@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
-- Added: `.pss` visual properties: text `color`/`font-*` inherited by children, `opacity`, `box-shadow`, per-corner `border-radius`, `outline`, `linear-gradient` backgrounds and `cursor`; `gui.SetOpacity`
+- Added: `.pss` visual properties: text `color`/`font-*` inherited by children, `opacity`, `box-shadow`, per-corner `border-radius`, `outline`, `linear-gradient` backgrounds and state-aware `cursor`; `gui.SetOpacity` fades a subtree as one group (CSS-like); `PointerCursor.Move`
+- Fixed (breaking visuals): `Shape.OuterShadow`/`InnerShadow` follow CSS `box-shadow` semantics (inset shadows fall on the edge away from the offset; blur is the CSS radius); render-pass scope values (hover text color) reach existing children
 - Added: icons (`gui.Icon`)
 - Added: `MASS4.Guinevere.Svg` package loads SVG icons.
 - Added: Desktop file-drop capability

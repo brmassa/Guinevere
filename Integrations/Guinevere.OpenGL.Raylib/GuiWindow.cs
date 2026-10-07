@@ -221,6 +221,7 @@ public partial class GuiWindow : IDisposable, IInputHandler, IWindowIdentityCapa
                 PointerCursor.ResizeDiagonalNorthWestSouthEast => MouseCursor.ResizeNwse,
                 PointerCursor.ResizeDiagonalNorthEastSouthWest => MouseCursor.ResizeNesw,
                 PointerCursor.NotAllowed => MouseCursor.NotAllowed,
+                PointerCursor.Move => MouseCursor.ResizeAll,
                 _ => MouseCursor.Default
             });
         }
