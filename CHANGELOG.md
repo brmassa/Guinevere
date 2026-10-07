@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+- Added: `.pss` visual properties: text `color`/`font-*` inherited by children, `opacity`, `box-shadow`, per-corner `border-radius`, `outline`, `linear-gradient` backgrounds and `cursor`; `gui.SetOpacity`
 - Added: icons (`gui.Icon`)
 - Added: `MASS4.Guinevere.Svg` package loads SVG icons.
 - Added: Desktop file-drop capability
