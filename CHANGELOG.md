@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+## v[6.0.0][] 2026-10-10
+
 - Changed (breaking): Excalibur defaults to Material Design 3. The previous look ships as `ExcaliburStyles.Classic` (`SetBaseSheet`).
 - Changed (breaking): Node ids are automatic and numeric #167.
 - Changed (breaking): GUI data has scopes and animations are keyed and sampled once per frame #174.
@@ -212,6 +214,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First Commit
 
+[6.0.0]: https://github.com/brmassa/guinevere/compare/v5.9.0...v6.0.0
 [5.9.0]: https://github.com/brmassa/guinevere/compare/v5.8.0...v5.9.0
 [5.8.0]: https://github.com/brmassa/guinevere/compare/v5.7.0...v5.8.0
 [5.7.0]: https://github.com/brmassa/guinevere/compare/v5.6.1...v5.7.0
@@ -246,4 +249,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.2.0]: https://github.com/MASS4ORG/Guinevere/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/MASS4ORG/Guinevere/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/MASS4ORG/Guinevere/compare/main...1.0.0
-[Unreleased]: https://github.com/brmassa/guinevere/compare/v5.9.0...HEAD
+[Unreleased]: https://github.com/brmassa/guinevere/compare/v6.0.0...HEAD
