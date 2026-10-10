@@ -96,6 +96,8 @@ public partial class Gui
     /// <param name="fontWidgetIcon">Optional font for explicit widget icons.</param>
     public void BeginFrame(SKCanvas canvas, Font? font = null, Font? fontIcon = null, Font? fontWidgetIcon = null)
     {
+        BeginIdentityPass();
+        _dataFrame++;
         Canvas = canvas;
         if (Platform.TryGet<IAccessibilityCapability>(out var accessibility)) accessibility?.BeginFrame();
         UpdateSystemAppearance();
@@ -175,6 +177,7 @@ public partial class Gui
     /// <param name="newPass">The new rendering stage to assign, represented as a value of the <see cref="Pass"/> enumeration.</param>
     public void SetStage(Pass newPass)
     {
+        BeginIdentityPass();
         Pass = newPass;
         if (RootNode is not null) RootNode!.Pass2NodeCount = 0;
     }
@@ -202,6 +205,7 @@ public partial class Gui
             return zOrder != 0 ? zOrder : left.Sequence.CompareTo(right.Sequence);
         });
 
+        using var renderer = new PrimitiveRenderer();
         for (var index = 0; index < _renderNodes.Count; index++)
         {
             var node = _renderNodes[index].Node;
@@ -209,7 +213,7 @@ public partial class Gui
             var restore = Canvas!.Save();
             ApplyAncestorClips(node, Canvas!);
             if (opacity < 1f) SaveOpacityLayer(node.DrawList.InkBounds(node), opacity);
-            if (opacity > 0f) node.DrawList.Render(this, node, Canvas!);
+            if (opacity > 0f) node.DrawList.Render(this, node, Canvas!, renderer);
             Canvas!.RestoreToCount(restore);
             node.Pass2NodeCount = 0;
         }
