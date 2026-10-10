@@ -84,7 +84,7 @@ public class AppBarTests
         h.Frame(Draw);
         var press = Content(h).Center;
         h.Input.MoveTo(press);
-        h.Input.PressButton(MouseButton.Left);
+        h.Input.PressButton();
         h.Frame(Draw);
         h.Input.MoveTo(press + new Vector2(40, 20));
         h.Frame(Draw);
@@ -93,7 +93,7 @@ public class AppBarTests
         h.Frame(Draw);
         h.Frame(Draw);
         Assert.Equal(new Vector2(140, 120), window.Position);
-        h.Input.ReleaseButton(MouseButton.Left);
+        h.Input.ReleaseButton();
         h.Frame(Draw);
         h.Input.MoveTo(press + new Vector2(30, 10));
         h.Frame(Draw);
@@ -113,11 +113,42 @@ public class AppBarTests
         h.Click(Draw, point);
         Assert.True(window.IsMaximized);
         h.Input.MoveTo(point);
-        h.Input.PressButton(MouseButton.Left);
+        h.Input.PressButton();
         h.Frame(Draw);
         h.Input.MoveTo(point + new Vector2(20, 10));
         h.Frame(Draw);
         Assert.Equal(new Vector2(100, 100), window.Position);
+    }
+
+    /// <summary>Keeps the background draggable when interactive widgets and menus fill the bar.</summary>
+    [Fact]
+    public void MenuBarAndWidgetsStillLeaveTheBarDraggable()
+    {
+        using var h = new FrameHarness();
+        var window = new Window(h);
+        h.Gui.Platform.Register<IWindowChromeCapability>(window);
+        var checkbox = false;
+        LayoutNode? spacer = null;
+        void Gallery(Gui gui)
+        {
+            using var bar = gui.AppBar();
+            gui.MenuBar(menu => menu.Collapsible()
+                .Menu("File", file => file.Item("Close", () => { }))
+                .Menu("View", view => view.Item("Toggle", () => { })));
+            gui.DrawText("Guinevere Excalibur");
+            using (gui.Node().ExpandWidth().Enter()) spacer = gui.CurrentNode;
+            gui.DrawText("FPS: 60.0");
+            checkbox = gui.Checkbox(checkbox, "Native title bar");
+            gui.Button("◐", 36, 36);
+        }
+        h.Frame(Gallery);
+        Assert.NotNull(spacer);
+        h.Input.MoveTo(spacer!.Center);
+        h.Input.PressButton();
+        h.Frame(Gallery);
+        h.Input.MoveTo(spacer.Center + new Vector2(40, 20));
+        h.Frame(Gallery);
+        Assert.Equal(new Vector2(140, 120), window.Position);
     }
 
     /// <summary>Keeps native decorations when the backend cannot move the window.</summary>
@@ -131,7 +162,7 @@ public class AppBarTests
         Assert.Equal([true], window.Decorations);
         Assert.Equal(4, Bar(h).Children.Count);
         h.Input.MoveTo(Content(h).Center);
-        h.Input.PressButton(MouseButton.Left);
+        h.Input.PressButton();
         h.Frame(Draw);
         h.Input.MoveTo(Content(h).Center + new Vector2(40, 10));
         h.Frame(Draw);
@@ -186,7 +217,7 @@ public class AppBarTests
         Assert.True(children[0].Rect.X + children[0].Rect.W < children[1].Rect.X);
         Assert.True(children[1].Rect.X + children[1].Rect.W < children[2].Rect.X);
         h.Input.MoveTo(children[1].Center);
-        h.Input.PressButton(MouseButton.Left);
+        h.Input.PressButton();
         h.Frame(Images);
         h.Input.MoveTo(children[1].Center + new Vector2(25, 10));
         h.Frame(Images);
@@ -218,15 +249,15 @@ public class AppBarTests
         h.Frame(Custom);
         var control = Content(h).Children[0].Center;
         h.Input.MoveTo(control);
-        h.Input.PressButton(MouseButton.Left);
+        h.Input.PressButton();
         h.Frame(Custom);
         h.Input.MoveTo(new Vector2(200, 18));
         h.Frame(Custom);
         Assert.Equal(1, clicked);
         Assert.Equal(new Vector2(100, 100), window.Position);
-        h.Input.ReleaseButton(MouseButton.Left);
+        h.Input.ReleaseButton();
         h.Frame(Custom);
-        h.Input.PressButton(MouseButton.Left);
+        h.Input.PressButton();
         h.Frame(Custom);
         h.Input.MoveTo(new Vector2(230, 28));
         h.Frame(Custom);
@@ -248,7 +279,7 @@ public class AppBarTests
         }
         h.Frame(Custom);
         h.Input.MoveTo(Content(h).Children[0].Center);
-        h.Input.PressButton(MouseButton.Left);
+        h.Input.PressButton();
         h.Frame(Custom);
         h.Input.MoveTo(new Vector2(200, 18));
         h.Frame(Custom);

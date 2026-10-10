@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased][]
 
+- Changed (breaking): Excalibur defaults to Material Design 3. The previous look ships as `ExcaliburStyles.Classic` (`SetBaseSheet`).
 - Changed (breaking): Node ids are automatic and numeric #167.
 - Changed (breaking): GUI data has scopes and animations are keyed and sampled once per frame #174.
 - Changed (breaking): Mutable fluent effects use `Draw…` shapes #20.
@@ -27,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed: Silk.NET, OpenTK and Raylib windows draw with Skia on the GPU; CPU rasterization remains the fallback #186.
 - Changed: Render-pass node matching is linear #166.
 - Changed: Nodes are reused across frames by identity #168.
+- Changed: Examples 02-09 are merged into Example 01.
 
 ## v[5.9.0][] 2026-10-06
 
@@ -49,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v[5.5.0][] 2026-10-02
 
-- Added: Attribute-driven forms in three packages: `MASS4.Attributes` (metadata), `Autoformers` (GUI-free form model) and `Autoformers.Excalibur` (`gui.Form` on Excalibur controls). See [Example 76](Examples/Example-76-Odin-Attributes/README.md).
+- Added: Attribute-driven forms in three packages: `MASS4.Attributes` (metadata), `Autoformers` (GUI-free form model) and `Autoformers.Excalibur` (`gui.Form` on Excalibur controls).
 - Changed: Every package now shares one version line, so the project folders drop the `MASS4.` prefix (`Attributes`, `Autoformers`, `Autoformers.Excalibur`) and the forms packages are published as `Autoformers` and `Autoformers.Excalibur`.
 
 ## v[5.4.0][] 2026-09-30

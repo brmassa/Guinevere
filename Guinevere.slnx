@@ -10,16 +10,12 @@
         <Project Path="Examples/Example-01-OpenGL-SilkNet/Example-01-OpenGL-SilkNet.csproj"/>
         <Project Path="Examples/Example-01-Vulkan-SilkNet/Example-01-Vulkan-SilkNet.csproj"/>
         <Project Path="Examples/Example-01/Example-01.csproj"/>
-        <Project Path="Examples/Example-02-Layout/Example-02-Layout.csproj"/>
-        <Project Path="Examples/Example-03-Texts/Example-03-Texts.csproj"/>
-        <Project Path="Examples/Example-04-Animation/Example-04-Animation.csproj"/>
-        <Project Path="Examples/Example-05-DragAndDrop/Example-05-DragAndDrop.csproj"/>
-        <Project Path="Examples/Example-06-ResponsiveLayout/Example-06-ResponsiveLayout.csproj"/>
-        <Project Path="Examples/Example-07-Styling/Example-07-Styling.csproj"/>
-        <Project Path="Examples/Example-08-HeadlessControls/Example-08-HeadlessControls.csproj"/>
-        <Project Path="Examples/Example-09-EventsAndCursors/Example-09-EventsAndCursors.csproj"/>
-        <Project Path="Examples/Example-50-Excalibur-Controls/Example-50-Excalibur-Controls.csproj"/>
-        <Project Path="Examples/Example-51-Docking/Example-51-Docking.csproj"/>
+        <Project Path="Examples/Example-11-Excalibur-Attributes/Example-11-Excalibur-Attributes.csproj"/>
+        <Project Path="Examples/Example-50-OpenGL-OpenTK/Example-50-OpenGL-OpenTK.csproj"/>
+        <Project Path="Examples/Example-50-OpenGL-Raylib/Example-50-OpenGL-Raylib.csproj"/>
+        <Project Path="Examples/Example-50-OpenGL-SilkNet/Example-50-OpenGL-SilkNet.csproj"/>
+        <Project Path="Examples/Example-50-Vulkan-SilkNet/Example-50-Vulkan-SilkNet.csproj"/>
+        <Project Path="Examples/Example-50/Example-50.csproj"/>
         <Project Path="Examples/Example-70-PanGui-HelloWorld/Example-70-PanGui-HelloWorld.csproj"/>
         <Project Path="Examples/Example-71-PanGui-HelloTriangle/Example-71-PanGui-HelloTriangle.csproj"/>
         <Project Path="Examples/Example-72-PanGui-AirbnbSlider/Example-72-PanGui-AirbnbSlider.csproj"/>
@@ -28,7 +24,6 @@
         </Project>
         <Project Path="Examples/Example-74-PanGui-Heart/Example-74-PanGui-Heart.csproj"/>
         <Project Path="Examples/Example-75-PaperUI-Dashboard/Example-75-PaperUI-Dashboard.csproj"/>
-        <Project Path="Examples/Example-76-Odin-Attributes/Example-76-Odin-Attributes.csproj"/>
         <Project Path="Examples/Example-90-LayoutBenchmarks/Example-90-LayoutBenchmarks.csproj"/>
         <Project Path="Examples/Example-91-TypeBenchmarks/Example-91-TypeBenchmarks.csproj"/>
         <Project Path="Examples/Example-92-DrawBenchmarks/Example-92-DrawBenchmarks.csproj"/>
