@@ -4,6 +4,9 @@ namespace Guinevere;
 
 public partial class Gui : ILayoutNodeEnterExit
 {
+    /// <summary>Per-parent identity indexes built when the render pass diverges from the build pass.</summary>
+    readonly Dictionary<LayoutNode, Dictionary<int, int>> _matchIndexes = new(ReferenceEqualityComparer.Instance);
+
     /// <summary>
     /// Retrieves the currently active <see cref="LayoutNode"/> within the layout context.
     /// </summary>
@@ -122,13 +125,9 @@ public partial class Gui : ILayoutNodeEnterExit
         var identity = NodeIdentity(id, filePath, lineNumber, CurrentNode);
         if (id is null) CurrentNode.Pass2NodeCount++;
         SubmitIdentity(identity);
-        LayoutNode node;
         var nodeExist = Pass == Pass.Pass1Build ? null : FindImmediateNode(identity);
-        if (Pass == Pass.Pass1Build || nodeExist is null)
-        {
-            node = new LayoutNode(identity, this, CurrentNode, width, height);
-            CurrentNode.AddChild(node);
-        }
+        LayoutNode node;
+        if (nodeExist is null) node = BuildNode(identity, width, height);
         else
         {
             node = nodeExist;
@@ -159,12 +158,11 @@ public partial class Gui : ILayoutNodeEnterExit
         SubmitIdentity(identity);
         var nodeExist = Pass == Pass.Pass1Build ? null : FindImmediateNode(identity);
         LayoutNode node;
-        if (Pass == Pass.Pass1Build || nodeExist is null)
+        if (nodeExist is null)
         {
-            node = new LayoutNode(identity, this, CurrentNode);
+            node = BuildNode(identity, null, null);
             node.ApplyWidth(width);
             node.ApplyHeight(height);
-            CurrentNode.AddChild(node);
         }
         else
         {
@@ -178,11 +176,49 @@ public partial class Gui : ILayoutNodeEnterExit
         return node;
     }
 
+    /// <summary>
+    /// Adds a child for this frame under the current node, reusing the previous frame's node with the same identity
+    /// (reset to a new node's state) or creating one.
+    /// </summary>
+    LayoutNode BuildNode(int identity, float? width, float? height)
+    {
+        var parent = CurrentNode;
+        var node = parent.TakePreviousChild(identity);
+        if (node is null) node = new LayoutNode(identity, this, parent, width, height);
+        else node.ResetForBuild(width, height);
+        parent.AppendNewChild(node);
+        return node;
+    }
+
+    /// <summary>
+    /// Finds the build-pass child the render pass is revisiting. Children come back in build order, so the parent's
+    /// cursor finds each in constant time; a call that diverges resynchronizes through an identity index.
+    /// </summary>
     LayoutNode? FindImmediateNode(int identity)
     {
-        foreach (var child in CurrentNode.ChildNodes)
-            if (child.Identity == identity) return child;
-        return null;
+        var parent = CurrentNode;
+        var children = parent.ChildNodes;
+        var cursor = parent.MatchCursor;
+        if (cursor < children.Count && children[cursor].Identity == identity)
+        {
+            parent.MatchCursor = cursor + 1;
+            return children[cursor];
+        }
+        return FindDivergedNode(parent, identity);
+    }
+
+    /// <summary>Looks a child up by identity, indexing the parent's children on its first mismatch this pass.</summary>
+    LayoutNode? FindDivergedNode(LayoutNode parent, int identity)
+    {
+        var children = parent.ChildNodes;
+        if (!_matchIndexes.TryGetValue(parent, out var index))
+        {
+            _matchIndexes.Add(parent, index = new Dictionary<int, int>(children.Count));
+            for (var i = 0; i < children.Count; i++) index.TryAdd(children[i].Identity, i);
+        }
+        if (!index.TryGetValue(identity, out var position)) return null;
+        parent.MatchCursor = position + 1;
+        return children[position];
     }
 
     LayoutNode CreateRootNode(Rect rect)

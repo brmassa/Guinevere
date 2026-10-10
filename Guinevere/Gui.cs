@@ -97,6 +97,7 @@ public partial class Gui
     public void BeginFrame(SKCanvas canvas, Font? font = null, Font? fontIcon = null, Font? fontWidgetIcon = null)
     {
         BeginIdentityPass();
+        BeginFrameRequests();
         _dataFrame++;
         Canvas = canvas;
         if (Platform.TryGet<IAccessibilityCapability>(out var accessibility)) accessibility?.BeginFrame();
@@ -120,7 +121,7 @@ public partial class Gui
         }
         else
         {
-            RootNode.ClearRoot();
+            RootNode.BeginRootFrame();
             RegisterLayoutNodeScope(RootNode);
         }
 
@@ -179,7 +180,10 @@ public partial class Gui
     {
         BeginIdentityPass();
         Pass = newPass;
-        if (RootNode is not null) RootNode!.Pass2NodeCount = 0;
+        _matchIndexes.Clear();
+        if (RootNode is null) return;
+        RootNode.Pass2NodeCount = 0;
+        RootNode.MatchCursor = 0;
     }
 
     /// <summary>
