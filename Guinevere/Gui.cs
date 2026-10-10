@@ -115,6 +115,7 @@ public partial class Gui
         LayoutNodeScopeStack.Clear();
 
         // Clear the previous tree completely
+        ClearTransforms();
         if (RootNode is null)
         {
             RootNode = CreateRootNode(ScreenRect);
@@ -215,7 +216,8 @@ public partial class Gui
             var node = _renderNodes[index].Node;
             var opacity = _opacityUsed ? EnterOpacityGroups(index) : 1f;
             var restore = Canvas!.Save();
-            ApplyAncestorClips(node, Canvas!);
+            if (TransformsUsed) ApplyTransformedClips(node, Canvas!);
+            else ApplyAncestorClips(node, Canvas!);
             if (opacity < 1f) SaveOpacityLayer(node.DrawList.InkBounds(node), opacity);
             if (opacity > 0f) node.DrawList.Render(this, node, Canvas!, renderer);
             Canvas!.RestoreToCount(restore);
