@@ -22,8 +22,14 @@ public abstract partial class Program
     static string _selectedFile = "No file selected";
     static string _selectedFolder = "No folder selected";
 
+    // Choice controls take no colors: this class restyles a toggle's track from a sheet over the default one.
+    static readonly StyleSheet SelectionSheet = StyleSheet.Parse("""
+        toggle.purple > track { background-color = #9e9e9e; :checked { background-color = #9c27b0; } }
+        """);
+
     static void SelectionContent(Gui gui)
     {
+        if (!gui.StyleSheets.Contains(SelectionSheet)) gui.StyleSheets.Add(SelectionSheet);
         Section(gui, "Checkboxes", () => CheckboxRow(gui));
         Section(gui, "Toggles", () => ToggleRow(gui));
         Section(gui, "Radio Buttons", () => RadioButtonRow(gui));
@@ -47,9 +53,7 @@ public abstract partial class Program
         using (gui.Node().Height(30).Direction(Axis.Horizontal).Gap(20).Enter())
         {
             gui.Toggle(ref _toggle1, "Dark mode");
-            gui.Toggle(ref _toggle2, "High contrast",
-                onColor: Color.FromArgb(255, 156, 39, 176),
-                offColor: Color.FromArgb(255, 158, 158, 158));
+            gui.Toggle(ref _toggle2, "High contrast", classes: ["purple"]);
             gui.Toggle(ref _toggle1, "Disabled toggle", enabled: false);
         }
     }
@@ -58,11 +62,10 @@ public abstract partial class Program
     {
         using (gui.Node().Height(120).Direction(Axis.Horizontal).Gap(40).Enter())
         {
-            gui.DrawText("Control palette:", 14, gui.ControlPalette.Text);
+            gui.DrawText("Theme:", 14, Token(gui, "text"));
 
             gui.RadioGroup(ref _radioChoice,
                 [(0, "Light"), (1, "Dark"), (2, "Mono Light"), (3, "Mono Dark")]);
-            gui.ControlPalette = SelectedPalette();
             gui.RadioButton(ref _radioChoice, 4, "Disabled radio", enabled: false);
         }
     }
@@ -78,7 +81,9 @@ public abstract partial class Program
 
             using (gui.Node().Width(200).Enter())
             {
-                gui.Dropdown(DropdownOptions, ref _dropdown2, selectedColor: Color.FromArgb(255, 76, 175, 80));
+                // A token set on a node themes its whole subtree, including the dropdown's option list.
+                gui.SetStyleToken("selected", Color.FromArgb(255, 76, 175, 80));
+                gui.Dropdown(DropdownOptions, ref _dropdown2);
             }
             gui.Dropdown(DropdownOptions, ref _dropdown1, placeholder: "Disabled dropdown",
                 enabled: false);
@@ -95,7 +100,7 @@ public abstract partial class Program
         }
 
         gui.DrawText("The same asynchronous control can select files or folders and can be embedded in any panel.",
-            size: 12, color: gui.ControlPalette.TextDim);
+            size: 12, color: Token(gui, "text-dim"));
 
         using (gui.Node().ExpandWidth().Margin(0, 8, 0, 0).Direction(Axis.Horizontal).Gap(12).Enter())
         {
@@ -121,8 +126,8 @@ public abstract partial class Program
     {
         using (gui.Node().Width(520).Height(500).Padding(8).Direction(Axis.Vertical).Gap(6).Enter())
         {
-            gui.DrawText(title, size: 14, color: gui.ControlPalette.Text);
-            gui.DrawText(result, size: 11, color: gui.ControlPalette.TextDim, wrapWidth: 500);
+            gui.DrawText(title, size: 14, color: Token(gui, "text"));
+            gui.DrawText(result, size: 11, color: Token(gui, "text-dim"), wrapWidth: 500);
 
             if (state.IsOpen) gui.FileBrowser(state, width: 504, height: 450, fontSize: 12);
             else if (gui.Button("Browse again", width: 120, height: 28, fontSize: 12)) reopen();

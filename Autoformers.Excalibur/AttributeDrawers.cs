@@ -93,8 +93,9 @@ sealed class GuiColorDrawer : IAttributeDrawer
         var surface = new FormStyle(gui).Field;
         using (gui.Node(-1, -1, $"{id}/tint").ExpandWidth().Direction(Axis.Vertical).Enter())
         {
-            gui.CurrentNodeScope.Set(ControlStyles.Value<ControlText, Color>(color));
-            gui.CurrentNodeScope.Set(ControlStyles.Value<ControlSurface, Color>(Blend(surface, color, 0.25f)));
+            var tinted = Blend(surface, color, 0.25f);
+            gui.SetStyleToken("text", color);
+            gui.SetStyleToken("surface", tinted);
             next();
         }
     }

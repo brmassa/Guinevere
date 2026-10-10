@@ -2,7 +2,7 @@ namespace Guinevere;
 
 public partial class Gui
 {
-    readonly List<(int Z, int Sequence, LayoutNode Node)> _renderNodes = [];
+    readonly List<(int Z, int Sequence, int End, LayoutNode Node)> _renderNodes = [];
     readonly List<LayoutNode> _clipAncestors = [];
     /// <summary>
     /// A property that represents the core rendering surface for graphical operations.
@@ -14,17 +14,18 @@ public partial class Gui
     /// </remarks>
     public SKCanvas? Canvas { get; set; }
 
-    Font? _defaultTextFont;
-    Font? _defaultEmojiFont;
-    Font? _defaultWidgetIconFont;
+    /// <summary>Runtime font faces, fallback lists and frame font roles.</summary>
+    public FontRegistry Fonts { get; } = new();
 
     /// <summary>Sets the fonts inherited by every frame. Optional icon fonts fall back to the text font.</summary>
     public void ConfigureFonts(Font text, Font? emoji = null, Font? widgetIcon = null)
     {
         ArgumentNullException.ThrowIfNull(text);
-        _defaultTextFont = text;
-        _defaultEmojiFont = emoji;
-        _defaultWidgetIconFont = widgetIcon;
+        Fonts.SetRole(FontRole.Ui, text);
+        if (emoji is null) Fonts.ClearRole(FontRole.Emoji);
+        else Fonts.SetRole(FontRole.Emoji, emoji);
+        if (widgetIcon is null) Fonts.ClearRole(FontRole.Icon);
+        else Fonts.SetRole(FontRole.Icon, widgetIcon);
     }
 
     /// <summary>
@@ -49,21 +50,7 @@ public partial class Gui
         Platform.Register<ITimeCapability>(Time);
     }
 
-    ControlPalette _controls = ControlPalette.Light;
-
-    /// <summary>Fallback colors applied as independent values to each frame's root scope.</summary>
-    public ControlPalette ControlPalette
-    {
-        get => _controls;
-        set
-        {
-            ArgumentNullException.ThrowIfNull(value);
-            _controls = value;
-            if (LayoutNodeScopeStack.TryPeek(out var scope)) value.Apply(scope);
-        }
-    }
-
-    /// <summary>Control colors and dimensions inherited by the current layout node.</summary>
+    /// <summary>Control dimensions inherited by the current layout node.</summary>
     public ControlStyleValues ControlStyle => new(this);
 
     /// <summary>
@@ -111,6 +98,7 @@ public partial class Gui
     {
         Canvas = canvas;
         if (Platform.TryGet<IAccessibilityCapability>(out var accessibility)) accessibility?.BeginFrame();
+        UpdateSystemAppearance();
 
         // Events run against the previous frame's tree, before it is cleared, so listeners see what the user saw.
         DispatchInputEvents();
@@ -134,15 +122,29 @@ public partial class Gui
             RegisterLayoutNodeScope(RootNode);
         }
 
-        _controls.Apply(CurrentNodeScope);
         ControlMetrics.Apply(CurrentNodeScope);
+        ApplyFontScale();
 
-        if ((font ?? _defaultTextFont) is { } textFont)
-            SetTextFont(textFont);
-        if ((fontIcon ?? _defaultEmojiFont ?? font ?? _defaultTextFont) is { } emojiFont)
-            SetEmojiFont(emojiFont);
-        SetWidgetIconFont(fontWidgetIcon ?? _defaultWidgetIconFont ?? fontIcon ?? _defaultEmojiFont
-            ?? font ?? _defaultTextFont ?? CurrentNodeScope.Get<LayoutNodeScopeIconFont>().Value);
+        var textFont = ApplyFrameTextFonts(font, fontIcon);
+        ApplyFrameWidgetFont(textFont, fontIcon, fontWidgetIcon);
+    }
+
+    Font? ApplyFrameTextFonts(Font? font, Font? fontIcon)
+    {
+        if (font is not null) Fonts.Register(font.FamilyName, font);
+        if (fontIcon is not null) Fonts.Register(fontIcon.FamilyName, fontIcon);
+        var textFont = font ?? Fonts.ResolveRole(FontRole.Ui);
+        if (textFont is not null) SetTextFont(textFont);
+        var emojiFont = fontIcon ?? Fonts.ResolveRole(FontRole.Emoji) ?? textFont;
+        if (emojiFont is not null) SetEmojiFont(emojiFont);
+        return textFont;
+    }
+
+    void ApplyFrameWidgetFont(Font? textFont, Font? fontIcon, Font? fontWidgetIcon)
+    {
+        if (fontWidgetIcon is not null) Fonts.Register(fontWidgetIcon.FamilyName, fontWidgetIcon);
+        SetWidgetIconFont(fontWidgetIcon ?? Fonts.ResolveRole(FontRole.Icon) ?? fontIcon
+            ?? Fonts.ResolveRole(FontRole.Emoji) ?? textFont ?? LayoutNodeScopeIconFont.Default.Value);
     }
 
     /// <summary>
@@ -200,14 +202,18 @@ public partial class Gui
             return zOrder != 0 ? zOrder : left.Sequence.CompareTo(right.Sequence);
         });
 
-        foreach (var (_, _, node) in _renderNodes)
+        for (var index = 0; index < _renderNodes.Count; index++)
         {
+            var node = _renderNodes[index].Node;
+            var opacity = _opacityUsed ? EnterOpacityGroups(index) : 1f;
             var restore = Canvas!.Save();
             ApplyAncestorClips(node, Canvas!);
-            node.DrawList.Render(this, node, Canvas!);
+            if (opacity < 1f) SaveOpacityLayer(node.DrawList.InkBounds(node), opacity);
+            if (opacity > 0f) node.DrawList.Render(this, node, Canvas!);
             Canvas!.RestoreToCount(restore);
             node.Pass2NodeCount = 0;
         }
+        if (_opacityUsed) CloseOpacityGroups(int.MaxValue, int.MaxValue);
     }
 
     /// <summary>
@@ -253,12 +259,16 @@ public partial class Gui
         }
     }
 
-    void NodeFlatList(LayoutNode node, List<(int Z, int Sequence, LayoutNode Node)> list)
+    /// <summary>Lists the tree in pre-order; <c>End</c> is the sequence of the node's last descendant.</summary>
+    static void NodeFlatList(LayoutNode node, List<(int Z, int Sequence, int End, LayoutNode Node)> list)
     {
-        list.Add((node.Scope.Get<LayoutNodeScopeZIndex>().Value, list.Count, node));
+        var index = list.Count;
+        list.Add((node.Scope.Get<LayoutNodeScopeZIndex>().Value, index, index, node));
 
         foreach (var child in node.Children)
             NodeFlatList(child, list);
+
+        list[index] = list[index] with { End = list.Count - 1 };
     }
 
     /// <summary>

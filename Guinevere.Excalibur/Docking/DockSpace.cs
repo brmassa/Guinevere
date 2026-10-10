@@ -4,6 +4,8 @@ namespace Guinevere;
 
 public static partial class ControlsExtensions
 {
+    static readonly string[] DockClass = ["dock"];
+
     /// <summary>
     /// Renders a <see cref="DockLayout"/>: nested splits with draggable splitters, tab groups whose
     /// tabs can be reordered, moved between groups, torn off into floating windows and closed.
@@ -16,25 +18,29 @@ public static partial class ControlsExtensions
     /// <param name="layout">The layout to render. Mutated in place as the user rearranges it.</param>
     /// <param name="panelInfo">Resolves a panel id to its tab label. Return null for an id the host no longer knows.</param>
     /// <param name="renderPanel">Draws a panel's body. Called for the active tab of every visible group.</param>
-    /// <param name="theme">Colors and metrics. Defaults to <see cref="DockTheme.Dark"/>.</param>
+    /// <param name="theme">Metrics. Defaults to <see cref="DockTheme.Default"/>; colors come from the sheets.</param>
     /// <param name="renderTabStripActions">
     /// Draws into the space a group's tab strip does not use. Children flow from the right edge, which
     /// is where an overflow or lock button belongs; <see cref="DockTabStrip.FreeArea"/> is there for
     /// anyone who would rather position content absolutely.
     /// </param>
     /// <param name="filePath">Call site, supplied by the compiler.</param>
+    /// <param name="classes">Stylesheet classes for the dock space.</param>
+    /// <param name="id">Stable stylesheet identity.</param>
     /// <param name="lineNumber">Call site, supplied by the compiler.</param>
     public static void DockSpace(this Gui gui, DockLayout layout,
         Func<string, DockPanelInfo?> panelInfo,
         Action<string, Gui> renderPanel,
         DockTheme? theme = null,
         Action<DockTabStrip, Gui>? renderTabStripActions = null,
+        IReadOnlyList<string>? classes = null, string? id = null,
         [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
     {
-        var context = new DockContext(gui, layout, panelInfo, renderPanel, theme ?? DockTheme.FromStyle(gui.ControlStyle),
+        ExcaliburStyles.Ensure(gui);
+        var context = new DockContext(gui, layout, panelInfo, renderPanel, theme ?? DockTheme.Default,
             renderTabStripActions);
 
-        using (gui.Node(filePath: filePath, lineNumber: lineNumber).Expand().Enter())
+        using (gui.StyledNode("dockspace", classes, id, filePath: filePath, lineNumber: lineNumber).Expand().Enter())
         {
             // Declared before any zone so that a drop the zones do not claim falls through to here
             // and tears the panel off: overlapping targets resolve last-declared-wins.
@@ -79,8 +85,7 @@ public static partial class ControlsExtensions
             using (first.Enter()) RenderNode(context, split.First, $"{path}/a");
 
             var fraction = split.Fraction;
-            if (gui.Splitter(ref fraction, split.Axis, context.Theme.SplitterThickness,
-                    color: context.Theme.Border, hoverColor: context.Theme.Hover))
+            if (gui.Splitter(ref fraction, split.Axis, context.Theme.SplitterThickness, classes: DockClass))
             {
                 split.Fraction = fraction;
                 context.Layout.MarkChanged();
@@ -116,9 +121,8 @@ public static partial class ControlsExtensions
             if (outcome.Activated is { } activated) Activate(context, leaf, activated);
             if (outcome.Closed is { } closed) context.Closing = closed.Id;
 
-            using (gui.Node(-1, -1, $"{path}/body").Expand().Enter())
+            using (gui.StyledNode("dock-panel", id: $"{path}/body").Expand().Enter())
             {
-                gui.DrawBackgroundRect(theme.Panel);
                 gui.ClipContent();
 
                 if (leaf.ActivePanelId is { } activeId && context.PanelInfo(activeId) is not null)
@@ -152,11 +156,8 @@ public static partial class ControlsExtensions
 
         var dragging = gui.DragSource(id, new DockTabPayload(item.Id, leaf), ghost: g =>
         {
-            using (g.Node(120, context.Theme.TabHeight).Enter())
-            {
-                g.DrawBackgroundRect(context.Theme.Accent, 3);
-                g.DrawText(item.Label, context.Theme.FontSize, context.Theme.Ink);
-            }
+            using (g.StyledNode("dock-ghost").Width(120).Height(context.Theme.TabHeight).Enter())
+                g.DrawText(item.Label, context.Theme.FontSize);
         });
 
         var index = leaf.PanelIds.IndexOf(item.Id);
@@ -173,7 +174,7 @@ public static partial class ControlsExtensions
             var rect = gui.CurrentNode.Rect;
             var after = leaf.PanelIds.IndexOf(payload.PanelId) < index;
             gui.DrawRect(new Rect(after ? rect.X + rect.W - 2 : rect.X, rect.Y + 3, 2,
-                Math.Max(1, rect.H - 6)), context.Theme.Accent);
+                Math.Max(1, rect.H - 6)), PartColor(gui, "drop-indicator", "background-color"));
         }
 
         return dragging;
@@ -213,8 +214,8 @@ public static partial class ControlsExtensions
             if (!drop.IsAccepted) return;
 
             var preview = ZoneRect(rect, zone, zone == DockZone.Center ? 1f : 0.5f);
-            gui.DrawRect(preview, Color.FromArgb(70, context.Theme.Accent), 2);
-            gui.DrawRectBorder(preview, context.Theme.Accent, 2, 2);
+            var style = gui.ResolvePart("drop-preview");
+            gui.DrawStyledBox(style, preview);
         }
     }
 
@@ -267,28 +268,24 @@ public static partial class ControlsExtensions
     static void RenderFloating(DockContext context)
     {
         var gui = context.Gui;
-        var theme = context.Theme;
 
         for (var i = 0; i < context.Layout.Floating.Count; i++)
         {
             var window = context.Layout.Floating[i];
             var bounds = window.Bounds;
 
-            using (gui.Node(bounds.W, bounds.H, $"dock:float/{i}")
+            using (gui.StyledNode("dock-window", id: $"dock:float/{i}").Width(bounds.W).Height(bounds.H)
                        .AbsoluteScreen(bounds.X, bounds.Y)
                        .BlockInput()
                        .Direction(Axis.Vertical)
                        .Enter())
             {
                 gui.SetZIndex(100 + i);
-                gui.DrawBackgroundRect(theme.Panel, 3);
-                gui.DrawRectBorder(gui.CurrentNode.Rect, theme.Border, 1, 3);
 
-                using (gui.Node(-1, 18, $"dock:float/{i}/grip").ExpandWidth().Enter())
+                using (gui.StyledNode("dock-grip", id: $"dock:float/{i}/grip").Height(18).ExpandWidth().Enter())
                 {
                     if (gui.Pass == Pass.Pass2Render)
                     {
-                        gui.DrawBackgroundRect(theme.TabStrip);
 
                         // Anchored to the window's position at the press, then offset by the pointer's
                         // total travel — accumulating per-frame deltas drifts away from the cursor.
@@ -322,11 +319,8 @@ public static partial class ControlsExtensions
     {
         var gui = context.Gui;
 
-        using (gui.Node(-1, -1, "dock:empty").Expand().Enter())
-        {
-            gui.DrawBackgroundRect(context.Theme.TabStrip);
-            gui.DrawText("No panels open", context.Theme.FontSize, context.Theme.InkDim);
-        }
+        using (gui.StyledNode("dock-empty", id: "dock:empty").Expand().Enter())
+            gui.DrawText("No panels open", context.Theme.FontSize);
     }
 
     /// <summary>

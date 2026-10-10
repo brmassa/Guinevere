@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Guinevere;
 
 public static partial class ControlsExtensions
@@ -8,37 +10,41 @@ public static partial class ControlsExtensions
     /// <summary>Track widths the indeterminate chunk crosses per second.</summary>
     const float IndeterminateSpeed = 0.7f;
 
+    static readonly string[] IndeterminateModifier = ["indeterminate"];
+
     /// <summary>
     /// Draws a horizontal progress bar filling left to right. Pass a null <paramref name="fraction"/>
-    /// for work of unknown length, which animates a traveling chunk instead.
+    /// for work of unknown length, which animates a traveling chunk instead. The track is styled by the
+    /// <c>progress</c> rules and the filled part by its <c>fill</c> part's <c>background-color</c>.
     /// </summary>
     /// <param name="gui">The GUI for this frame.</param>
     /// <param name="fraction">Completion in 0..1, clamped; null for indeterminate.</param>
     /// <param name="width">Bar width, or -1 to fill the parent.</param>
-    /// <param name="height">Bar height.</param>
-    /// <param name="trackColor">Groove color; defaults to the palette's.</param>
-    /// <param name="fillColor">Filled color; defaults to the palette's.</param>
+    /// <param name="height">Bar height; null uses the stylesheet's height.</param>
+    /// <param name="classes">Extra classes for the sheet.</param>
+    /// <param name="id">Element id for stylesheet selectors.</param>
+    /// <param name="filePath">Compiler-supplied call site.</param>
+    /// <param name="lineNumber">Compiler-supplied call site.</param>
     public static void ProgressBar(this Gui gui, float? fraction,
-        float width = -1, float height = 6,
-        Color? trackColor = null, Color? fillColor = null)
+        float width = -1, float? height = null, IReadOnlyList<string>? classes = null, string? id = null,
+        [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
     {
         ArgumentNullException.ThrowIfNull(gui);
-
-        var palette = gui.ControlStyle;
-        var track = trackColor ?? palette.Divider;
-        var fill = fillColor ?? palette.Accent;
-        var radius = height / 2f;
-
-        using (gui.Node(width, height).Enter())
+        ExcaliburStyles.Ensure(gui);
+        var node = gui.StyledNode("progress", classes, id,
+            modifiers: fraction is null ? IndeterminateModifier : NoModifiers,
+            filePath: filePath, lineNumber: lineNumber);
+        if (width > 0) node.Width(UnitValue.Pixels(width));
+        if (height is { } size) node.Height(UnitValue.Pixels(size));
+        using (node.Enter())
         {
             if (gui.Pass != Pass.Pass2Render) return;
 
-            var rect = gui.CurrentNode.Rect;
-            gui.DrawRect(rect, track, radius);
+            var rect = gui.CurrentNode.InnerRect;
             if (rect.W <= 0) return;
 
             var filled = FillRect(rect, fraction, gui.Clock.Elapsed);
-            if (filled.W > 0) gui.DrawRect(filled, fill, radius);
+            gui.DrawStyledBox(gui.ResolvePart("fill"), filled);
         }
     }
 

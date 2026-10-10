@@ -51,7 +51,11 @@ public abstract partial class Program
                                     centerInRect: false);
 
                             using (gui.Node().Expand().Enter())
-                                gui.ProgressBar(value, height: 10, fillColor: Hsb(value * 240f));
+                            {
+                                // Controls take no colors: a token set here recolors this subtree's fill.
+                                gui.SetStyleToken("accent", Hsb(value * 240f));
+                                gui.ProgressBar(value, height: 10);
+                            }
                         }
                     }
                 }
@@ -65,10 +69,17 @@ public abstract partial class Program
                         color: Color.FromArgb(255, 102, 102, 102));
 
                     gui.ProgressBar(null, height: 6);
-                    gui.ProgressBar(null, height: 10, fillColor: Hsb(220f));
-                    gui.ProgressBar(null, height: 14,
-                        trackColor: Color.FromArgb(255, 224, 224, 224),
-                        fillColor: Color.FromArgb(255, 76, 175, 80));
+                    using (gui.Node().ExpandWidth().Enter())
+                    {
+                        gui.SetStyleToken("accent", Hsb(220f));
+                        gui.ProgressBar(null, height: 10);
+                    }
+                    using (gui.Node().ExpandWidth().Enter())
+                    {
+                        gui.SetStyleToken("divider", Color.FromArgb(255, 224, 224, 224));
+                        gui.SetStyleToken("accent", Color.FromArgb(255, 76, 175, 80));
+                        gui.ProgressBar(null, height: 14);
+                    }
                 }
             });
         }
@@ -89,35 +100,35 @@ public abstract partial class Program
                     gui.Toast("Here is some information", new ToastOptions
                     {
                         Corner = ToastCorner.BottomRight,
-                        AccentColor = Color.FromArgb(255, 33, 150, 243)
+                        Classes = ["info"]
                     });
 
                 if (gui.Button("Success", width: 80, height: 26))
                     gui.Toast("Operation completed successfully!", new ToastOptions
                     {
                         Corner = ToastCorner.BottomRight,
-                        AccentColor = Color.FromArgb(255, 76, 175, 80)
+                        Classes = ["positive"]
                     });
 
                 if (gui.Button("Warning", width: 80, height: 26))
                     gui.Toast("Something needs your attention", new ToastOptions
                     {
                         Corner = ToastCorner.TopRight,
-                        AccentColor = Color.FromArgb(255, 255, 152, 0)
+                        Classes = ["warning"]
                     });
 
                 if (gui.Button("Danger", width: 80, height: 26))
                     gui.Toast("That action could not be completed", new ToastOptions
                     {
                         Corner = ToastCorner.BottomLeft,
-                        AccentColor = Color.FromArgb(255, 229, 57, 53)
+                        Classes = ["negative"]
                     });
 
                 if (gui.Button("Note", width: 80, height: 26))
                     gui.Toast("A reminder pinned to the top-left corner", new ToastOptions
                     {
                         Corner = ToastCorner.TopLeft,
-                        AccentColor = Color.FromArgb(255, 0, 150, 136)
+                        Classes = ["info"]
                     });
 
                 if (gui.Button("Clear", width: 80, height: 26))

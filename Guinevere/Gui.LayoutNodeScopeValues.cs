@@ -66,6 +66,18 @@ public partial class Gui
     }
 
     /// <summary>
+    /// Fades the current node and its descendants as one group, like CSS: the subtree is composited first, so
+    /// overlapping descendants do not show through each other. Nested opacities multiply; descendants drawn on another
+    /// z-layer, such as popups, are faded individually.
+    /// </summary>
+    public void SetOpacity(float opacity, LayoutNodeScope? scope = null)
+    {
+        scope ??= CurrentNodeScope;
+        scope.Set(new LayoutNodeScopeOpacity { Value = Math.Clamp(opacity, 0f, 1f) });
+        _opacityUsed = true;
+    }
+
+    /// <summary>
     /// Sets the Z-index for the current node and its children.
     /// The Z-index is automatically restored when exiting the node scope.
     /// </summary>

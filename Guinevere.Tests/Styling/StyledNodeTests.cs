@@ -1,6 +1,8 @@
+using Guinevere.Tests.Mocks;
+
 namespace Guinevere.Tests.Styling;
 
-/// <summary>Integration tests for <see cref="Gui.StyledNode"/> — a stylesheet drives a real frame.</summary>
+/// <summary>Integration tests for <c>gui.StyledNode</c> — a stylesheet drives a real frame.</summary>
 public class StyledNodeTests
 {
     const int Size = 80;
@@ -48,7 +50,7 @@ public class StyledNodeTests
     public void ClassRule_AppliesLayoutAndBackground()
     {
         var px = RenderFrame(
-            ".panel { flex-grow: 1; background-color: #ff0000; }",
+            ".panel { flex-grow = 1; background-color = #ff0000; }",
             MouseAt(-100, -100),
             gui =>
             {
@@ -64,7 +66,7 @@ public class StyledNodeTests
     public void TypeSelector_Applies()
     {
         var px = RenderFrame(
-            "Box { flex-grow: 1; background-color: #00ff00; }",
+            "Box { flex-grow = 1; background-color = #00ff00; }",
             MouseAt(-100, -100),
             gui =>
             {
@@ -79,8 +81,8 @@ public class StyledNodeTests
     public void HoverModifier_SwapsBackground()
     {
         const string css = """
-            .btn        { flex-grow: 1; background-color: #101010; }
-            .btn:hover  { background-color: #00a2ff; }
+            .btn        { flex-grow = 1; background-color = #101010; }
+            .btn:hover  { background-color = #00a2ff; }
             """;
 
         var idle = RenderFrame(css, MouseAt(-100, -100),
@@ -92,14 +94,36 @@ public class StyledNodeTests
         Assert.True(At(hot, Size / 2, Size / 2).B > 180, "hover should be blue");
     }
 
+    /// <summary>A child matches a selector on its parent's live state, such as <c>Row:hover &gt; Box</c>.</summary>
+    [Fact]
+    public void ParentHover_StylesChild()
+    {
+        const string css = """
+            Row { flex-grow = 1; }
+            Row > Box { flex-grow = 1; background-color = #101010; }
+            Row:hover > Box { background-color = #00a2ff; }
+            """;
+        static void Draw(Gui gui)
+        {
+            using (gui.StyledNode("Row").Enter())
+            using (gui.StyledNode("Box").Enter()) { }
+        }
+
+        var idle = RenderFrame(css, MouseAt(-100, -100), Draw);
+        var hot = RenderFrame(css, MouseAt(Size / 2f, Size / 2f), Draw);
+
+        Assert.True(At(idle, Size / 2, Size / 2) is { R: < 40, G: < 40, B: < 40 }, "idle should be dark");
+        Assert.True(At(hot, Size / 2, Size / 2).B > 180, "parent hover should turn the child blue");
+    }
+
     /// <summary>Styled-node scopes automatically provide ancestry and semantic modifiers.</summary>
     [Fact]
     public void NestedRuleAndCustomModifier_ApplyThroughStyledHierarchy()
     {
         var px = RenderFrame("""
             Panel {
-                flex-grow: 1;
-                > Button:checked { flex-grow: 1; background-color: #00ff00; }
+                flex-grow = 1;
+                > Button:checked { flex-grow = 1; background-color = #00ff00; }
             }
             """, MouseAt(-100, -100), gui =>
             {
@@ -118,6 +142,47 @@ public class StyledNodeTests
             MouseAt(-100, -100), gui => { using (gui.StyledNode("box").Enter()) { } });
 
         Assert.True(At(px, Size / 2, Size / 2).R > 200);
+    }
+
+    /// <summary><c>:disabled</c> drives layout in the build pass and wins over hover in the render pass.</summary>
+    [Fact]
+    public void Disabled_AppliesToLayoutAndSuppressesHover()
+    {
+        const string css = """
+            .btn          { width = 20; height = expand; background-color = #101010; }
+            .btn:hover    { background-color = #0000ff; }
+            .btn:disabled { width = 60; background-color = #ff0000; }
+            """;
+
+        var px = RenderFrame(css, MouseAt(10, Size / 2f),
+            gui => { using (gui.StyledNode("Button", ["btn"], disabled: true).Enter()) { } });
+
+        Assert.True(At(px, 10, Size / 2) is { R: > 200, B: < 60 }, "disabled should not show hover");
+        Assert.True(At(px, 50, Size / 2).R > 200, "disabled width should come from the build pass");
+    }
+
+    /// <summary>A focused styled node is matched by <c>:focus</c>.</summary>
+    [Fact]
+    public void Focus_AppliesFocusRule()
+    {
+        using var harness = new FrameHarness(Size, Size);
+        harness.Gui.StyleSheets.Add(StyleSheet.Parse("""
+            .btn       { width = expand; height = expand; background-color = #101010; }
+            .btn:focus { background-color = #00ff00; }
+            """));
+        void Draw(Gui gui)
+        {
+            using (gui.StyledNode("Button", ["btn"], id: "target").Enter()) gui.RegisterFocusable();
+        }
+
+        harness.Frame(Draw);
+        harness.Gui.RequestFocus("target");
+        for (var i = 0; i < 3 && !harness.Gui.HasFocus("target"); i++) harness.Frame(Draw);
+        harness.Frame(Draw);
+
+        Assert.True(harness.Gui.HasFocus("target"));
+        using var bitmap = SKBitmap.FromImage(harness.Snapshot());
+        Assert.True(bitmap.GetPixel(Size / 2, Size / 2).Green > 200, "focused node should use the :focus rule");
     }
 
     /// <summary>With no stylesheet a styled node behaves like a plain node.</summary>

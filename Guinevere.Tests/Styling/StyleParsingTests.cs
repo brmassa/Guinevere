@@ -78,9 +78,48 @@ public class StyleParsingTests
         Assert.True(StyleValue.TryColor("#4a90e2", out var hex));
         Assert.Equal((74, 144, 226, 255), (hex.R, hex.G, hex.B, hex.A));
 
-        Assert.True(StyleValue.TryColor("rgba(10,20,30,0.5)", out var rgba));
-        Assert.Equal(10, rgba.R);
-        Assert.InRange(rgba.A, 120, 132);
+        Assert.True(StyleValue.TryColor("rgba(10,20,30,128)", out var rgba));
+        Assert.Equal((10, 128), (rgba.R, rgba.A));
+    }
+
+    /// <summary><c>rgb</c>/<c>rgba</c> take 0..255 channels and <c>rgb1</c>/<c>rgba1</c> take 0..1 channels.</summary>
+    [Theory]
+    [InlineData("rgba(1, 1, 1, 1)", 1, 1)]
+    [InlineData("RGBA1(1, 1, 1, 1)", 255, 255)]
+    [InlineData("rgb1(0.5, 0.5, 0.5)", 128, 255)]
+    [InlineData("rgb(300, 0, 0)", 255, 255)]
+    public void Value_Color_RgbScales(string text, int red, int alpha)
+    {
+        Assert.True(StyleValue.TryColor(text, out var color));
+        Assert.Equal((red, alpha), (color.R, color.A));
+    }
+
+    /// <summary>Unknown <c>rgb</c>-like names and malformed channel lists are not colors.</summary>
+    [Theory]
+    [InlineData("rgb2(1, 1, 1)")]
+    [InlineData("rgba(1, 1, 1, x)")]
+    [InlineData("rgb(1, 1)")]
+    [InlineData("rgb 1, 1, 1")]
+    public void Value_Color_RgbRejectsMalformed(string text) => Assert.False(StyleValue.TryColor(text, out _));
+
+    /// <summary>CSS escapes: hex code points with an optional trailing space, and literal characters.</summary>
+    [Theory]
+    [InlineData(@"\f07b", "")]
+    [InlineData(@"\1F600 x", "\U0001F600x")]
+    [InlineData(@"scene\.move", "scene.move")]
+    [InlineData(@"\110000", "�")]
+    [InlineData(@"a\", @"a\")]
+    [InlineData("plain", "plain")]
+    public void Value_Unescape(string text, string expected) => Assert.Equal(expected, StyleValue.Unescape(text));
+
+    /// <summary>Escaped dots, hashes and colons stay inside a selector name.</summary>
+    [Fact]
+    public void Selector_Escapes()
+    {
+        var s = Selector.Parse(@"icon#scene\.move.ext\:x");
+
+        Assert.True(s.Matches(new StyleTarget("icon", "scene.move", ["ext:x"])));
+        Assert.False(s.Matches(new StyleTarget("icon", "scene", ["move"])));
     }
 
     /// <summary>
@@ -123,10 +162,10 @@ public class StyleParsingTests
     }
 
     /// <summary>
-    /// Verifies that a style sheet parses comments, variables, and multi-selector rules correctly.
+    /// Verifies that the CSS-flavored fallback parses comments, variables, and multi-selector rules when enabled.
     /// </summary>
     [Fact]
-    public void Sheet_Parse_Comments_Variables_MultiSelector()
+    public void Sheet_Parse_CssSyntax_Comments_Variables_MultiSelector()
     {
         var sheet = StyleSheet.Parse("""
             /* a comment */
@@ -136,7 +175,7 @@ public class StyleParsingTests
               padding: 8 16;   /* inline comment */
             }
             #save { border-width: 2; }
-            """);
+            """, new StyleSheetOptions { AllowCssSyntax = true });
 
         Assert.Equal(2, sheet.Rules.Count);
         Assert.Equal("#4a90e2", sheet.Variables["--accent"]);
@@ -151,9 +190,9 @@ public class StyleParsingTests
     {
         var sheet = StyleSheet.Parse("""
             .panel, Dialog {
-                padding: 8;
-                > Button { width: 40; }
-                &:disabled { opacity: 0.5; }
+                padding = 8;
+                > Button { width = 40; }
+                &:disabled { opacity = 0.5; }
             }
             """);
 
@@ -193,6 +232,6 @@ public class StyleParsingTests
     [Fact]
     public void Sheet_UnterminatedRule_Throws()
     {
-        Assert.Throws<FormatException>(() => StyleSheet.Parse(".x { color: red "));
+        Assert.Throws<StyleSheetException>(() => StyleSheet.Parse(".x { color = red "));
     }
 }

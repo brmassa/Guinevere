@@ -176,8 +176,7 @@ A **GPU accelerated immediate mode GUI system** built on SkiaSharp, designed for
   `SetTextLayout` makes these settings inheritable within a node scope. Styled nodes accept
   `text-wrap`, `line-height`, `max-lines`, and `text-ellipsis` declarations.
 - Theming via transient color changes
-- Runtime stylesheets with nested selectors, `>` child selectors, custom modifiers, variables,
-  `@const`, `#inherit(...)`, and non-destructive provider/file reloads
+- Runtime `.pss` (PanGui Style Sheet) theme files with nested selectors, `>` child selectors, custom modifiers, `$tokens` layered across sheets and host overrides, host-readable `@const` metadata, `#inherit(...)` variants, `@font-face`/`url()` resolved against the sheet, `@import` through a host resolver, `file:line:col` errors, cached resolution, and non-destructive provider/file reloads
 
   ```csharp
   gui.DrawText("Title", 24, Color.White);
@@ -190,38 +189,42 @@ A **GPU accelerated immediate mode GUI system** built on SkiaSharp, designed for
   gui.SetTextColor(Color.White);
   ```
 
-  Styles accept both the existing CSS-like form and PanGui's scalar syntax:
+  Stylesheets live in the optional [`MASS4.Guinevere.Styling`](Guinevere.Styling/README.md) package (`dotnet add package MASS4.Guinevere.Styling`) and use PanGui's `prop = value;` syntax:
 
   ```csharp
   var styles = StyleSheetSource.FromFile("theme.pss");
   gui.AddStyleSheet(styles);
+  gui.StyleSheets.SetToken("accent", "#ff8800"); // host override above every sheet
+  var themeName = styles.Current.Constants["theme-name"];
 
   using (gui.StyledNode("checkbox", isChecked ? ["checked"] : []).Enter()) { }
   ```
 
   ```css
+  @const theme-name = "Night";
   @const spacing = 12;
+  $accent = #4a90e2;
+  @font-face { font-family = "Inter"; src = url("fonts/Inter.ttf"); }
+
   checkbox {
       padding = @spacing;
-      :checked(0.2 ease-out) { background-color = #4a90e2; }
+      :checked(0.2 ease-out) { background-color = $accent; }
   }
   ```
 
-  Transition annotations are parsed for source compatibility; animated interpolation, expressions,
-  shape/effect declarations, advanced macro families, and `#inherit-properties`/`#inherit-selector`
-  remain planned styling features.
+  Icons are glyphs, images or vector pictures drawn with `gui.Icon(icon, size, tint)`. With the styling package, `icon#id` rules (`glyph`/`font-family` or `src`/`tint`, plus `color`) form swappable icon themes read by `gui.StyledIcon("scene.move")`. SVG sources need the optional [`MASS4.Guinevere.Svg`](Guinevere.Svg/README.md) package.
 
-  Color palettes are collections of independent, inheritable values. Override only the values a
-  subtree needs:
+  Styled nodes draw `background` colors or `linear-gradient`s, `box-shadow`s, per-corner `border-radius` and `outline`s, and apply `opacity`, `cursor` and text `color`/`font-*` that child text inherits.
+
+  Transition annotations, shapes, effects, mixins and macros parse for source compatibility and are kept in `StyleSheet.Deferred`; animated interpolation, expressions and applying those constructs remain planned styling features. The CSS-flavored `prop: value;`/`--x`/`var()` form is only accepted with `StyleSheetOptions.AllowCssSyntax` for migration tools.
+
+  Excalibur's colors are sheet tokens. `ExcaliburStyles.SetTheme(gui, ExcaliburStyles.Dark)` swaps the whole set (`Light`, `Dark`, `MonoLight`, `MonoDark` or any token sheet), and a subtree overrides only the tokens it needs; control dimensions stay independent, inheritable scope values:
 
   ```csharp
   using (gui.Node().Enter())
   {
-      gui.CurrentNodeScope.Set(
-      [
-          ControlStyles.Value<ControlAccent, Color>(Color.Orange),
-          ControlStyles.Value<ControlFieldHeight, float>(40f)
-      ]);
+      gui.SetStyleToken("accent", Color.Orange);
+      gui.CurrentNodeScope.Set(ControlStyles.Value<ControlFieldHeight, float>(40f));
       gui.Button("Locally styled");
   }
   ```
