@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased][]
+## [Unreleased]
+
+## [6.1.0] - 2026-10-13
 
 - Improved: `Shape.Mix` and smooth `Shape.Union` sample a coarser anti-aliased distance grid with pooled buffers and return smooth curves, making the PanGui heart demo about four times cheaper per frame.
 - Improved: PanGui Airbnb slider dragging and shading, heart stage morphs and distance-based shape blending; refreshed the MusicApp gap plan.
@@ -219,6 +221,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - First Commit
 
+[Unreleased]: https://github.com/MASS4ORG/Guinevere/compare/v6.1.0...HEAD
+[6.1.0]: https://github.com/MASS4ORG/Guinevere/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/brmassa/guinevere/compare/v5.9.0...v6.0.0
 [5.9.0]: https://github.com/brmassa/guinevere/compare/v5.8.0...v5.9.0
 [5.8.0]: https://github.com/brmassa/guinevere/compare/v5.7.0...v5.8.0
@@ -254,4 +258,3 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 [1.2.0]: https://github.com/MASS4ORG/Guinevere/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/MASS4ORG/Guinevere/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/MASS4ORG/Guinevere/compare/main...1.0.0
-[Unreleased]: https://github.com/brmassa/guinevere/compare/v6.0.0...HEAD
