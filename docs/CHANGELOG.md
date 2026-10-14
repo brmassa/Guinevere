@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [6.2.0] - 2026-10-14
+
 - Added: gamepad focus navigation #115.
 - Added: multi touch events and optional gestures #134.
 - Added: semantic controller actions #103.
@@ -228,7 +230,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - First Commit
 
-[Unreleased]: https://github.com/MASS4ORG/Guinevere/compare/v6.1.0...HEAD
+[Unreleased]: https://github.com/MASS4ORG/Guinevere/compare/v6.2.0...HEAD
+[6.2.0]: https://github.com/MASS4ORG/Guinevere/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/MASS4ORG/Guinevere/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/brmassa/guinevere/compare/v5.9.0...v6.0.0
 [5.9.0]: https://github.com/brmassa/guinevere/compare/v5.8.0...v5.9.0
