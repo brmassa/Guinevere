@@ -19,9 +19,9 @@ partial class Build
     /// Discovers example projects from <c>Examples/*/*.csproj</c>, so a new example needs no registration here
     /// </summary>
     private List<ExampleProject> ExampleProjects => [.. (RootDirectory / "Examples").GlobFiles("*/*.csproj")
-        .Select(path => new ExampleProject(path))
+        .Select(static path => new ExampleProject(path))
         .Where(p => p.Property("ExcludeFromBuild") != "true" && p.IsEnabledInSolution(Solution.Path))
-        .OrderBy(p => p.Name)];
+        .OrderBy(static p => p.Name)];
 
     /// <summary>An example project file found on disk.</summary>
     private sealed record ExampleProject(AbsolutePath File)
@@ -35,8 +35,8 @@ partial class Build
             return !System.Xml.Linq.XDocument.Load(solutionFile).Descendants("Project")
                 .Where(project => project.Attribute("Path")?.Value is { } path
                                   && Path.GetFullPath(Path.Combine(solutionDirectory, path)) == File)
-                .SelectMany(project => project.Descendants("Build"))
-                .Any(build => string.Equals(build.Attribute("Project")?.Value, "false", StringComparison.OrdinalIgnoreCase));
+                .SelectMany(static project => project.Descendants("Build"))
+                .Any(static build => string.Equals(build.Attribute("Project")?.Value, "false", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>Reads a literal property from the project file; null when absent.</summary>
@@ -57,7 +57,7 @@ partial class Build
             {
                 Log.Information("Building example: {Project}", project.Name);
 
-                _ = DotNetTasks.DotNetBuild(s => s
+                _ = DotNetBuild(s => s
                     .SetProjectFile(project.File)
                     .SetConfiguration(Config)
                     .EnableNoRestore()
@@ -97,7 +97,7 @@ partial class Build
 
                     Log.Information("Publishing {Project} for {Runtime}", project.Name, runtime);
 
-                    _ = DotNetTasks.DotNetPublish(s => s
+                    _ = DotNetPublish(s => s
                         .SetProject(project.File)
                         .SetConfiguration(Config)
                         .SetOutput(projectOutput)
@@ -131,7 +131,7 @@ partial class Build
 
                 Log.Information("Creating examples archive: {Archive}", archiveName);
 
-                runtimeOutput.ZipTo(archivePath, compressionLevel: System.IO.Compression.CompressionLevel.Optimal);
+                runtimeOutput.ZipTo(archivePath, compressionLevel: CompressionLevel.Optimal);
             }
 
             Log.Information("Successfully packaged all examples");
@@ -144,7 +144,7 @@ partial class Build
     private Target CleanExamples => td => td
         .Executes(() =>
         {
-            ExampleProjects.ForEach(project =>
+            ExampleProjects.ForEach(static project =>
             {
                 (project.Directory / "bin").DeleteDirectory();
                 (project.Directory / "obj").DeleteDirectory();
@@ -215,7 +215,7 @@ MIT License - see the project repository for full license details.
     private string GetExampleDescriptions()
     {
         var descriptions = ExampleProjects
-            .OrderBy(p => p.Name)
+            .OrderBy(static p => p.Name)
             .Select(project => $"- **{project.Name}**: {GetExampleDescription(project)}")
             .ToArray();
 
@@ -237,8 +237,8 @@ MIT License - see the project repository for full license details.
         }
 
         return readme.FileExists()
-            ? File.ReadLines(readme).Select(line => line.Trim())
-                .FirstOrDefault(line => line.Length > 0 && !line.StartsWith('#')) ?? fallback
+            ? File.ReadLines(readme).Select(static line => line.Trim())
+                .FirstOrDefault(static line => line.Length > 0 && !line.StartsWith('#')) ?? fallback
             : fallback;
     }
 }
