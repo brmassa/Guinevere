@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [6.3.0] - 2026-10-15
+
 - Added: game HUD primitives #100.
 
 ## [6.2.0] - 2026-10-14
@@ -232,7 +234,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - First Commit
 
-[Unreleased]: https://github.com/MASS4ORG/Guinevere/compare/v6.2.0...HEAD
+[Unreleased]: https://github.com/MASS4ORG/Guinevere/compare/v6.3.0...HEAD
+[6.3.0]: https://github.com/MASS4ORG/Guinevere/compare/v6.2.0...v6.3.0
 [6.2.0]: https://github.com/MASS4ORG/Guinevere/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/MASS4ORG/Guinevere/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/brmassa/guinevere/compare/v5.9.0...v6.0.0
