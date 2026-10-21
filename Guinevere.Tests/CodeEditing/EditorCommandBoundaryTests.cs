@@ -59,13 +59,12 @@ public class EditorCommandBoundaryTests
     [Fact]
     public async Task SuggestCommandPublishesCompletions()
     {
-        var state = Editor("alpha al|");
+        var provider = new TrackedCompletionProvider();
+        var state = Editor("alpha al|", new LanguageServices { Completion = provider });
         Assert.True(state.Execute("triggerSuggest"));
-        for (var attempt = 0; attempt < 100 && state.Completion is null; attempt++)
-        {
-            await Task.Delay(5, TestContext.Current.CancellationToken);
-            state.Update(0);
-        }
+        await provider.Request.WaitAsync(TestContext.Current.CancellationToken);
+        state.Update(0);
+        Assert.NotNull(state.Completion);
         Assert.Equal("alpha", Assert.Single(state.Completion!.Items).Label);
     }
 }

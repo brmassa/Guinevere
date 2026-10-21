@@ -72,7 +72,7 @@ public class LanguageProviderTests
     public async Task DiagnosticsWaitForTypingToPauseAndStaleAnswersAreDropped()
     {
         var provider = new ManualDiagnostics();
-        var state = Editor("ab|", LanguageServices.PlainText with { Diagnostics = provider });
+        var state = Editor("ab|", LanguageServices.PlainText with { Diagnostics = provider, Folding = null });
 
         state.Update(0.0);
         Assert.Single(provider.Requests);
@@ -90,11 +90,7 @@ public class LanguageProviderTests
         await provider.Requests[1].Answer.Task;
         state.Update(0.6);
         Assert.Equal("new", state.Diagnostics.Single().Message);
-        await WaitFor(() =>
-        {
-            state.Update(0.6);
-            return !state.IsWaitingForProviders;
-        });
+        Assert.False(state.IsWaitingForProviders);
     }
 
     [Fact]
@@ -112,14 +108,18 @@ public class LanguageProviderTests
         Assert.Equal(new TextDiagnostic(3, 2, DiagnosticSeverity.Error, "x"), state.Diagnostics.Single());
     }
 
+    /// <summary>Completion results filter with typing and insert the selected suggestion.</summary>
     [Fact]
     public async Task CompletionOpensFiltersAsYouTypeAndAccepts()
     {
-        var state = Editor("counter country\nco|", settings: new TextEditorSettings());
-        state.Language = state.Language with { Completion = WordCompletionProvider.Instance };
+        var provider = new TrackedCompletionProvider();
+        var state = Editor("counter country\nco|", new LanguageServices { Completion = provider },
+            new TextEditorSettings());
 
         state.Type("u");
-        await WaitFor(() => { state.Update(0); return state.Completion is not null; });
+        await provider.Request.WaitAsync(TestContext.Current.CancellationToken);
+        state.Update(0);
+        Assert.NotNull(state.Completion);
         Assert.Equal(["counter", "country"], state.Completion!.Items.Select(item => item.Label).Order());
         state.Type("n");
         state.Update(0);
@@ -134,12 +134,16 @@ public class LanguageProviderTests
         Assert.Null(state.Completion);
     }
 
+    /// <summary>Moving the caret outside a completed word closes its suggestion list.</summary>
     [Fact]
     public async Task CompletionClosesWhenTheCaretLeavesTheWord()
     {
-        var state = Editor("alpha\nal|");
+        var provider = new TrackedCompletionProvider();
+        var state = Editor("alpha\nal|", new LanguageServices { Completion = provider });
         state.TriggerCompletion();
-        await WaitFor(() => { state.Update(0); return state.Completion is not null; });
+        await provider.Request.WaitAsync(TestContext.Current.CancellationToken);
+        state.Update(0);
+        Assert.NotNull(state.Completion);
 
         state.Execute("cursorUp");
         state.Update(0);
@@ -147,14 +151,16 @@ public class LanguageProviderTests
         Assert.Null(state.Completion);
     }
 
+    /// <summary>Hover results are reused within their range and explicit clearing removes them.</summary>
     [Fact]
-    public async Task HoverAsksOncePerRangeAndClears()
+    public void HoverAsksOncePerRangeAndClears()
     {
         var provider = new FixedHover(new HoverInfo(0, 3, "**doc**"));
-        var state = Editor("abc", LanguageServices.PlainText with { Hover = provider });
+        var state = Editor("abc", new LanguageServices { Hover = provider });
 
         state.RequestHover(1);
-        await WaitFor(() => { state.Update(0); return state.Hover is not null; });
+        state.Update(0);
+        Assert.NotNull(state.Hover);
         state.RequestHover(2);
         Assert.Equal(1, provider.Calls);
         state.ClearHover();
@@ -222,15 +228,5 @@ public class LanguageProviderTests
         Assert.Equal("{|\n a\n}", Show(state));
         state.Execute("unfold");
         Assert.False(state.IsFolded(0));
-    }
-
-    static async Task WaitFor(Func<bool> condition)
-    {
-        for (var i = 0; i < 200 && !condition(); i++)
-        {
-            await Task.Delay(5, TestContext.Current.CancellationToken);
-        }
-
-        Assert.True(condition());
     }
 }

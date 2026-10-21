@@ -197,17 +197,35 @@ public sealed class TextEditorViewTests : IDisposable
         Assert.True(watch.ElapsedMilliseconds < 3000, $"20 edited frames took {watch.ElapsedMilliseconds} ms");
     }
 
-    [Fact]
-    public void ClickingAFoldMarkerHidesTheRegion()
+    /// <summary>Fold markers accept provider results without depending on background scheduling.</summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(64)]
+    public void ClickingAFoldMarkerHidesTheRegion(int pendingFrames)
     {
-        var state = Editor("{\n  a\n  b\n}\nend", LanguageServices.ForLanguage("csharp"));
-        for (var i = 0; i < 20 && state.FoldingRanges.Count == 0; i++)
+        var answer = new TaskCompletionSource<IReadOnlyList<FoldingRange>>();
+        var provider = new ControlledFolding(answer.Task);
+        var state = Editor("{\n  a\n  b\n}\nend", LanguageServices.ForLanguage("csharp") with { Folding = provider });
+        if (pendingFrames == 0)
         {
-            Frame(state, 0.25);
-            Thread.Sleep(5);
+            answer.SetResult([new FoldingRange(0, 2)]);
         }
 
-        Assert.NotEmpty(state.FoldingRanges);
+        Frame(state);
+        Assert.Equal(1, provider.Requests);
+        for (var i = 0; i < pendingFrames; i++)
+        {
+            Frame(state);
+            Assert.Empty(state.FoldingRanges);
+        }
+
+        if (pendingFrames > 0)
+        {
+            answer.SetResult([new FoldingRange(0, 2)]);
+        }
+
+        Frame(state);
+        Assert.Equal(new FoldingRange(0, 2), Assert.Single(state.FoldingRanges));
         var first = PointOf(state, 0);
         var rowHeight = PointOf(state, 2).Y - first.Y;
         Click(state, new Vector2(_node!.Rect.X + 30, first.Y));
@@ -217,25 +235,73 @@ public sealed class TextEditorViewTests : IDisposable
         Assert.Equal(first.Y + rowHeight, closing.Y, 0.5f);
     }
 
-    [Fact]
-    public void CompletionPopupShowsAndAClickAcceptsAnItem()
+    /// <summary>Completion appears in a laid-out popup after its provider answers and a click accepts it.</summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(64)]
+    public void CompletionPopupShowsAndAClickAcceptsAnItem(int pendingFrames)
     {
-        var state = Editor("counter\nco|", settings: new TextEditorSettings());
+        var answer = new TaskCompletionSource<CompletionList?>();
+        var provider = new ControlledCompletion(answer.Task);
+        var state = Editor("counter\nco|", new LanguageServices { Completion = provider }, new TextEditorSettings());
+        if (pendingFrames == 0)
+        {
+            answer.SetResult(new CompletionList(8, [new CompletionItem("counter")]));
+        }
+
         Focus(state);
         _harness.Input.TypeText("u");
         Frame(state);
-        for (var i = 0; i < 50 && state.Completion is null; i++)
+        Assert.Equal(1, provider.Requests);
+        Assert.Equal("counter\ncou|", Show(state));
+        for (var i = 0; i < pendingFrames; i++)
         {
-            Thread.Sleep(5);
             Frame(state);
+            Assert.Null(state.Completion);
+        }
+
+        if (pendingFrames > 0)
+        {
+            answer.SetResult(new CompletionList(8, [new CompletionItem("counter")]));
         }
 
         Frame(state);
-        var popup = FindNode(_node!, node => node.Rect.W > 0 && node.Rect.H > 0 && node != _node && node.Parent == _node);
-        Assert.NotNull(popup);
-        Click(state, FrameHarness.Center(popup!));
+        Assert.NotNull(state.Completion);
+        Assert.Equal("counter", Assert.Single(state.Completion.Items).Label);
+        Frame(state);
+        Assert.True(state.View.ShowCompletion);
+        var popup = Assert.Single(_node!.Children, node => node.Style.BlocksInput);
+        Assert.True(popup.Rect.W > 0 && popup.Rect.H > 0);
+        Click(state, FrameHarness.Center(popup));
 
         Assert.Equal("counter\ncounter|", Show(state));
+        Assert.Null(state.Completion);
+    }
+
+    sealed class ControlledFolding(Task<IReadOnlyList<FoldingRange>> answer) : IFoldingProvider
+    {
+        internal int Requests { get; private set; }
+
+        /// <inheritdoc />
+        public Task<IReadOnlyList<FoldingRange>> GetFoldingRangesAsync(TextSnapshot snapshot,
+            CancellationToken cancellation)
+        {
+            Requests++;
+            return answer;
+        }
+    }
+
+    sealed class ControlledCompletion(Task<CompletionList?> answer) : ICompletionProvider
+    {
+        internal int Requests { get; private set; }
+
+        /// <inheritdoc />
+        public Task<CompletionList?> GetCompletionsAsync(TextSnapshot snapshot, int offset,
+            CancellationToken cancellation)
+        {
+            Requests++;
+            return answer;
+        }
     }
 
     [Fact]
